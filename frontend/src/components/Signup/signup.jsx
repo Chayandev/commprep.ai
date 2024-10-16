@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import logo from "../../assets/commprepai.jpg";
 import { Link, NavLink } from "react-router-dom";
 import {
@@ -10,27 +10,21 @@ import {
   Avatar,
   Box,
 } from "@mui/material";
-import {
-  ArrowForward as ArrowRight,
-  Check as CheckIcon,
-} from "@mui/icons-material";
-
+import { ArrowForward as ArrowRight } from "@mui/icons-material";
 import { Radio, RadioGroup } from "@headlessui/react";
 import CustomTextField from "../CustomTextField";
-import avatarImg from "/avatar.webp";
+import UserContext from "../../context/UserContext.js";
+import GridLoader from "react-spinners/GridLoader.js";
 
-const avatars = [
-  { id: "1", name: "Avatar 1", svg: <Avatar src={avatarImg} /> },
-  { id: "2", name: "Avatar 2", svg: <Avatar src={avatarImg} /> },
-  { id: "3", name: "Avatar 3", svg: <Avatar src={avatarImg} /> },
-  { id: "4", name: "Avatar 4", svg: <Avatar src={avatarImg} /> },
-  { id: "5", name: "Avatar 5", svg: <Avatar src={avatarImg} /> },
-  { id: "6", name: "Avatar 6", svg: <Avatar src={avatarImg} /> },
-  // Add more avatars as needed
-];
+const overrideCSS = {
+  display: "block",
+  margin: "auto",
+  padding: "20px 0", // Add padding here
+};
 
 export default function Signup() {
-  const [selectedAvatar, setSelectedAvatar] = useState(avatars[0].id);
+  const { avatars, fetchAvatars, isLoading } = useContext(UserContext);
+  const [selectedAvatar, setSelectedAvatar] = useState("");
   const [formValues, setFormValues] = useState({
     name: "",
     email: "",
@@ -39,17 +33,25 @@ export default function Signup() {
   });
   const [formErrors, setFormErrors] = useState({});
 
+  // Fetch avatars from the backend
+  useEffect(() => {
+    if (avatars.length === 0) {
+      fetchAvatars();
+    } else {
+      setSelectedAvatar(avatars[0].public_id);
+    }
+  }, [fetchAvatars, avatars]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
-    setFormErrors((prev) => ({ ...prev, [name]: "" })); // Clear error on change
+    setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const errors = {};
 
-    // Basic validation
     if (!formValues.name) {
       errors.name = "Full Name is required";
     }
@@ -67,10 +69,11 @@ export default function Signup() {
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
-      return; // Prevent form submission if there are errors
+      return;
     }
 
-    // Handle form submission logic here
+    // Submit form logic
+    console.log("Form submitted with avatar:", selectedAvatar);
   };
 
   return (
@@ -114,7 +117,6 @@ export default function Signup() {
                 variant="outlined"
                 required
                 name="name"
-                color=""
                 value={formValues.name}
                 onChange={handleInputChange}
                 error={!!formErrors.name}
@@ -142,7 +144,6 @@ export default function Signup() {
                 error={!!formErrors.password}
                 helperText={formErrors.password}
               />
-
               <CustomTextField
                 label="Confirm Password"
                 type="password"
@@ -160,35 +161,44 @@ export default function Signup() {
                 Select Avatar
               </label>
               <div className="max-h-80 overflow-y-auto border border-gray-300 rounded-md">
-                <RadioGroup value={selectedAvatar} onChange={setSelectedAvatar}>
-                  <div className="grid grid-cols-4 gap-2 p-2">
-                    {avatars.map((avatar) => (
-                      <Radio
-                        key={avatar.id}
-                        value={avatar.id}
-                        className={`relative flex flex-col items-center justify-center border rounded-full transition shadow-md duration-200 ease-in-out ${
-                          selectedAvatar === avatar.id
-                            ? "border-2 border-secondary/90 bg-secondary/5"
-                            : "border-gray-300 bg-white hover:border-gray-700"
-                        }`}
-                      >
-                        {/* Set the img tag to take full space */}
-                        <img
-                          src={avatarImg} // Assuming avatar.imgUrl is the image URL
-                          width={200}
-                          height={200}
-                          alt={`Avatar ${avatar.id}`}
-                          className="w-full h-full object-fill rounded-full" // Ensures the image covers the grid item fully and maintains a circular shape
-                        />
-                        {/* {selectedAvatar === avatar.id && (
-                          <div className="absolute top-2 right-2">
-                            <CheckIcon className="w-5 h-5 text-secondary" />
-                          </div>
-                        )} */}
-                      </Radio>
-                    ))}
-                  </div>
-                </RadioGroup>
+                {isLoading ? (
+                  <GridLoader
+                    color="#02cbc3"
+                    loading={isLoading}
+                    cssOverride={overrideCSS}
+                  />
+                ) : avatars.length > 0 ? (
+                  <RadioGroup
+                    value={selectedAvatar}
+                    onChange={setSelectedAvatar}
+                  >
+                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 p-2">
+                      {avatars.map((avatar) => (
+                        <Radio
+                          key={avatar.public_id}
+                          value={avatar.public_id}
+                          className={`relative flex flex-col items-center justify-center border rounded-full transition shadow-md duration-200 ease-in-out ${
+                            selectedAvatar === avatar.public_id
+                              ? "border-2 border-secondary/90 bg-secondary/5"
+                              : "border-gray-300 bg-white hover:border-gray-700"
+                          }`}
+                        >
+                          <img
+                            src={avatar.url}
+                            alt={avatar.name}
+                            width={200}
+                            height={200}
+                            className="w-full h-full object-fill rounded-full"
+                          />
+                        </Radio>
+                      ))}
+                    </div>
+                  </RadioGroup>
+                ) : (
+                  <p className="text-center p-4 text-md">
+                    No avatars available.
+                  </p>
+                )}
               </div>
             </div>
             <button

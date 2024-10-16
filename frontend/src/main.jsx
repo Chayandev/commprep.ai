@@ -12,6 +12,7 @@ import App from "./App.jsx";
 import Home from "./components/Home/home.jsx";
 import Login from "./components/Login/login.jsx";
 import Signup from "./components/Signup/signup.jsx";
+import AvatarContextProvider from "./context/AvatarContextProvider.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -25,6 +26,8 @@ const router = createBrowserRouter(
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AvatarContextProvider>
+      <RouterProvider router={router} />
+    </AvatarContextProvider>
   </StrictMode>
 );
