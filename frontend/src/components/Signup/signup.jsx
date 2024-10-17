@@ -7,8 +7,11 @@ import {
   CardContent,
   CardActions,
   CardHeader,
-  Avatar,
   Box,
+  MenuItem,
+  FormControl,
+  Select,
+  InputLabel,
 } from "@mui/material";
 import { ArrowForward as ArrowRight } from "@mui/icons-material";
 import { Radio, RadioGroup } from "@headlessui/react";
@@ -25,8 +28,11 @@ const overrideCSS = {
 export default function Signup() {
   const { avatars, fetchAvatars, isLoading } = useContext(UserContext);
   const [selectedAvatar, setSelectedAvatar] = useState("");
+  const [hasFetchedAvaters, setHasFetchedAvatars] = useState(false);
   const [formValues, setFormValues] = useState({
     name: "",
+    username: "",
+    role: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -35,12 +41,14 @@ export default function Signup() {
 
   // Fetch avatars from the backend
   useEffect(() => {
-    if (avatars.length === 0) {
+    if (!hasFetchedAvaters && avatars.length === 0) {
       fetchAvatars();
-    } else {
+      setHasFetchedAvatars(true); // Set it to true after trying to fetch once
+    }
+    if (avatars.length !== 0) {
       setSelectedAvatar(avatars[0].public_id);
     }
-  }, [fetchAvatars, avatars]);
+  }, [avatars, fetchAvatars, hasFetchedAvaters]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -54,6 +62,11 @@ export default function Signup() {
 
     if (!formValues.name) {
       errors.name = "Full Name is required";
+    }
+    if (!formValues.username) {
+      errors.username = "Username is required";
+    } else if (formValues.username !== formValues.username.toLowerCase()) {
+      errors.username = "Username must be in lowercase";
     }
     if (!formValues.email) {
       errors.email = "Email is required";
@@ -123,6 +136,16 @@ export default function Signup() {
                 helperText={formErrors.name}
               />
               <CustomTextField
+                label="Username"
+                variant="outlined"
+                required
+                name="username"
+                value={formValues.username}
+                onChange={handleInputChange}
+                error={!!formErrors.username}
+                helperText={formErrors.name}
+              />
+              <CustomTextField
                 label="Email"
                 type="email"
                 variant="outlined"
@@ -133,6 +156,33 @@ export default function Signup() {
                 error={!!formErrors.email}
                 helperText={formErrors.email}
               />
+              {/* dropdown for roles */}
+              <FormControl
+                fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#02cbc3", // Custom focus color
+                    },
+                  },
+                }}
+              >
+                <Select
+                  displayEmpty
+                  labelId="role-label"
+                  id="role"
+                  value={formValues.role}
+                  onChange={handleInputChange}
+                  inputProps={{ "aria-label": "Without label" }}
+                >
+                  <MenuItem disabled value="">
+                    <em className="text-gray-500">Role describe you best</em>
+                  </MenuItem>
+                  <MenuItem value="admin">Student</MenuItem>
+                  <MenuItem value="moderator">Profesional</MenuItem>
+                  <MenuItem value="user">Corporate-person</MenuItem>
+                </Select>
+              </FormControl>
               <CustomTextField
                 label="Password"
                 type="password"
