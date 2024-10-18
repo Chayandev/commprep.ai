@@ -3,6 +3,14 @@ import { ApiError } from "../utils/ApiErros.js";
 import { ApiResponse } from "../utils/ApiResonse.js";
 import { asyncHandelr } from "../utils/asyncHandler.js";
 
+//registering user
+const registerUser = asyncHandelr(async (req, res) => {
+  res.status(200).json({
+    message: "Ok",
+  });
+});
+
+//fethcing avaters details form the cloudinery
 const getAvatars = asyncHandelr(async (req, res) => {
   // Fetch all images from the 'commprep.ai_avatars' folder
   const { resources } = await cloudinary.search
@@ -28,4 +36,4 @@ const getAvatars = asyncHandelr(async (req, res) => {
     .json(new ApiResponse(200, avatars, "avaters fetched sucessfully!"));
 });
 
-export {getAvatars}
+export { registerUser, getAvatars };
