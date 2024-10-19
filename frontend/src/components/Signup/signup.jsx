@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
 import logo from "../../assets/commprepai.jpg";
-import { Link, NavLink } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import LoadingBar from "react-top-loading-bar";
+
 import {
   Typography,
   Card,
@@ -18,6 +21,7 @@ import { Radio, RadioGroup } from "@headlessui/react";
 import CustomTextField from "../CustomTextField";
 import UserContext from "../../context/UserContext.js";
 import GridLoader from "react-spinners/GridLoader.js";
+import { registerUser } from "../../../actions/user.actions.js";
 
 const overrideCSS = {
   display: "block",
@@ -26,9 +30,12 @@ const overrideCSS = {
 };
 
 export default function Signup() {
+  const navigate = useNavigate(); // Initialize useNavigate
   const { avatars, fetchAvatars, isLoading } = useContext(UserContext);
   const [selectedAvatar, setSelectedAvatar] = useState("");
   const [hasFetchedAvaters, setHasFetchedAvatars] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [formValues, setFormValues] = useState({
     name: "",
     username: "",
@@ -56,9 +63,11 @@ export default function Signup() {
     setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = {};
+    setProgress(10);
+    setIsRegistering(true);
 
     if (!formValues.name) {
       errors.name = "Full Name is required";
@@ -75,6 +84,9 @@ export default function Signup() {
     }
     if (!formValues.password) {
       errors.password = "Password is required";
+    } else if (formValues.password.length < 6) {
+      errors.password =
+        "Password should be strong , should have atleast 6 characters";
     }
     if (formValues.password !== formValues.confirmPassword) {
       errors.confirmPassword = "Passwords do not match";
@@ -82,15 +94,70 @@ export default function Signup() {
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      setIsRegistering(false);
+      setProgress(100);
       return;
     }
 
+    // Prepare the data to send to the backend
+    const userData = {
+      fullname: formValues.name,
+      username: formValues.username,
+      email: formValues.email,
+      password: formValues.password,
+      role: formValues.role, // Role input from dropdown
+      avatar: selectedAvatar, // Selected avatar
+    };
+
     // Submit form logic
+    try {
+      // Call the registerUser action
+      const result = await registerUser(userData);
+      setProgress(70);
+      // If successful
+      toast.success(result.message, {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      console.log("Registered user:", result.data);
+      navigate("/login")
+    } catch (error) {
+      // Show error toast with the error message
+      toast.error(error.message || "An error occurred during registration.", {
+        position: "top-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      console.error("Error during registration:", error.message);
+    } finally {
+      setProgress(100);
+      // Delay before setting isRegistering to false
+      setTimeout(() => {
+        setIsRegistering(false);
+      }, 1000); // Adjust the delay time as needed (1000 ms = 1 second)
+    }
     console.log("Form submitted with avatar:", selectedAvatar);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-100 flex flex-col justify-center items-center p-4">
+      <LoadingBar
+        color="#02cbc3"
+        progress={progress}
+        height={4}
+        onLoaderFinished={() => setProgress(0)}
+      />
       <div className="mb-8">
         <img
           src={logo}
@@ -143,7 +210,7 @@ export default function Signup() {
                 value={formValues.username}
                 onChange={handleInputChange}
                 error={!!formErrors.username}
-                helperText={formErrors.name}
+                helperText={formErrors.username}
               />
               <CustomTextField
                 label="Email"
@@ -168,6 +235,7 @@ export default function Signup() {
                 }}
               >
                 <Select
+                  name="role"
                   displayEmpty
                   labelId="role-label"
                   id="role"
@@ -253,7 +321,12 @@ export default function Signup() {
             </div>
             <button
               type="submit"
-              className="w-full bg-primary hover:bg-teal-700 py-2 rounded-md shadow-md text-white"
+              disabled={isRegistering}
+              className={`w-full py-2 rounded-md shadow-md text-white ${
+                isRegistering
+                  ? "bg-teal-700 cursor-not-allowed"
+                  : "bg-primary hover:bg-teal-700"
+              }`}
             >
               Sign Up
             </button>

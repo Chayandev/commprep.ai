@@ -1,1 +1,1 @@
-export const DB_NAME="commprep"
+export const DB_NAME="CommprepDB"
