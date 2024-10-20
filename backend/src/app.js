@@ -24,6 +24,7 @@ import userRouter from "./routes/user.routes.js";
 app.use("/api/v1/users", userRouter);
 
 // Error handling middleware
+// Error handling middleware
 app.use((err, req, res, next) => {
   // Check if it's an instance of ApiError
   if (err instanceof ApiError) {
@@ -35,13 +36,15 @@ app.use((err, req, res, next) => {
       data: null,
     });
   }
-  // Default error handling for any other error types
-  return res.status(500).json({
-    statusCode: 500,
-    message: "Internal Server Error",
+
+  // For any other errors, provide the exact error message instead of a generic one
+  return res.status(err.status || 500).json({
+    statusCode: err.status || 500,
+    message: err.message || "An unknown error occurred",
     success: false,
-    errors: [],
+    errors: err.stack ? [err.stack] : [], // Optionally include stack trace for debugging
     data: null,
   });
 });
+
 export { app };

@@ -126,7 +126,7 @@ export default function Signup() {
         theme: "light",
       });
       console.log("Registered user:", result.data);
-      navigate("/login")
+      navigate("/emailVerification")
     } catch (error) {
       // Show error toast with the error message
       toast.error(error.message || "An error occurred during registration.", {

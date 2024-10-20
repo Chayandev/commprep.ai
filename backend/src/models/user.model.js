@@ -47,6 +47,16 @@ const userSchema = new Schema(
     refreshToken: {
       type: String,
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationCode: {
+      type: String,
+    },
+    verificationCodeExpireAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
@@ -57,7 +67,7 @@ userSchema.pre("save", async function (next) {
   //add condition for this runs only when password changes
   if (!this.isModified("password")) return next();
 
-  this.password = bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
