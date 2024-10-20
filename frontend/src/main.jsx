@@ -13,6 +13,7 @@ import Home from "./components/Home/home.jsx";
 import Login from "./components/Login/login.jsx";
 import Signup from "./components/Signup/signup.jsx";
 import AvatarContextProvider from "./context/AvatarContextProvider.jsx";
+import EmailVerification from "./components/Verification/emailVerification.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -20,6 +21,7 @@ const router = createBrowserRouter(
       <Route path="" element={<Home />} />
       <Route path="login" element={<Login />} />
       <Route path="signup" element={<Signup />} />
+      <Route path="emailverification" element={< EmailVerification/>} />
     </Route>
   )
 );
