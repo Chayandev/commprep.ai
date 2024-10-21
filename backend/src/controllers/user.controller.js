@@ -105,6 +105,7 @@ const verifyEmail = asyncHandelr(async (req, res) => {
   });
 
   if (!user) {
+    console.log(verificationCode);
     throw new ApiError(400, "Invalid or Expired Varification Code");
   }
 

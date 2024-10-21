@@ -4,7 +4,7 @@ export default function Footer(){
     return(
         <footer className="bg-gray-800">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row  justify-between items-center">
             <div className="flex justify-center space-x-6 md:order-2">
               <a href="#" className="text-gray-400 hover:text-gray-300">
                 <span className="sr-only">Facebook</span>
