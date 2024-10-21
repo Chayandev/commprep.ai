@@ -2,7 +2,7 @@ import crypto from "crypto";
 
 // Function to generate an 8-character random code
 const randomCryptoVerificationCode = () => {
-  return crypto.randomBytes(4).toString("hex").slice(0, 8);
+  return crypto.randomBytes(32).toString("hex").slice(0, 6);
 };
 
 // Function to return the expiration time (1 day from now)
