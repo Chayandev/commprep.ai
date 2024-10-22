@@ -1,9 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import {
-  Button,
-  TextField,
   Typography,
   Card,
   CardContent,
@@ -14,9 +12,36 @@ import logo from "../../assets/commprepai.jpg";
 import CustomTextField from "../CustomTextField";
 
 export default function LoginPage() {
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [formValues, setFormValues] = useState({
+    email: "",
+    password: "",
+  });
+  const [formErrors, setFormErrors] = useState({});
+
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle login logic here
+    if (!formValues.email) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formValues.email)) {
+      errors.email = "Email address is invalid";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setProgress(100);
+      return;
+    }
+
+    
+
+  };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+    setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   return (
