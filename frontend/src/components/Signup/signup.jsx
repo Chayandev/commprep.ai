@@ -59,7 +59,10 @@ export default function Signup() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: name === "username" ? value.toLowerCase() : value,
+    }));
     setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
 

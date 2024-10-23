@@ -1,16 +1,42 @@
 import { cloudinary } from "../utils/cloudinary.js";
 import { ApiError } from "../utils/ApiErros.js";
 import { ApiResponse } from "../utils/ApiResonse.js";
-import { asyncHandelr } from "../utils/asyncHandler.js";
+import { asyncHandelr as asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { sendVerificationEmail } from "../nodemailer/emails.js";
 import {
   oneDayExpiryTime,
   randomCryptoVerificationCode,
 } from "../utils/codeGenarator.js";
+import jwt from "jsonwebtoken";
+
+//options to secure cookies
+const options = {
+  httpOnly: true,
+  secure: true,
+};
+//generate access and refresh token method
+const generateAccessAndRefreshTokens = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  } catch (error) {
+    console.log(error);
+    throw new ApiError(500);
+  }
+};
 
 //registering user
-const registerUser = asyncHandelr(async (req, res) => {
+const registerUser = asyncHandler(async (req, res) => {
   const { fullname, username, email, password, avatar, role } = req.body;
 
   if (
@@ -93,10 +119,122 @@ const registerUser = asyncHandelr(async (req, res) => {
     );
 });
 
-const loginUser = asyncHandelr(async (req, res) => {});
+const loginUser = asyncHandler(async (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username && !email) {
+    throw new ApiError(400, "username or email is required!");
+  }
+
+  if (!password) {
+    throw new ApiError(400, "password is required!");
+  }
+
+  const user = await User.findOne({
+    $or: [{ username }, { email }],
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User dose'nt exist");
+  }
+
+  console.log(user);
+  const isPasswordvalid = await user.isPasswordCorrect(password);
+
+  if (!isPasswordvalid) {
+    throw new ApiError(401, "Invalid Password");
+  }
+
+  const loggedinUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id
+  );
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: loggedinUser,
+          accessToken,
+          refreshToken,
+        },
+        "User logged in Successfully!"
+      )
+    );
+});
+
+//log out
+const logoutUser = asyncHandler(async (req, res) => {
+  // Use $unset to remove the refreshToken field
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $unset: { refreshToken: "" },
+    },
+    {
+      new: true,
+    }
+  );
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User Logged out Successfully"));
+});
+
+//refhres the accesstoken
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Unauthorized Access!");
+  }
+
+  try {
+    const decodedToke = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    const user = await User.findById(decodedToke?._id);
+
+    if (!user) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
+
+    if (incomingRefreshToken !== user?.refreshToken) {
+      throw new ApiError(401, "Refresh Token is expired");
+    }
+
+    const { accessToken, newRefreshToken } =
+      await generateAccessAndRefreshTokens(user._id);
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          { accessToken, newRefreshToken },
+          "Access token Refreshed sucessfully!"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(401, error?.message || "invalid refrech Token");
+  }
+});
 
 //verify email
-const verifyEmail = asyncHandelr(async (req, res) => {
+const verifyEmail = asyncHandler(async (req, res) => {
   const { verificationCode } = req.body;
 
   const user = await User.findOne({
@@ -130,7 +268,7 @@ const verifyEmail = asyncHandelr(async (req, res) => {
 });
 
 //fethcing avaters details form the cloudinery
-const getAvatars = asyncHandelr(async (req, res) => {
+const getAvatars = asyncHandler(async (req, res) => {
   // Fetch all images from the 'commprep.ai_avatars' folder
   const { resources } = await cloudinary.search
     .expression("folder:commprep.ai_avatars") // Specify the folder
@@ -155,4 +293,11 @@ const getAvatars = asyncHandelr(async (req, res) => {
     .json(new ApiResponse(200, avatars, "avaters fetched sucessfully!"));
 });
 
-export { registerUser, loginUser, getAvatars, verifyEmail };
+export {
+  registerUser,
+  loginUser,
+  getAvatars,
+  verifyEmail,
+  logoutUser,
+  refreshAccessToken,
+};
