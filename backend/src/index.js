@@ -1,7 +1,7 @@
-import https from 'https';
-import fs from 'fs';
-import connectDB from './db/index.js';
-import { app } from './app.js';
+import https from "https";
+import fs from "fs";
+import connectDB from "./db/index.js";
+import { app } from "./app.js";
 
 // SSL certificate and key using environment variables
 const sslOptions = {
@@ -12,16 +12,15 @@ const sslOptions = {
 // Connect to MongoDB
 connectDB()
   .then(() => {
-    app.on('error', (error) => {
-      console.log('Error:', error);
+    app.on("error", (error) => {
+      console.log("Error:", error);
       throw error;
     });
 
-    // Create HTTPS server
-    https.createServer(sslOptions, app).listen(process.env.PORT || 443, () => {
-      console.log(`HTTPS server is running at PORT: ${process.env.PORT || 443}`);
+    app.listen(process.env.PORT || 5000, () => {
+      console.log(`Server is running at PORT: ${process.env.PORT}`);
     });
   })
   .catch((error) => {
-    console.log('MongoDB connection failed!!!', error);
+    console.log("MongoDB connection failed!!!", error);
   });

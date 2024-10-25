@@ -7,7 +7,7 @@ import {
   MessageSquare,
   Star,
 } from "lucide-react";
-import Card from "../Card"; // Make sure the path is correct
+import Card from "../../components/Card"; // Make sure the path is correct
 
 export default function Home() {
   const features = [
@@ -38,7 +38,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-[84vh] bg-gradient-to-br from-teal-50 to-blue-100">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
       <main className="w-[80%] mx-auto">
         <div className="py-16">
           <div className="lg:grid lg:grid-cols-12 lg:gap-8">
