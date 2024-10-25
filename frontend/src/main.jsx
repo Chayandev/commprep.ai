@@ -1,19 +1,22 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import {
-  BrowserRouter,
   createBrowserRouter,
   createRoutesFromElements,
   Route,
   RouterProvider,
 } from "react-router-dom";
 import "./index.css";
-import App from "./App.jsx";
-import Home from "./components/Home/home.jsx";
-import Login from "./components/Login/login.jsx";
-import Signup from "./components/Signup/signup.jsx";
 import AvatarContextProvider from "./context/AvatarContextProvider.jsx";
-import EmailVerification from "./components/Verification/emailVerification.jsx";
+import App from "./App.jsx";
+import Login from "./pages/Login/login.page.jsx";
+import Signup from "./pages/Signup/signup.page.jsx";
+import EmailVerification from "./pages/Verification/emailVerification.page.jsx";
+import Practice from "./pages/Practice/practice.page.jsx";
+import Home from "./pages/Home/home.page.jsx";
+import Feedback from "./pages/Feedback/feedback.page.jsx";
+import Contact from "./pages/Contact/contact.page.jsx";
+import TakeTest from "./pages/TakeTest/takeTest.page.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -21,7 +24,11 @@ const router = createBrowserRouter(
       <Route path="" element={<Home />} />
       <Route path="login" element={<Login />} />
       <Route path="signup" element={<Signup />} />
-      <Route path="emailverification" element={< EmailVerification/>} />
+      <Route path="emailverification" element={<EmailVerification />} />
+      <Route path="practice" element={<Practice />} />
+      <Route path="takeTest" element={<TakeTest />} />
+      <Route path="contact" element={<Contact />} />
+      <Route path="feedback" element={<Feedback />} />
     </Route>
   )
 );

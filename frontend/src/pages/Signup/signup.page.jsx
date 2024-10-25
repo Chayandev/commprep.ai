@@ -18,10 +18,11 @@ import {
 } from "@mui/material";
 import { ArrowForward as ArrowRight } from "@mui/icons-material";
 import { Radio, RadioGroup } from "@headlessui/react";
-import CustomTextField from "../CustomTextField";
+import CustomTextField from "../../components/CustomTextField.jsx";
 import UserContext from "../../context/UserContext.js";
 import GridLoader from "react-spinners/GridLoader.js";
-import { registerUser } from "../../../actions/user.actions.js";
+import { registerUser } from "../../../actions/auth.actions.js";
+import { useDispatch, useSelector } from "react-redux";
 
 const overrideCSS = {
   display: "block",
@@ -34,8 +35,12 @@ export default function Signup() {
   const { avatars, fetchAvatars, isLoading } = useContext(UserContext);
   const [selectedAvatar, setSelectedAvatar] = useState("");
   const [hasFetchedAvaters, setHasFetchedAvatars] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const dispatch = useDispatch();
+
+  const isRegistering = useSelector((state) => state.auth.isProcessing);
+
   const [formValues, setFormValues] = useState({
     name: "",
     username: "",
@@ -70,7 +75,6 @@ export default function Signup() {
     e.preventDefault();
     const errors = {};
     setProgress(10);
-    setIsRegistering(true);
 
     if (!formValues.name) {
       errors.name = "Full Name is required";
@@ -97,7 +101,6 @@ export default function Signup() {
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
-      setIsRegistering(false);
       setProgress(100);
       return;
     }
@@ -112,45 +115,40 @@ export default function Signup() {
       avatar: selectedAvatar, // Selected avatar
     };
 
-    // Submit form logic
-    try {
-      // Call the registerUser action
-      const result = await registerUser(userData);
-      setProgress(70);
-      // If successful
-      toast.success(result.message, {
-        position: "top-center",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
+    // Dispatch the registerUser action on submit
+    dispatch(registerUser(userData))
+      .unwrap()
+      .then((result) => {
+        setProgress(70);
+        toast.success(result.message, {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        navigate("/emailVerification");
+      })
+      .catch((error) => {
+        // Show the error message as a toast error
+        toast.error(error || "An error occurred during registration.", {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        console.error("Error during registration:", error);
+      })
+      .finally(() => {
+        setProgress(100);
       });
-      console.log("Registered user:", result.data);
-      navigate("/emailVerification");
-    } catch (error) {
-      // Show error toast with the error message
-      toast.error(error.message || "An error occurred during registration.", {
-        position: "top-center",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      console.error("Error during registration:", error.message);
-    } finally {
-      setProgress(100);
-      // Delay before setting isRegistering to false
-      setTimeout(() => {
-        setIsRegistering(false);
-      }, 1000); // Adjust the delay time as needed (1000 ms = 1 second)
-    }
-    console.log("Form submitted with avatar:", selectedAvatar);
   };
 
   return (
@@ -196,6 +194,7 @@ export default function Signup() {
               gap={2}
             >
               <CustomTextField
+                id="fullname"
                 label="Full Name"
                 variant="outlined"
                 required
@@ -206,6 +205,7 @@ export default function Signup() {
                 helperText={formErrors.name}
               />
               <CustomTextField
+                id="username"
                 label="Username"
                 variant="outlined"
                 required
@@ -216,6 +216,7 @@ export default function Signup() {
                 helperText={formErrors.username}
               />
               <CustomTextField
+                id="email"
                 label="Email"
                 type="email"
                 variant="outlined"
@@ -255,6 +256,7 @@ export default function Signup() {
                 </Select>
               </FormControl>
               <CustomTextField
+                id="password"
                 label="Password"
                 type="password"
                 variant="outlined"
@@ -266,6 +268,7 @@ export default function Signup() {
                 helperText={formErrors.password}
               />
               <CustomTextField
+                id="confirmpassword"
                 label="Confirm Password"
                 type="password"
                 variant="outlined"

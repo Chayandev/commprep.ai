@@ -9,11 +9,22 @@ import {
   randomCryptoVerificationCode,
 } from "../utils/codeGenarator.js";
 import jwt from "jsonwebtoken";
+import { convertToMilliseconds } from "../utils/convertToMiliseconds.js";
+
+// Set maxAge using the converted values
+const accessTokenMaxAge = convertToMilliseconds(
+  process.env.ACCESS_TOKEN_EXPIRY
+);
+const refreshTokenMaxAge = convertToMilliseconds(
+  process.env.REFRESH_TOKEN_EXPIRY
+);
 
 //options to secure cookies
 const options = {
   httpOnly: true,
   secure: true,
+  sameSite: "None",
+  path: "/", // Allow cookie across the app
 };
 //generate access and refresh token method
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -154,8 +165,14 @@ const loginUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, {
+      ...options,
+      maxAge: accessTokenMaxAge, // Set maxAge using the environment variable
+    })
+    .cookie("refreshToken", refreshToken, {
+      ...options,
+      maxAge: refreshTokenMaxAge, // Optionally set for refresh token as well
+    })
     .json(
       new ApiResponse(
         200,
@@ -189,6 +206,69 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User Logged out Successfully"));
 });
 
+//auto-login
+const autoLoginUser = asyncHandler(async (req, res) => {
+  const accessToken = req.cookies?.accessToken;
+  const refreshToken = req.cookies?.refreshToken; // Get refresh token from cookies
+
+  if (!accessToken) {
+    throw new ApiError(401, "Unauthorized request");
+  }
+
+  try {
+    const decodedToke = jwt.verify(
+      accessToken,
+      process.env.ACCESS_TOKEN_SECRET
+    );
+    const user = await User.findById(decodedToke?._id).select(
+      "-password -refreshToken"
+    );
+
+    if (!user) {
+      throw new ApiError(401, "Invalid or expired Access Token");
+    }
+
+    return res
+      .status(201)
+      .json(new ApiResponse(200, user, "Auto-login successfull"));
+  } catch (error) {
+    if (!refreshToken) {
+      throw new ApiError(401, "Refresh token missing. Please log in again.");
+    }
+    try {
+      const decodedToke = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+      );
+
+      const user = await User.findById(decodedToke?._id).select(
+        "-password -refreshToken"
+      );
+
+      if (!user) {
+        throw new ApiError(401, "Invalid refresh token");
+      }
+
+      if (refreshToken !== user?.refreshToken) {
+        throw new ApiError(401, "Refresh Token is expired");
+      }
+
+      const { accessToken, refreshToken } =
+        await generateAccessAndRefreshTokens(user._id);
+
+      return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+          new ApiResponse(200, user, "Access token Refreshed sucessfully!")
+        );
+    } catch (error) {
+      throw new ApiError(401, error?.message || "invalid refrech Token");
+    }
+  }
+});
+
 //refhres the accesstoken
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
@@ -214,17 +294,18 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Refresh Token is expired");
     }
 
-    const { accessToken, newRefreshToken } =
-      await generateAccessAndRefreshTokens(user._id);
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+      user._id
+    );
 
     return res
       .status(200)
       .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", newRefreshToken, options)
+      .cookie("refreshToken", refreshToken, options)
       .json(
         new ApiResponse(
           200,
-          { accessToken, newRefreshToken },
+          { accessToken, refreshToken },
           "Access token Refreshed sucessfully!"
         )
       );
@@ -299,5 +380,6 @@ export {
   getAvatars,
   verifyEmail,
   logoutUser,
+  autoLoginUser,
   refreshAccessToken,
 };
