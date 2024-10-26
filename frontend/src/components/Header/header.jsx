@@ -7,6 +7,7 @@ import { Bell, User, LogOut } from "lucide-react";
 import NavIconItem from "../NavIconItem.jsx";
 import LoadingBar from "react-top-loading-bar";
 import { toast } from "react-toastify";
+import LoadingPage from "../LoadingPage.jsx";
 
 const Header = () => {
   const [progress, setProgress] = useState(0);
@@ -16,16 +17,16 @@ const Header = () => {
   const navigate = useNavigate();
 
   // Auto-login on initial load
-  useEffect(() => {
-    dispatch(autoLoginUser());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(autoLoginUser());
+  // }, [dispatch]);
 
-  // Navigate based on authentication state
+  // // Navigate based on authentication state
   useEffect(() => {
     if (!isLoading) {
-      navigate(isAuthenticated ? "/practice" : "/");
+      navigate(isAuthenticated ? "/practice" : "/home");
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated]);
 
   const handleLogout = async () => {
     setProgress(10);
@@ -44,7 +45,7 @@ const Header = () => {
           progress: undefined,
           theme: "light",
         });
-        //navigate("/practice");
+        // navigate("/home");
       })
       .catch((error) => {
         // Show the error message as a toast error
@@ -83,7 +84,7 @@ const Header = () => {
 
   return (
     <header className="shadow sticky z-50 top-0">
-       <LoadingBar
+      <LoadingBar
         color="#02cbc3"
         progress={progress}
         height={4}
@@ -91,7 +92,7 @@ const Header = () => {
       />
       <nav className="bg-white/80 backdrop-blur-md shadow-md">
         <div className="flex justify-between items-center h-16 mx-auto w-[80%]">
-          <Link to="/" className="flex-shrink-0">
+          <Link to="/home" className="flex-shrink-0">
             <img
               src={logo}
               alt="Commprep.ai logo"
@@ -103,7 +104,7 @@ const Header = () => {
 
           {/* Loading State */}
           {isLoading ? (
-            <span className="text-gray-600">Loading...</span>
+            <span className="text-center">Loading....</span>
           ) : !isAuthenticated ? (
             <div className="flex items-baseline space-x-4">
               <Link

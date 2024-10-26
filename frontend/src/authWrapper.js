@@ -1,20 +1,10 @@
-// authWrapper.js (convert to a hook)
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+// authWrapper.js (normal function version)
+import { store } from "./app/store.js";
 import { autoLoginUser } from "../actions/auth.actions.js";
 
-const useAuthWrapper = () => {
-  const dispatch = useDispatch();
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const isProcessing = useSelector((state) => state.auth.isProcessing);
-
-  useEffect(() => {
-
-      dispatch(autoLoginUser());
-    
-  }, []);
-
-  return { isAuthenticated, isProcessing };
+const authWrapper = async () => {
+  console.log("authwrapper");
+  await store.dispatch(autoLoginUser());
 };
 
-export default useAuthWrapper;
+export default authWrapper;

@@ -6,6 +6,7 @@ import LoadingBar from "react-top-loading-bar";
 import { Link, useNavigate } from "react-router-dom";
 import { Typography, Card, CardContent, CardHeader } from "@mui/material";
 import { verifyUserEmail } from "../../../actions/user.actions";
+import { useDispatch, useSelector } from "react-redux";
 
 const EMAIL_CODE_LENGTH = 6; // Constant for the length of the email verification code
 
@@ -14,9 +15,12 @@ export default function EmailVerification() {
   const [code, setCode] = useState(Array(EMAIL_CODE_LENGTH).fill("")); // Array to hold each digit of the verification code
   const inputRefs = useRef([]); // Refs to manage focus on input fields
   const navigate = useNavigate(); // Hook to programmatically navigate
-  const [isVerifying, setIsVerifying] = useState(false); // State to track if verification is in progress
   const [progress, setProgress] = useState(0); // State for loading progress
-  const [error, setError] = useState(""); // State to hold error messages
+  const dispatch = useDispatch();
+  const isVerifying = useSelector((state) => state.verify.isProcessing);
+  const verificationError = useSelector(
+    (state) => state.verify.verificationError
+  );
 
   // Handle input change
   const handleChange = (index, value) => {
@@ -41,24 +45,31 @@ export default function EmailVerification() {
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission behavior
     setProgress(10); // Start loading progress
-    setIsVerifying(true); // Set verifying state to true
 
-    try {
-      // Attempt to verify the email with the provided code
-      const result = await verifyUserEmail({ verificationCode: code.join("") });
-      toast.success(result.message, {
-        position: "top-center",
-        autoClose: 4000,
-      }); // Show success message
-      navigate("/login"); // Redirect to login page
-    } catch (err) {
-      // Handle errors during verification
-      setError(err.message || "An error occurred while verifying your email."); // Set error message
-      console.log(err); // Log error for debugging
-    } finally {
-      setProgress(100); // Complete loading progress
-      setIsVerifying(false); // Reset verifying state
-    }
+    // Dispatch the verification email action on submit
+    dispatch(verifyUserEmail({ verificationCode: code.join("") }))
+      .unwrap()
+      .then((result) => {
+        setProgress(70);
+        toast.success(result.message, {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        navigate("/login");
+      })
+      .catch((error) => {
+        console.error("Error during email-verification:", error);
+        console.log(verificationError);
+      })
+      .finally(() => {
+        setProgress(100);
+      });
   };
 
   // Automatically submit the form when the code is fully filled
@@ -119,8 +130,10 @@ export default function EmailVerification() {
                 />
               ))}
             </div>
-            {error && (
-              <p className="text-red-500 font-semibold mt-2">{error}</p>
+            {verificationError && (
+              <p className="text-red-500 font-semibold text-center mt-2">
+                {verificationError}
+              </p>
             )}{" "}
             {/* Display error message */}
             <button

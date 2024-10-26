@@ -1,0 +1,38 @@
+@keyframes border-beam {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .border-beam {
+    position: relative;
+    overflow: hidden; /* Prevent the beam from overflowing the border */
+  }
+  
+  .border-beam::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit; /* Match the border radius of the parent */
+    border: var(--border-width) solid transparent;
+    background: linear-gradient(90deg, var(--color-from), var(--color-to));
+    animation: border-beam var(--duration)s linear infinite;
+    transform-origin: center;
+    mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
+    mask-composite: intersect;
+    -webkit-mask-composite: destination-in; /* For WebKit browsers */
+  }
+  
+  .border-beam {
+    --border-width: 1.5px;
+    --duration: 15s;
+    --color-from: #ffaa40;
+    --color-to: #9c40ff;
+  }
+  
