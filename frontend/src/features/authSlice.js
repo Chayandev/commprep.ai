@@ -5,11 +5,11 @@ import {
   autoLoginUser,
   logoutUser,
 } from "../../actions/auth.actions";
-import { act } from "react";
+
 
 const initialState = {
   user: null,
-  isLoading:false,
+  isLoading: false,
   isProcessing: false,
   isAuthenticated: false,
 };
@@ -25,7 +25,7 @@ const authSlice = createSlice({
     });
     builder.addCase(registerUser.fulfilled, (state, action) => {
       state.isProcessing = false;
-      state.user = action.payload;
+      state.user = action.payload?.data;
     });
     builder.addCase(registerUser.rejected, (state, action) => {
       state.isProcessing = false;
@@ -38,7 +38,7 @@ const authSlice = createSlice({
     builder.addCase(loginUser.fulfilled, (state, action) => {
       state.isProcessing = false;
       state.isAuthenticated = true;
-      state.user = action.payload;
+      state.user = action.payload?.data;
     });
     builder.addCase(loginUser.rejected, (state, action) => {
       state.isProcessing = false;
@@ -52,28 +52,27 @@ const authSlice = createSlice({
     });
     builder.addCase(autoLoginUser.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.user = action.payload;
+      state.user = action.payload?.data;
       state.isAuthenticated = true;
     });
 
     builder.addCase(autoLoginUser.rejected, (state, action) => {
       state.isLoading = false;
-      state.user = action.payload;
       state.isAuthenticated = false;
     });
 
     //logout
-    builder.addCase(logoutUser.pending,(state,_)=>{
-        state.isProcessing=true;
-    })
-    builder.addCase(logoutUser.fulfilled,(state,action)=>{
-        state.isAuthenticated=false,
-        state.isProcessing=false,
-        state.user=null
-    })
-    builder.addCase(logoutUser.rejected,(state,action)=>{
-        state.isProcessing=false
-    })
+    builder.addCase(logoutUser.pending, (state, _) => {
+      state.isProcessing = true;
+    });
+    builder.addCase(logoutUser.fulfilled, (state, action) => {
+      state.isAuthenticated = false;
+      state.isProcessing = false;
+      state.user = null;
+    });
+    builder.addCase(logoutUser.rejected, (state, action) => {
+      state.isProcessing = false;
+    });
   },
 });
 

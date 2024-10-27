@@ -6,8 +6,8 @@ import {
 
 //action/emial-verification
 export const verifyUserEmail = createAsyncThunk(
-  "user/emailVerification",
-  async (_,{ rejectWithValue }) => {
+  "verify/emailVerification",
+  async (verificationCode, { rejectWithValue }) => {
     try {
       const response = await fetch(VERIFY_USER_EMAIL_ROUTE, {
         method: "POST",
@@ -30,7 +30,6 @@ export const verifyUserEmail = createAsyncThunk(
     }
   }
 );
-
 
 //action/refresh-access-token
 export const refreshAccessToken = async () => {

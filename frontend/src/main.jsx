@@ -17,11 +17,13 @@ import Home from "./pages/Home/home.page.jsx";
 import Feedback from "./pages/Feedback/feedback.page.jsx";
 import Contact from "./pages/Contact/contact.page.jsx";
 import TakeTest from "./pages/TakeTest/takeTest.page.jsx";
+import LoadingPage from "./components/LoadingPage.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
-      <Route path="" element={<Home />} />
+      <Route path="" element={<LoadingPage />} />
+      <Route path="home" element={<Home />} />
       <Route path="login" element={<Login />} />
       <Route path="signup" element={<Signup />} />
       <Route path="emailverification" element={<EmailVerification />} />
