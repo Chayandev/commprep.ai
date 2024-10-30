@@ -1,88 +1,62 @@
-import React, { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
-import {
-  Typography,
-  Card,
-  CardContent,
-  CardActions,
-  CardHeader,
-} from "@mui/material";
+import React, { useState } from "react";
 import logo from "../../assets/commprepai.jpg";
-import CustomTextField from "../../components/CustomTextField";
-import { loginUser } from "../../../actions/auth.actions.js";
-import LoadingBar from "react-top-loading-bar";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
-import FormDialog from "../../components/Dialog.jsx";
-import { sendVerificationCode, verifyUserEmail } from "../../../actions/user.actions.js";
+import LoadingBar from "react-top-loading-bar";
 
-export default function LoginPage() {
+import { Typography, Card, CardContent, CardHeader } from "@mui/material";
+import { ArrowForward as ArrowRight } from "@mui/icons-material";
+import CustomTextField from "../../components/CustomTextField.jsx";
+import { useDispatch, useSelector } from "react-redux";
+import { resetPassword } from "../../../actions/auth.actions.js";
+
+export default function ResetPassword() {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
-
-  const dispatch = useDispatch();
-  const isLoggingIn = useSelector((state) => state.auth.isProcessing);
-
   const [formValues, setFormValues] = useState({
-    email: "",
     password: "",
+    confirmPassword: "",
   });
+  const dispatch = useDispatch();
+  const isSaving = useSelector((state) => state.auth.isProcessing);
+  const userId = useSelector((state) => state.verify.user._id);
   const [formErrors, setFormErrors] = useState({});
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setProgress(10);
-
-    const loginData = {
-      email: formValues.email,
-      password: formValues.password,
-    };
-
-    // Dispatch the registerUser action on submit
-    dispatch(loginUser(loginData))
-      .unwrap()
-      .then((result) => {
-        setProgress(70);
-        toast.success(result.message, {
-          position: "top-center",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        //navigate("/practice");
-      })
-      .catch((error) => {
-        // Show the error message as a toast error
-        toast.error(error || "An error occurred during Login.", {
-          position: "top-center",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        console.error("Error during login:", error);
-      })
-      .finally(() => {
-        setProgress(100);
-      });
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
     setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
-  const handleEmailSend = async (email) => {
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const errors = {};
     setProgress(10);
-    dispatch(sendVerificationCode({ email: email }))
+
+    if (!formValues.password) {
+      errors.password = "Password is required";
+    } else if (formValues.password.length < 6) {
+      errors.password =
+        "Password should be strong , should have atleast 6 characters";
+    }
+    if (formValues.password !== formValues.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      setProgress(100);
+      return;
+    }
+
+    // Prepare the data to send to the backend
+    const newPasswordData = {
+      newPassword: formValues.password,
+      confirmPassword: formValues.confirmPassword,
+      userId: userId,
+    };
+
+    dispatch(resetPassword(newPasswordData))
       .unwrap()
       .then((result) => {
         setProgress(70);
@@ -96,24 +70,21 @@ export default function LoginPage() {
           progress: undefined,
           theme: "light",
         });
-        navigate("/emailVerification");
+        navigate("/login");
       })
       .catch((error) => {
         // Show the error message as a toast error
-        toast.error(
-          error || "An error occurred while sending verification code.",
-          {
-            position: "top-center",
-            autoClose: 1000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          }
-        );
-        console.error("Error during sending verification code:", error);
+        toast.error(error || "An error occurred during saving new password.", {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        console.error("Error during restpassword:", error);
       })
       .finally(() => {
         setProgress(100);
@@ -144,29 +115,17 @@ export default function LoginPage() {
               gutterBottom
               style={{ fontWeight: 600 }}
             >
-              Welcome Back
+              Change Password
             </Typography>
           }
           subheader={
             <Typography align="center" color="textSecondary">
-              Log in to your CommPrep.ai account
+              Please enter new password to change password
             </Typography>
           }
         />
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-            <CustomTextField
-              id="email"
-              label="Email"
-              type="email"
-              variant="outlined"
-              required
-              name="email"
-              value={formValues.email}
-              onChange={handleInputChange}
-              error={!!formErrors.email}
-              helperText={formErrors.email}
-            />
             <CustomTextField
               id="password"
               label="Password"
@@ -176,17 +135,31 @@ export default function LoginPage() {
               name="password"
               value={formValues.password}
               onChange={handleInputChange}
+              error={!!formErrors.password}
+              helperText={formErrors.password}
+            />
+            <CustomTextField
+              id="confirmpassword"
+              label="Confirm Password"
+              type="password"
+              variant="outlined"
+              required
+              name="confirmPassword"
+              value={formValues.confirmPassword}
+              onChange={handleInputChange}
+              error={!!formErrors.confirmPassword}
+              helperText={formErrors.confirmPassword}
             />
             <button
               type="submit"
-              disabled={isLoggingIn}
+              disabled={isSaving}
               className={`w-full py-2 rounded-md shadow-md text-white inline-flex items-center justify-center ${
-                isLoggingIn
+                isSaving
                   ? "bg-teal-700 cursor-not-allowed"
                   : "bg-primary hover:bg-teal-700"
               }`}
             >
-              {isLoggingIn && (
+              {isSaving && (
                 <svg
                   aria-hidden="true"
                   role="status"
@@ -205,32 +178,10 @@ export default function LoginPage() {
                   ></path>
                 </svg>
               )}
-              {isLoggingIn ? "Processing..." : "Log in"}
+              {isSaving ? "Processing..." : "Change"}
             </button>
           </form>
         </CardContent>
-        <CardActions className="flex flex-col space-y-4">
-          <FormDialog
-            dialogTitle="Verify your Email"
-            dialogSubitle="To reset your password, please enter your email address here. We will send a verification code to your email to help you regain access to your account"
-            onSend={handleEmailSend}
-            trigger={
-              <Typography
-                variant="body2"
-                className="text-primary hover:underline"
-              >
-                Forgot your password?
-              </Typography>
-            }
-          />
-
-          <Typography variant="body2" color="textSecondary">
-            Don&apos;t have an account?{" "}
-            <Link to="/signup" className="text-teal-600 hover:underline">
-              Sign up
-            </Link>
-          </Typography>
-        </CardActions>
       </Card>
       <div className="mt-8 text-center">
         <Link

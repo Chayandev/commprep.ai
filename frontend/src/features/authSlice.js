@@ -4,8 +4,8 @@ import {
   loginUser,
   autoLoginUser,
   logoutUser,
+  resetPassword,
 } from "../../actions/auth.actions";
-
 
 const initialState = {
   user: null,
@@ -58,6 +58,7 @@ const authSlice = createSlice({
 
     builder.addCase(autoLoginUser.rejected, (state, action) => {
       state.isLoading = false;
+      state.user = null;
       state.isAuthenticated = false;
     });
 
@@ -71,6 +72,17 @@ const authSlice = createSlice({
       state.user = null;
     });
     builder.addCase(logoutUser.rejected, (state, action) => {
+      state.isProcessing = false;
+    });
+
+    //reset-password
+    builder.addCase(resetPassword.pending, (state, _) => {
+      state.isProcessing = true;
+    });
+    builder.addCase(resetPassword.fulfilled, (state, action) => {
+      state.isProcessing = false;
+    });
+    builder.addCase(resetPassword.rejected, (state, action) => {
       state.isProcessing = false;
     });
   },

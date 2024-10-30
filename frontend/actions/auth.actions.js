@@ -4,6 +4,7 @@ import {
   REGISTER_USER_ROUTE,
   AUTO_LOGIN_ROUTER,
   LOGOUT_USER,
+  RESET_PASSWORD,
 } from "../constants";
 
 export const registerUser = createAsyncThunk(
@@ -61,7 +62,7 @@ export const loginUser = createAsyncThunk(
 //auto login user
 export const autoLoginUser = createAsyncThunk(
   "auth/autoLogin",
-  async (_,{ rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const response = await fetch(AUTO_LOGIN_ROUTER, {
         method: "POST",
@@ -83,23 +84,50 @@ export const autoLoginUser = createAsyncThunk(
   }
 );
 
-export const logoutUser=createAsyncThunk("auth/logout",async(_,{rejectWithValue})=>{
-  try {
-    const response = await fetch(LOGOUT_USER, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) {
-      throw new Error(
-        result.message || "An error occurred during logout"
-      );
+//resetpassword
+export const resetPassword = createAsyncThunk(
+  "auth/resetPassword",
+  async (reqData, { rejectWithValue }) => {
+    try {
+      const response = await fetch(RESET_PASSWORD, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(reqData),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          result.message || "An error occurred during password reset"
+        );
+      }
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
     }
-    return result;
-  } catch (error) {
-    return rejectWithValue(error.message || "Something went wrong");
   }
-})
+);
+
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(LOGOUT_USER, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "An error occurred during logout");
+      }
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
