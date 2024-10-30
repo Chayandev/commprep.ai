@@ -18,6 +18,7 @@ import Feedback from "./pages/Feedback/feedback.page.jsx";
 import Contact from "./pages/Contact/contact.page.jsx";
 import TakeTest from "./pages/TakeTest/takeTest.page.jsx";
 import LoadingPage from "./components/LoadingPage.jsx";
+import ResetPassword from "./pages/RestPassword/resetPassword.page.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -25,6 +26,7 @@ const router = createBrowserRouter(
       <Route path="" element={<LoadingPage />} />
       <Route path="home" element={<Home />} />
       <Route path="login" element={<Login />} />
+      <Route path="resetPassword" element={<ResetPassword />} />
       <Route path="signup" element={<Signup />} />
       <Route path="emailverification" element={<EmailVerification />} />
       <Route path="practice" element={<Practice />} />

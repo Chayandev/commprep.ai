@@ -1,8 +1,36 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   REFRESH_ACCESSTOKEN_ROUTE,
+  SEND_VERIFICATION_CODE,
   VERIFY_USER_EMAIL_ROUTE,
 } from "../constants";
+
+//action/send-verificationcode
+export const sendVerificationCode = createAsyncThunk(
+  "verify/sendVerificationCode",
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await fetch(SEND_VERIFICATION_CODE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(email), // Ensure email is sent as an object
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during sending verification code."
+        );
+      }
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
 
 //action/emial-verification
 export const verifyUserEmail = createAsyncThunk(

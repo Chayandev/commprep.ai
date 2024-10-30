@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import logo from "../../assets/commprepai.jpg";
 import { Link, useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { autoLoginUser, logoutUser } from "../../../actions/auth.actions.js";
+import { logoutUser } from "../../../actions/auth.actions.js";
 import { Bell, User, LogOut } from "lucide-react";
 import NavIconItem from "../NavIconItem.jsx";
 import LoadingBar from "react-top-loading-bar";
 import { toast } from "react-toastify";
-import LoadingPage from "../LoadingPage.jsx";
 
 const Header = () => {
   const [progress, setProgress] = useState(0);
@@ -16,21 +15,14 @@ const Header = () => {
   const isLoading = useSelector((state) => state.auth.isLoading);
   const navigate = useNavigate();
 
-  // Auto-login on initial load
-  // useEffect(() => {
-  //   dispatch(autoLoginUser());
-  // }, [dispatch]);
-
-  // // Navigate based on authentication state
   useEffect(() => {
     if (!isLoading) {
       navigate(isAuthenticated ? "/practice" : "/home");
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isLoading]);
 
   const handleLogout = async () => {
     setProgress(10);
-    // Dispatch the registerUser action on submit
     dispatch(logoutUser())
       .unwrap()
       .then((result) => {
@@ -45,10 +37,8 @@ const Header = () => {
           progress: undefined,
           theme: "light",
         });
-        // navigate("/home");
       })
       .catch((error) => {
-        // Show the error message as a toast error
         toast.error(error || "An error occurred during Logout.", {
           position: "top-center",
           autoClose: 1000,

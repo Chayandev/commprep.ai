@@ -314,6 +314,51 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
+//reset-password
+const resetPassword = asyncHandler(async (req, res) => {
+  const { userId, newPassword, confirmPassword } = req.body;
+
+  if (newPassword != confirmPassword) {
+    throw new ApiError(401, "Your rechek the confirsm passwordFiled");
+  }
+
+  const user = await User.findById(userId);
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false }); //as we r only chanign the password so no need to validate the other fields
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password reset successfully"));
+});
+
+//send verification email-with email
+const sendVerificationCode = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email: email });
+
+  if (!user) {
+    throw new ApiError(401, "No user found with this email");
+  }
+
+  const newVerificationCode = randomCryptoVerificationCode();
+  const newVerificationCodeExpiryTime = oneDayExpiryTime();
+
+  user.set({
+    verificationCode: newVerificationCode,
+    verificationCodeExpireAt: newVerificationCodeExpiryTime,
+  });
+
+  await user.save();
+
+  sendVerificationEmail(user.email, user.verificationCode);
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, "Verificaion-code is sent to you email id!"));
+});
+
 //verify email
 const verifyEmail = asyncHandler(async (req, res) => {
   const { verificationCode } = req.body;
@@ -382,4 +427,6 @@ export {
   logoutUser,
   autoLoginUser,
   refreshAccessToken,
+  sendVerificationCode,
+  resetPassword
 };
