@@ -209,62 +209,58 @@ const logoutUser = asyncHandler(async (req, res) => {
 //auto-login
 const autoLoginUser = asyncHandler(async (req, res) => {
   const accessToken = req.cookies?.accessToken;
-  const refreshToken = req.cookies?.refreshToken; // Get refresh token from cookies
+  const refreshToken = req.cookies?.refreshToken;
 
-  if (!accessToken) {
-    throw new ApiError(401, "Unauthorized request");
-  }
-
-  try {
-    const decodedToke = jwt.verify(
-      accessToken,
-      process.env.ACCESS_TOKEN_SECRET
-    );
-    const user = await User.findById(decodedToke?._id).select(
-      "-password -refreshToken"
-    );
-
-    if (!user) {
-      throw new ApiError(401, "Invalid or expired Access Token");
-    }
-
-    return res
-      .status(201)
-      .json(new ApiResponse(200, user, "Auto-login successfull"));
-  } catch (error) {
-    if (!refreshToken) {
-      throw new ApiError(401, "Refresh token missing. Please log in again.");
-    }
+  if (!accessToken && refreshToken) {
     try {
-      const decodedToke = jwt.verify(
+      const decodedToken = jwt.verify(
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET
       );
+      const user = await User.findById(decodedToken._id);
 
-      const user = await User.findById(decodedToke?._id).select(
-        "-password -refreshToken"
-      );
-
-      if (!user) {
-        throw new ApiError(401, "Invalid refresh token");
+      if (!user || user.refreshToken !== refreshToken) {
+        throw new ApiError(401, "Refresh token is invalid or expired.");
       }
 
-      if (refreshToken !== user?.refreshToken) {
-        throw new ApiError(401, "Refresh Token is expired");
-      }
-
-      const { accessToken, refreshToken } =
+      // Generate new tokens
+      const { accessToken, refreshToken: newRefreshToken } =
         await generateAccessAndRefreshTokens(user._id);
+
+      // Update refresh token in database
+      user.refreshToken = newRefreshToken;
+      await user.save();
 
       return res
         .status(200)
         .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
         .json(
-          new ApiResponse(200, user, "Access token Refreshed sucessfully!")
+          new ApiResponse(200, user, "Access token refreshed successfully!")
         );
     } catch (error) {
-      throw new ApiError(401, error?.message || "invalid refrech Token");
+      throw new ApiError(401, "Invalid refresh token or expired.");
+    }
+  } else {
+    // Handle access token verification
+    try {
+      const decodedToken = jwt.verify(
+        accessToken,
+        process.env.ACCESS_TOKEN_SECRET
+      );
+      const user = await User.findById(decodedToken._id).select(
+        "-password -refreshToken"
+      );
+
+      if (!user) {
+        throw new ApiError(401, "Invalid access token");
+      }
+
+      return res
+        .status(200)
+        .json(new ApiResponse(200, user, "Auto-login successful"));
+    } catch (error) {
+      throw new ApiError(401, "Invalid access token");
     }
   }
 });
@@ -428,5 +424,5 @@ export {
   autoLoginUser,
   refreshAccessToken,
   sendVerificationCode,
-  resetPassword
+  resetPassword,
 };

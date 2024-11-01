@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import logo from "../../assets/commprepai.jpg";
-import { Link, useNavigate, NavLink } from "react-router-dom";
+import { Link, useNavigate, NavLink, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../../actions/auth.actions.js";
-import { Bell, User, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import NavIconItem from "../NavIconItem.jsx";
 import LoadingBar from "react-top-loading-bar";
 import { toast } from "react-toastify";
@@ -11,15 +11,21 @@ import { toast } from "react-toastify";
 const Header = () => {
   const [progress, setProgress] = useState(0);
   const dispatch = useDispatch();
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const isLoading = useSelector((state) => state.auth.isLoading);
+  const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
+  const { isFullScreenLayout } = useSelector((state) => state.layoutChanger);
   const navigate = useNavigate();
+  const location = useLocation(); // Access the current location
 
   useEffect(() => {
     if (!isLoading) {
-      navigate(isAuthenticated ? "/practice" : "/home");
+      // Redirect logic on initial load
+      if (isAuthenticated && location.pathname === "/") {
+        navigate("/practice");
+      } else if (!isAuthenticated && location.pathname === "/") {
+        navigate("/home");
+      }
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, navigate, location.pathname]);
 
   const handleLogout = async () => {
     setProgress(10);
@@ -37,6 +43,7 @@ const Header = () => {
           progress: undefined,
           theme: "light",
         });
+        navigate("/home");
       })
       .catch((error) => {
         toast.error(error || "An error occurred during Logout.", {
@@ -71,6 +78,9 @@ const Header = () => {
       {label}
     </NavLink>
   );
+
+  // Only render the header if isFullScreenLayout is true
+  if (isFullScreenLayout) return null;
 
   return (
     <header className="shadow sticky z-50 top-0">

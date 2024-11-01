@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
+  GET_ALL_READING_ASSESMENTS,
   REFRESH_ACCESSTOKEN_ROUTE,
   SEND_VERIFICATION_CODE,
   VERIFY_USER_EMAIL_ROUTE,
@@ -80,3 +81,32 @@ export const refreshAccessToken = async () => {
     throw error;
   }
 };
+
+//action/getReadingAssementes
+export const getAllReadingAssesments = createAsyncThunk(
+  "operation/getAllReadingAssesments",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(GET_ALL_READING_ASSESMENTS, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during fetching reading assesments."
+        );
+      }
+      console.log("getAllReadingAssesments", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);

@@ -15,7 +15,10 @@ import LoadingBar from "react-top-loading-bar";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import FormDialog from "../../components/Dialog.jsx";
-import { sendVerificationCode, verifyUserEmail } from "../../../actions/user.actions.js";
+import {
+  sendVerificationCode,
+  verifyUserEmail,
+} from "../../../actions/user.actions.js";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -54,7 +57,7 @@ export default function LoginPage() {
           progress: undefined,
           theme: "light",
         });
-        //navigate("/practice");
+        navigate("/practice");
       })
       .catch((error) => {
         // Show the error message as a toast error

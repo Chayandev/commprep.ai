@@ -9,6 +9,8 @@ export const verifyJWT = asyncHandelr(async (req, res, next) => {
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", ""); //take cookie form teh browser or auth header
 
+    console.log(token);
+
     if (!token) {
       throw new ApiError(401, "Unauthorized request");
     }
@@ -27,7 +29,9 @@ export const verifyJWT = asyncHandelr(async (req, res, next) => {
     next();
   } catch (error) {
     console.log(error);
-    throw new ApiError(401, error?.message || "Invalid Access or expired Token");
+    throw new ApiError(
+      401,
+      error?.message || "Invalid Access or expired Token"
+    );
   }
 });
-

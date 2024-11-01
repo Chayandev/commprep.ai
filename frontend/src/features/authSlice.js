@@ -5,7 +5,7 @@ import {
   autoLoginUser,
   logoutUser,
   resetPassword,
-} from "../../actions/auth.actions";
+} from "../../actions/auth.actions.js";
 
 const initialState = {
   user: null,

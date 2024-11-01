@@ -17,10 +17,12 @@ const readingAssesmentSchema = new Schema(
         required: true,
       },
     },
-    assessmentCompleters: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
+    assessmentCompleters: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );
