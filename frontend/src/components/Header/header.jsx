@@ -12,7 +12,7 @@ const Header = () => {
   const [progress, setProgress] = useState(0);
   const dispatch = useDispatch();
   const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
-  const { isFullScreenLayout } = useSelector((state) => state.layoutChanger);
+ 
   const navigate = useNavigate();
   const location = useLocation(); // Access the current location
 
@@ -78,9 +78,6 @@ const Header = () => {
       {label}
     </NavLink>
   );
-
-  // Only render the header if isFullScreenLayout is true
-  if (isFullScreenLayout) return null;
 
   return (
     <header className="shadow sticky z-50 top-0">

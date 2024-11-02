@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
+  BASE_URL,
   GET_ALL_READING_ASSESMENTS,
   REFRESH_ACCESSTOKEN_ROUTE,
   SEND_VERIFICATION_CODE,
@@ -104,6 +105,33 @@ export const getAllReadingAssesments = createAsyncThunk(
         );
       }
       console.log("getAllReadingAssesments", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
+
+//action/readingAssesmentAnalysis
+export const getReadingAssesmentAnslysis = createAsyncThunk(
+  "analysis/readingAssessmentAnalysis",
+  async (reqData, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/analyzeReadingAssesment`, {
+        method: "POST",
+        credentials: "include",
+        body: reqData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during analysis of reading assesments."
+        );
+      }
+      console.log("analyze reading assessment", result);
       return result;
     } catch (error) {
       return rejectWithValue(error.message || "Something went wrong");

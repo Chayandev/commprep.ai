@@ -10,8 +10,9 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json({ limit: "16Kb" }));
-app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+// Set a larger limit for incoming request bodies
+app.use(express.json({ limit: '10mb' })); // Example limit
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cookieParser());
 
 // app.use("/", (req, res, next) => {

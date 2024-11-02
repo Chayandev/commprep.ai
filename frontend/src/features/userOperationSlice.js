@@ -22,6 +22,7 @@ const userOperationSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    //fetching all reading assessments
     builder.addCase(getAllReadingAssesments.pending, (state, _) => {
       state.isProcessing = true;
       state.assessments = null;
@@ -34,6 +35,8 @@ const userOperationSlice = createSlice({
       state.isProcessing = false;
       state.assessments = null;
     });
+
+   
   },
 });
 

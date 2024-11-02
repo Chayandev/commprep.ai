@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   AlertTriangle,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Mic,
@@ -16,24 +17,33 @@ import {
 } from "../../features/userOperationSlice";
 import { Card, CardContent } from "@mui/material";
 import Progress from "../../components/Progress";
+import { getReadingAssesmentAnslysis } from "../../../actions/user.actions";
+import { toast } from "react-toastify";
+import LoadingBar from "react-top-loading-bar";
 
 export default function ReadingAssessmentPractice() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [progress, setProgress] = useState(0);
   const [feedbackReceived, setFeedbackReceived] = useState(false);
-  const { isProcessing, assessments, selectedAssessmentIndex } = useSelector(
+  const { assessments, selectedAssessmentIndex } = useSelector(
     (state) => state.operation
+  );
+  const { isAnalyzing, result } = useSelector(
+    (state) => state.assessmestAnalysis
   );
 
   const isErrorState = selectedAssessmentIndex === -1;
   const isLastAssessment = selectedAssessmentIndex === assessments?.length - 1;
+
   const [isRecording, setIsRecording] = useState(false);
   const [recordingComplete, setRecordingComplete] = useState(false);
   const timerRef = useRef(null);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Set up timer when assessment index changes
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [audioBlob, setAudioBlob] = useState(null);
+
   useEffect(() => {
     if (!isErrorState) {
       setTimeLeft(
@@ -42,7 +52,6 @@ export default function ReadingAssessmentPractice() {
     }
   }, [selectedAssessmentIndex, assessments, isErrorState]);
 
-  // Warn user on page reload
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       const confirmationMessage =
@@ -69,8 +78,26 @@ export default function ReadingAssessmentPractice() {
     navigate("/practice/reading");
   };
 
-  const toggleRecording = () => {
-    isRecording ? stopRecording() : startRecording();
+  const toggleRecording = async () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      const permission = await requestMicrophonePermission();
+      if (permission) {
+        startRecording();
+      }
+    }
+  };
+
+  const requestMicrophonePermission = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      return true;
+    } catch (err) {
+      console.error("Microphone permission denied", err);
+      alert("Microphone access is required for this feature.");
+      return false;
+    }
   };
 
   const startRecording = () => {
@@ -79,29 +106,77 @@ export default function ReadingAssessmentPractice() {
     setTimeLeft(
       assessments[selectedAssessmentIndex].evaluationCriteria.timeToComplete
     );
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          stopRecording();
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      const recorder = new MediaRecorder(stream);
+      setMediaRecorder(recorder);
+      recorder.start();
+
+      const audioChunks = [];
+      recorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      recorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+        setAudioBlob(audioBlob);
+        setRecordingComplete(true);
+      };
+
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prevTime) => {
+          if (prevTime <= 1) {
+            stopRecording();
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    });
   };
 
   const stopRecording = () => {
     setIsRecording(false);
-    setRecordingComplete(true);
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+    }
     clearInterval(timerRef.current);
   };
 
   const analyzeRecording = () => {
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setFeedbackReceived(true);
-    }, 3000);
+    if (!audioBlob) return;
+    setProgress(10);
+    const formData = new FormData();
+    formData.append("audio", audioBlob, "recording.wav");
+    formData.append("passage", assessments[selectedAssessmentIndex].passage);
+
+    dispatch(getReadingAssesmentAnslysis(formData))
+      .unwrap()
+      .then((result) => {
+        console.log(result);
+        setProgress(70);
+        setFeedbackReceived(true);
+      })
+      .catch((error) => {
+        // Show the error message as a toast error
+        toast.error(
+          error || "An error occurred during ReadingAssesment Analysis.",
+          {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          }
+        );
+        console.error("Error during ReadingAssesment Analysis:", error);
+      })
+      .finally(() => {
+        setProgress(100);
+      });
   };
 
   useEffect(() => {
@@ -114,8 +189,38 @@ export default function ReadingAssessmentPractice() {
     hard: "bg-[#fc900c] text-[#803d00]",
   };
 
+  // Extract feedback and suggestions
+  const feedbackLines = result?.feedback
+    .split(". ") // Split the feedback by period and space
+    .filter((line) => line.trim() !== ""); // Remove any empty lines
+
+  const suggestionLines = result?.suggestion
+    .split(". ") // Split the suggestions by period and space
+    .filter((line) => line.trim() !== ""); // Remove any empty lines
+
+  // Add a period at the end of the last line if it doesn't already have one
+  if (
+    feedbackLines?.length > 0 &&
+    !feedbackLines[feedbackLines?.length - 1].endsWith(".")
+  ) {
+    feedbackLines[feedbackLines?.length - 1] += ".";
+  }
+
+  if (
+    suggestionLines?.length > 0 &&
+    !suggestionLines[suggestionLines?.length - 1].endsWith(".")
+  ) {
+    suggestionLines[suggestionLines?.length - 1] += ".";
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
+      <LoadingBar
+        color="#02cbc3"
+        progress={progress}
+        height={4}
+        onLoaderFinished={() => setProgress(0)}
+      />
       <main className="w-[90%] mx-auto py-6">
         {isErrorState ? (
           <div className="text-red-600 text-center">
@@ -136,54 +241,124 @@ export default function ReadingAssessmentPractice() {
                 Difficulty: {assessments[selectedAssessmentIndex].difficulty}
               </div>
               <div className="prose max-w-none">
+                <h3 className="text-3xl font-bold mb-6 text-gray-800">{`Reading Assesment: ${
+                  selectedAssessmentIndex + 1
+                }`}</h3>
                 <p className="text-lg leading-relaxed text-gray-700">
                   {assessments[selectedAssessmentIndex].passage}
                 </p>
               </div>
-              {/* Feedback Display */}
-              {feedbackReceived && (
-                <div className="flex align-middle justify-center">
-                  <Card className="mt-12 w-full max-w-md  bg-white shadow-lg">
+
+              <div className="flex align-middle justify-center">
+                {/* Analysis Loading */}
+                {isAnalyzing && (
+                  <div className="mt-8 text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-600 mx-auto mb-4"></div>
+                    <div className="text-lg font-medium text-gray-700">
+                      Analyzing your recording...
+                    </div>
+                  </div>
+                )}
+                {/* Feedback Display */}
+
+                {feedbackReceived && (
+                  <Card className="mt-8 w-full bg-white shadow-lg">
                     <CardContent className="pt-6">
-                      <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                        Feedback
+                      <h3 className="text-2xl font-bold mb-6 text-gray-800">
+                        Analysis Result
                       </h3>
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         <div>
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-lg font-medium text-gray-700">
                               Overall Score
                             </span>
                             <span className="text-2xl font-bold text-teal-600">
-                              85/100
+                              {`${result.overallScore * 10}/100`}
                             </span>
                           </div>
-                          <Progress value={85} className="h-2 bg-gray-200" />
+                          <Progress
+                            value={result.overallScore * 10}
+                            className="h-3 rounded-full bg-gray-200"
+                            indicatorClassName="bg-black"
+                          />
                         </div>
-                        <div className="flex items-center">
-                          <ThumbsUp className="w-5 h-5 text-green-500 mr-2" />
-                          <span className="text-gray-700">
-                            <strong>Fluency:</strong> Good
-                          </span>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-sm font-medium text-gray-500 mb-1">
+                              Accuracy
+                            </div>
+                            <div
+                              className={`text-lg font-semibold rounded-full px-3 py-1 inline-block ${
+                                parseFloat(result.accuracy) < 60
+                                  ? "bg-red-100 text-red-800"
+                                  : parseFloat(result.accuracy) < 80
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              {result.accuracy}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-500 mb-1">
+                              Confidence
+                            </div>
+                            <div
+                              className={`text-lg font-semibold rounded-full px-3 py-1 inline-block ${
+                                parseFloat(result.pronunciationConfidence) < 60
+                                  ? "bg-red-100 text-red-800"
+                                  : parseFloat(result.pronunciationConfidence) <
+                                    80
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              {result.pronunciationConfidence}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <ThumbsUp className="w-5 h-5 text-green-500 mr-2" />
-                          <span className="text-gray-700">
-                            <strong>Pronunciation:</strong> Excellent
-                          </span>
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex items-start">
+                            <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 mt-1" />
+                            <div>
+                              <h4 className="font-semibold text-gray-800 mb-1">
+                                Feedback
+                              </h4>
+                              <ul className="list-disc list-inside text-gray-600 text-sm font-semibold">
+                                {feedbackLines.map((line, index) => (
+                                  <li key={index} className="flex items-start">
+                                    <span className="mr-2">•</span>
+                                    {line}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-start">
-                          <AlertTriangle className="w-5 h-5 text-yellow-500 mr-2 mt-1" />
-                          <span className="text-gray-700">
-                            <strong>Areas for improvement:</strong> Work on
-                            pacing and intonation for better expression.
-                          </span>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <div className="flex items-start">
+                            <AlertTriangle className="w-5 h-5 text-yellow-500 mr-2 mt-1" />
+                            <div>
+                              <h4 className="font-semibold text-gray-800 mb-1">
+                                Suggestion
+                              </h4>
+                              <ul className="list-disc list-inside text-gray-600 text-sm font-semibold">
+                                {suggestionLines.map((line, index) => (
+                                  <li key={index} className="flex items-start">
+                                    <span className="mr-2">•</span>
+                                    {line}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Right Column - Recording Interface */}
@@ -243,21 +418,18 @@ export default function ReadingAssessmentPractice() {
               {/* Analyze Button */}
               <button
                 onClick={analyzeRecording}
-                className="mt-8 bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 text-lg"
+                className={`mt-8 bg-teal-600  text-white px-8 py-3 text-lg
+                   ${
+                     !recordingComplete || isAnalyzing || feedbackReceived
+                       ? " bg-teal-700 cursor-not-allowed"
+                       : "hover:bg-teal-700"
+                   }
+                  
+                  `}
                 disabled={!recordingComplete || isAnalyzing || feedbackReceived}
               >
                 {isAnalyzing ? "Analyzing..." : "Analyze Recording"}
               </button>
-
-              {/* Analysis Loading */}
-              {isAnalyzing && (
-                <div className="mt-8 text-center">
-                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-600 mx-auto mb-4"></div>
-                  <div className="text-lg font-medium text-gray-700">
-                    Analyzing your recording...
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
