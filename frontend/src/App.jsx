@@ -11,13 +11,13 @@ function App() {
   authWrapper();
   return (
     <>
-      <Provider store={store}>
+ 
         <ToastContainer />
         <Header />
         <ScrollToTop />
         <Outlet />
         <Footer />
-      </Provider>
+ 
     </>
   );
 }

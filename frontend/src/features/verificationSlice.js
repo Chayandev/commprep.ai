@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { verifyUserEmail } from "../../actions/user.actions";
+import { verifyUserEmail } from "../../actions/user.actions.js";
 
 const initialState = {
   isProcessing: false,
