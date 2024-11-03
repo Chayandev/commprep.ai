@@ -12,10 +12,11 @@ import {
 } from "../controllers/user.auth.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
-  addReadingAssesment,
-  getReadingAssesments,
+  addListeningAssessment,
+  addReadingAssessment,
+  getReadingAssessments,
 } from "../controllers/user.operations.controller.js";
-import { analyzeReadingAssessment } from "../controllers/assesment.analysis.controller.js";
+import { analyzeReadingAssessment } from "../controllers/assessment.analysis.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router();
@@ -31,12 +32,17 @@ router.route("/sendVerificationCode").post(sendVerificationCode);
 router.route("/resetPassword").post(resetPassword);
 
 //routes for setup the assesments
-router.route("/addReadingAssesment").post(addReadingAssesment);
-
+router.route("/addReadingAssessment").post(addReadingAssessment);
+router
+  .route("/addListeningAssessment")
+  .post(
+    upload.fields([{ name: "audio", maxCount: 1 }]),
+    addListeningAssessment
+  );
 //testing
 // router.route("/getOpenAIModels").get(getOpenAIModels);
 router
-  .route("/analyzeReadingAssesment")
+  .route("/analyzeReadingAssessment")
   .post(
     verifyJWT,
     upload.fields([{ name: "audio", maxCount: 1 }]),
@@ -44,5 +50,5 @@ router
   );
 //secure routes
 router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/getReadingAssesments").get(verifyJWT, getReadingAssesments);
+router.route("/getReadingAssessments").get(verifyJWT, getReadingAssessments);
 export default router;

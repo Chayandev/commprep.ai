@@ -17,7 +17,7 @@ import {
 } from "../../features/userOperationSlice";
 import { Card, CardContent } from "@mui/material";
 import Progress from "../../components/Progress";
-import { getReadingAssesmentAnslysis } from "../../../actions/user.actions";
+import { getReadingAssessmentAnslysis } from "../../../actions/user.actions";
 import { toast } from "react-toastify";
 import LoadingBar from "react-top-loading-bar";
 
@@ -30,7 +30,7 @@ export default function ReadingAssessmentPractice() {
     (state) => state.operation
   );
   const { isAnalyzing, result } = useSelector(
-    (state) => state.assessmestAnalysis
+    (state) => state.assessmentAnalysis
   );
 
   const isErrorState = selectedAssessmentIndex === -1;
@@ -126,6 +126,7 @@ export default function ReadingAssessmentPractice() {
       timerRef.current = setInterval(() => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
+            setRecordingComplete(true);
             stopRecording();
             return 0;
           }
@@ -147,10 +148,11 @@ export default function ReadingAssessmentPractice() {
     if (!audioBlob) return;
     setProgress(10);
     const formData = new FormData();
+    formData.append("assessmentID", assessments[selectedAssessmentIndex]._id);
     formData.append("audio", audioBlob, "recording.wav");
     formData.append("passage", assessments[selectedAssessmentIndex].passage);
 
-    dispatch(getReadingAssesmentAnslysis(formData))
+    dispatch(getReadingAssessmentAnslysis(formData))
       .unwrap()
       .then((result) => {
         console.log(result);
@@ -191,27 +193,27 @@ export default function ReadingAssessmentPractice() {
 
   // Extract feedback and suggestions
   const feedbackLines = result?.feedback
-    .split(". ") // Split the feedback by period and space
+    .split("#") // Split the feedback by period and space
     .filter((line) => line.trim() !== ""); // Remove any empty lines
 
   const suggestionLines = result?.suggestion
-    .split(". ") // Split the suggestions by period and space
+    .split("#") // Split the suggestions by period and space
     .filter((line) => line.trim() !== ""); // Remove any empty lines
 
   // Add a period at the end of the last line if it doesn't already have one
-  if (
-    feedbackLines?.length > 0 &&
-    !feedbackLines[feedbackLines?.length - 1].endsWith(".")
-  ) {
-    feedbackLines[feedbackLines?.length - 1] += ".";
-  }
+  // if (
+  //   feedbackLines?.length > 0 &&
+  //   !feedbackLines[feedbackLines?.length - 1].endsWith(".")
+  // ) {
+  //   feedbackLines[feedbackLines?.length - 1] += ".";
+  // }
 
-  if (
-    suggestionLines?.length > 0 &&
-    !suggestionLines[suggestionLines?.length - 1].endsWith(".")
-  ) {
-    suggestionLines[suggestionLines?.length - 1] += ".";
-  }
+  // if (
+  //   suggestionLines?.length > 0 &&
+  //   !suggestionLines[suggestionLines?.length - 1].endsWith(".")
+  // ) {
+  //   suggestionLines[suggestionLines?.length - 1] += ".";
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">

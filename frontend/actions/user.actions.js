@@ -84,7 +84,7 @@ export const refreshAccessToken = async () => {
 };
 
 //action/getReadingAssementes
-export const getAllReadingAssesments = createAsyncThunk(
+export const getAllReadingAssessments = createAsyncThunk(
   "operation/getAllReadingAssesments",
   async (_, { rejectWithValue }) => {
     try {
@@ -113,11 +113,11 @@ export const getAllReadingAssesments = createAsyncThunk(
 );
 
 //action/readingAssesmentAnalysis
-export const getReadingAssesmentAnslysis = createAsyncThunk(
+export const getReadingAssessmentAnslysis = createAsyncThunk(
   "analysis/readingAssessmentAnalysis",
   async (reqData, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${BASE_URL}/analyzeReadingAssesment`, {
+      const response = await fetch(`${BASE_URL}/analyzeReadingAssessment`, {
         method: "POST",
         credentials: "include",
         body: reqData,

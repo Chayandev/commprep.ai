@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllReadingAssesments } from "../../actions/user.actions.js";
+import { getAllReadingAssessments } from "../../actions/user.actions.js";
 
 const initialState = {
   isProcessing: false,
@@ -23,15 +23,15 @@ const userOperationSlice = createSlice({
   },
   extraReducers: (builder) => {
     //fetching all reading assessments
-    builder.addCase(getAllReadingAssesments.pending, (state, _) => {
+    builder.addCase(getAllReadingAssessments.pending, (state, _) => {
       state.isProcessing = true;
       state.assessments = null;
     });
-    builder.addCase(getAllReadingAssesments.fulfilled, (state, action) => {
+    builder.addCase(getAllReadingAssessments.fulfilled, (state, action) => {
       state.isProcessing = false;
       state.assessments = action.payload?.data;
     });
-    builder.addCase(getAllReadingAssesments.rejected, (state, _) => {
+    builder.addCase(getAllReadingAssessments.rejected, (state, _) => {
       state.isProcessing = false;
       state.assessments = null;
     });
