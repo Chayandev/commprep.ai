@@ -1,5 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllReadingAssessments } from "../../actions/user.actions.js";
+import {
+  getAllListeningAssessments,
+  getAllReadingAssessments,
+} from "../../actions/user.actions.js";
 
 const initialState = {
   isProcessing: false,
@@ -26,17 +29,35 @@ const userOperationSlice = createSlice({
     builder.addCase(getAllReadingAssessments.pending, (state, _) => {
       state.isProcessing = true;
       state.assessments = null;
+      state.selectedAssessmentIndex = -1;
     });
     builder.addCase(getAllReadingAssessments.fulfilled, (state, action) => {
       state.isProcessing = false;
       state.assessments = action.payload?.data;
+      state.selectedAssessmentIndex = -1;
     });
     builder.addCase(getAllReadingAssessments.rejected, (state, _) => {
       state.isProcessing = false;
       state.assessments = null;
+      state.selectedAssessmentIndex = -1;
     });
 
-   
+    //fetching all listening assessments
+    builder.addCase(getAllListeningAssessments.pending, (state, action) => {
+      state.isProcessing = true;
+      state.assessments = null;
+      state.selectedAssessmentIndex = -1;
+    });
+    builder.addCase(getAllListeningAssessments.fulfilled, (state, action) => {
+      state.isProcessing = false;
+      state.assessments = action.payload?.data;
+      state.selectedAssessmentIndex = -1;
+    });
+    builder.addCase(getAllListeningAssessments.rejected, (state, _) => {
+      state.isProcessing = false;
+      state.assessments = null;
+      state.selectedAssessmentIndex = -1;
+    });
   },
 });
 

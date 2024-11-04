@@ -61,28 +61,6 @@ export const verifyUserEmail = createAsyncThunk(
   }
 );
 
-//action/refresh-access-token
-export const refreshAccessToken = async () => {
-  try {
-    const response = await fetch(REFRESH_ACCESSTOKEN_ROUTE, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const result = await response.json();
-    if (!response.ok) {
-      throw new Error(
-        result.message || "An error occurred during refresh access token."
-      );
-    }
-    return result;
-  } catch (error) {
-    throw error;
-  }
-};
-
 //action/getReadingAssementes
 export const getAllReadingAssessments = createAsyncThunk(
   "operation/getAllReadingAssesments",
@@ -105,6 +83,35 @@ export const getAllReadingAssessments = createAsyncThunk(
         );
       }
       console.log("getAllReadingAssesments", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
+
+//action/getAllListeningAssessments
+export const getAllListeningAssessments = createAsyncThunk(
+  "operation/getAllListeningAssessments",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/getListeningAssessments`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during fetching listening assesments."
+        );
+      }
+      console.log("getAllListeningAssessments", result);
       return result;
     } catch (error) {
       return rejectWithValue(error.message || "Something went wrong");

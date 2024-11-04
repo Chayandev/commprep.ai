@@ -4,8 +4,13 @@ import { ApiError } from "../utils/ApiErros.js";
 import { ApiResponse } from "../utils/ApiResonse.js";
 import { asyncHandelr } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+/*
+ *
+ *adding readingassements
+ *
+ *
+ */
 
-//adding readingassements
 const addReadingAssessment = asyncHandelr(async (req, res) => {
   const { passage, difficulty, timeToComplete } = req.body;
 
@@ -25,8 +30,15 @@ const addReadingAssessment = asyncHandelr(async (req, res) => {
       new ApiResponse(200, null, "Reading assessment created successfully")
     );
 });
+//************************************************************ */
 
-//get all reading assesments
+/*
+ *
+ *get all reading assesments
+ *
+ *
+ */
+
 const getReadingAssessments = asyncHandelr(async (req, res) => {
   const userId = req.user._id;
 
@@ -76,7 +88,15 @@ const getReadingAssessments = asyncHandelr(async (req, res) => {
     );
 });
 
-//adding all listening assessments
+//******************************************************************************************* */
+
+/*
+ *
+ *adding all listening assessments
+ *
+ *
+ */
+
 const addListeningAssessment = asyncHandelr(async (req, res) => {
   const { difficulty, mcqQuestions, saqQuestions, evaluationCriteria } =
     req.body;
@@ -116,9 +136,9 @@ const addListeningAssessment = asyncHandelr(async (req, res) => {
     throw new ApiError(400, "Audio file is missing");
   }
 
-  console.log("audioFileUrl",audioFileUrl);
+  console.log("audioFileUrl", audioFileUrl);
   const newAssessment = await ListeningAssessment.create({
-    audioFileUrl:audioFileUrl.url,
+    audioFileUrl: audioFileUrl.url,
     difficulty,
     mcqQuestions: parsedMcqQuestions.map((mcq) => ({
       question: mcq.question,
@@ -140,4 +160,71 @@ const addListeningAssessment = asyncHandelr(async (req, res) => {
       new ApiResponse(200, null, "Listening assessment created successfully")
     );
 });
-export { addReadingAssessment, getReadingAssessments, addListeningAssessment };
+
+//***************************************************************** */
+
+/*
+ *
+ *get allt her listening assessments
+ *
+ *
+ */
+
+const getListeningAssessments = asyncHandelr(async (req, res) => {
+  const userId = req.user._id;
+
+  const assessments = await ListeningAssessment.aggregate([
+    {
+      $addFields: {
+        userCompletion: {
+          $arrayElemAt: [
+            {
+              $filter: {
+                input: "$assessmentCompleters",
+                as: "completer",
+                cond: { $eq: ["$$completer.userId", userId] },
+              },
+            },
+            0,
+          ],
+        },
+      },
+    },
+    {
+      $project: {
+        passage: 1,
+        difficulty: 1,
+        evaluationCriteria: 1,
+        mcqQuestions: 1,
+        saqQuestions: 1,
+        isCompleted: {
+          $cond: {
+            if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
+            then: true,
+            else: false,
+          },
+        },
+        score: { $ifNull: ["$userCompletion.score", null] },
+        completedAt: { $ifNull: ["$userCompletion.completedAt", null] },
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        assessments,
+        "Listening assessments fetched successfully"
+      )
+    );
+});
+//********************************************************** */
+
+export {
+  addReadingAssessment,
+  getReadingAssessments,
+  addListeningAssessment,
+  getListeningAssessments,
+};
