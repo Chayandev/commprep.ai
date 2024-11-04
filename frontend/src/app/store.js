@@ -8,6 +8,6 @@ export const store = configureStore({
     auth: authReducer,
     verify: verificationReducer,
     operation: userOperationRecuder,
-    assessmestAnalysis: assessmentAnalysisRecuder,
+    assessmentAnalysis: assessmentAnalysisRecuder,
   },
 });

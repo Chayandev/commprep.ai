@@ -10,9 +10,9 @@ import {
 } from "@mui/material";
 import { Clock } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import logo from "/ic_reading.jpg";
+import logo from "/ic_reading.png";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllReadingAssesments } from "../../../actions/user.actions";
+import { getAllReadingAssessments } from "../../../actions/user.actions";
 import {
   moveNextAssessment,
   selectAssessment,
@@ -41,7 +41,7 @@ export default function ReadingAssessments() {
   // }, [handleSelectAssessment]);
 
   useEffect(() => {
-    dispatch(getAllReadingAssesments());
+    dispatch(getAllReadingAssessments());
   }, [dispatch]);
 
   const difficultyColor = {
@@ -59,7 +59,6 @@ export default function ReadingAssessments() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
-      
       {isProcessing ? (
         <div className="flex justify-center items-center h-full">
           <p>Loading...</p>
@@ -124,7 +123,22 @@ export default function ReadingAssessments() {
             {filteredAssessments?.map((assessment, index) => (
               <Card
                 key={assessment._id}
-                className="relative bg-white py-4 overflow-hidden shadow-md hover:shadow-lg transition-transform transform hover:scale-105"
+                sx={{
+                  backgroundColor: assessment.isCompleted
+                    ? "grey.200"
+                    : "common.white",
+                  py: 2,
+                  overflow: "hidden",
+                  transition:
+                    "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+                  "&:hover": {
+                    boxShadow: 6,
+                    transform: "scale(1.05)",
+                  },
+                }}
+                className={`relative ${
+                  assessment.isCompleted ? "bg-gray-50" : " bg-white"
+                } py-4 overflow-hidden shadow-md hover:shadow-lg transition-transform transform hover:scale-105`}
               >
                 <span
                   className={`absolute top-0 right-0 px-2 py-1 text-xs font-semibold rounded-bl-lg text-white ${
@@ -136,12 +150,17 @@ export default function ReadingAssessments() {
                 </span>
                 {assessment.isCompleted && (
                   <div
-                    className="absolute top-12 left-[-25px] rotate-[-45deg] bg-[#046f45] text-white text-xs text-center py-1 px-6"
-                    style={{ transformOrigin: "left top" }}
+                    className="absolute top-1/2 left-0 w-full transform -translate-y-1/2 bg-[#046f45]/95 text-white text-xs text-center py-1.5 shadow-lg"
+                    style={{ transformOrigin: "center center", zIndex: 10 }}
                   >
-                    Completed
+                    <div>Completed at</div>
+                    <div>
+                      {new Date(assessment.completedAt).toLocaleDateString()}{" "}
+                      {new Date(assessment.completedAt).toLocaleTimeString()}
+                    </div>
                   </div>
                 )}
+
                 <CardHeader
                   className="pb-0"
                   title={

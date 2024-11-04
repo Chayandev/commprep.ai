@@ -15,7 +15,7 @@ const progressSchema = new Schema(
         {
           assesmentId: {
             type: Schema.Types.ObjectId,
-            ref: "ReadingAssesment",
+            ref: "ReadingAssessment",
           },
           isCompleted: {
             type: Boolean,
@@ -47,7 +47,7 @@ const progressSchema = new Schema(
         {
           assesmentId: {
             type: Schema.Types.ObjectId,
-            ref: "ListeningAssesment",
+            ref: "ListeningAssessment",
           },
           isCompleted: {
             type: Boolean,
@@ -73,7 +73,7 @@ const progressSchema = new Schema(
         {
           assesmentId: {
             type: Schema.Types.ObjectId,
-            ref: "GrammerAssesment",
+            ref: "GrammerAssessment",
           },
           isCompleted: {
             type: Boolean,
@@ -99,7 +99,7 @@ const progressSchema = new Schema(
         {
           assesmentId: {
             type: Schema.Types.ObjectId,
-            ref: "VocabularyAssesment",
+            ref: "VocabularyAssessment",
           },
           isCompleted: {
             type: Boolean,

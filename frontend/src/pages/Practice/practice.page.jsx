@@ -100,6 +100,14 @@ export default function Practice() {
               {categories.map((category) => (
                 <Card
                   key={category.name}
+                  sx={{
+                    transition:
+                      "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+                    "&:hover": {
+                      boxShadow: 6,
+                      transform: "scale(1.05)",
+                    },
+                  }}
                   className="overflow-hidden  transition-all duration-200 hover:shadow-xl hover:scale-105"
                 >
                   <CardHeader

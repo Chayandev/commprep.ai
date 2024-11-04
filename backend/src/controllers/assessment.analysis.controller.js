@@ -3,13 +3,14 @@ import { ApiResponse } from "../utils/ApiResonse.js";
 import { ApiError } from "../utils/ApiErros.js";
 import fs from "fs"; // Import the fs module to read files
 import { AssemblyAI } from "assemblyai";
+import { ReadingAssessment } from "../models/readingAssessments.model.js";
 
 const assemblyClient = new AssemblyAI({
   apiKey: process.env.ASSEMBLYAI_API_KEY,
 });
 
 const analyzeReadingAssessment = asyncHandelr(async (req, res) => {
-  const { passage } = req.body;
+  const { passage, assessmentID } = req.body;
   console.log(passage);
 
   if (!passage) {
@@ -50,6 +51,21 @@ const analyzeReadingAssessment = asyncHandelr(async (req, res) => {
 
   //unlink the audio file
   fs.unlinkSync(audioLocalPath);
+
+  // Save the user to the completers list
+  await ReadingAssessment.findByIdAndUpdate(
+    assessmentID, // Use the assessmentId provided in the request
+    {
+      $addToSet: {
+        assessmentCompleters: {
+          userId: req.user._id, // User ID from the request
+          score: response.overallScore, // Assuming you pass the score in the request body
+          completedAt: new Date(), // Set the completion date to now
+        },
+      },
+    },
+    { new: true } // Return the updated document
+  );
 
   // Return the transcription result
   return res
@@ -138,18 +154,18 @@ async function analyzeAgainstPassageAndGenerateFeedback(
   if (accuracyRate >= 90) {
     feedback += "Excellent accuracy!\n";
   } else if (accuracyRate >= 70) {
-    feedback += "Good accuracy, but there’s room for improvement.\n";
+    feedback += "Good accuracy, but there’s room for improvement.#";
   } else {
-    feedback += "Accuracy could be improved. Pay attention to each word.\n";
+    feedback += "Accuracy could be improved. Pay attention to each word.#";
   }
 
   if (averageConfidence > 0.9) {
-    feedback += "Pronunciation is very clear and confident.\n";
+    feedback += "Pronunciation is very clear and confident.#";
   } else if (averageConfidence > 0.7) {
-    feedback += "Good pronunciation, though some words could be clearer.\n";
+    feedback += "Good pronunciation, though some words could be clearer.#";
   } else {
     feedback +=
-      "Consider practicing pronunciation, especially on complex words.\n";
+      "Consider practicing pronunciation, especially on complex words.#";
   }
 
   // Dynamic suggestions based on errors
@@ -157,17 +173,17 @@ async function analyzeAgainstPassageAndGenerateFeedback(
     suggestion +=
       "Review words that were substituted or have pronunciation issues, such as: " +
       pronunciationIssues.join(", ") +
-      ".\n";
+      ".#";
   }
   if (insertions > 0) {
-    suggestion += "Try to avoid adding extra words.\n";
+    suggestion += "Try to avoid adding extra words.#";
   }
   if (deletions > 0) {
-    suggestion += "Pay attention to omitted words.\n";
+    suggestion += "Pay attention to omitted words.#";
 
     // Additional encouragement if accuracy was low
     if (accuracyRate < 70) {
-      suggestion += "Practice reading passages slowly to improve accuracy.\n";
+      suggestion += "Practice reading passages slowly to improve accuracy.#";
     }
   }
 
@@ -176,7 +192,7 @@ async function analyzeAgainstPassageAndGenerateFeedback(
     suggestion +=
       "Words with low confidence scores include: " +
       punctuationIssues.join(", ") +
-      ".\n";
+      ".#";
   }
 
   return {
