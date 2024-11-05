@@ -25,6 +25,7 @@ import ReadingAssessmentPractice from "./pages/Assessments/reading.assessment.pa
 import FullScreenLayout from "./fullScreenLayout.jsx";
 import { store } from "./app/store.js";
 import { Provider } from "react-redux";
+import ListeningAssessments from "./pages/Practice/listening.page.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -48,6 +49,7 @@ const router = createBrowserRouter(
         <Route path="emailverification" element={<EmailVerification />} />
         <Route path="practice" element={<Practice />} />
         <Route path="practice/reading" element={<ReadingAssessments />} />
+        <Route path="practice/listening" element={<ListeningAssessments />} />
         <Route path="takeTest" element={<TakeTest />} />
         <Route path="contact" element={<Contact />} />
         <Route path="feedback" element={<Feedback />} />

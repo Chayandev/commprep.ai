@@ -14,6 +14,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   addListeningAssessment,
   addReadingAssessment,
+  getListeningAssessments,
   getReadingAssessments,
 } from "../controllers/user.operations.controller.js";
 import { analyzeReadingAssessment } from "../controllers/assessment.analysis.controller.js";
@@ -39,8 +40,10 @@ router
     upload.fields([{ name: "audio", maxCount: 1 }]),
     addListeningAssessment
   );
-//testing
-// router.route("/getOpenAIModels").get(getOpenAIModels);
+
+//secure routes
+router.route("/logout").post(verifyJWT, logoutUser);
+router.route("/getReadingAssessments").get(verifyJWT, getReadingAssessments);
 router
   .route("/analyzeReadingAssessment")
   .post(
@@ -48,7 +51,5 @@ router
     upload.fields([{ name: "audio", maxCount: 1 }]),
     analyzeReadingAssessment
   );
-//secure routes
-router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/getReadingAssessments").get(verifyJWT, getReadingAssessments);
+router.route("/getListeningAssessments").get(verifyJWT, getListeningAssessments);
 export default router;
