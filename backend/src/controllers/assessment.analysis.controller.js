@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiErros.js";
 import fs from "fs"; // Import the fs module to read files
 import { AssemblyAI } from "assemblyai";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
+import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 
 const assemblyClient = new AssemblyAI({
   apiKey: process.env.ASSEMBLYAI_API_KEY,
@@ -204,4 +205,77 @@ async function analyzeAgainstPassageAndGenerateFeedback(
   };
 }
 
-export { analyzeReadingAssessment };
+const analyseListeningAssessment = asyncHandelr(async (req, res) => {
+  const { answers, assessmentID } = req.body;
+  if (!answers || !assessmentID)
+    throw new ApiError(400, "Incomplete request data");
+
+  const response = await calculateScore(answers, assessmentID);
+
+  await ListeningAssessment.findByIdAndUpdate(
+    assessmentID, // Use the assessmentId provided in the request
+    {
+      $addToSet: {
+        assessmentCompleters: {
+          userId: req.user._id, // User ID from the request
+          score: response.score, // Assuming you pass the score in the request body
+          completedAt: new Date(), // Set the completion date to now
+        },
+      },
+    },
+    { new: true } // Return the updated document
+  );
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, response, "Sucessfully Analyzed"));
+});
+
+const calculateScore = async (answers, assessmentID) => {
+  try {
+    const assessment = await ListeningAssessment.findById(assessmentID).exec();
+
+    if (!assessment) throw new ApiError(400, "Assessment not found");
+
+    let score = 0;
+    const totalQuestions = assessment.mcqQuestions.length;
+
+    // Calculate score based on correct answers
+    assessment.mcqQuestions.forEach((question, index) => {
+      const userAnswer = answers[index.toString()];
+      if (
+        userAnswer &&
+        userAnswer === question.options[question.correctOption]
+      ) {
+        score += 1;
+      }
+    });
+
+    // Determine feedback based on score percentage
+    const scorePercentage = (score / totalQuestions) * 100;
+    let feedback = "";
+    let suggestions = "";
+
+    if (scorePercentage >= 80) {
+      feedback = "Excellent job! Your listening skills are impressive.";
+      suggestions =
+        "Keep practicing to maintain your high level. Try challenging yourself with more complex listening materials or faster audio to improve even further.";
+    } else if (scorePercentage >= 50) {
+      feedback = "Good work! Keep practicing to sharpen your listening skills.";
+      suggestions =
+        "Focus on picking out key information and understanding the main ideas. Try listening to various accents or slightly faster content to get more comfortable.";
+    } else {
+      feedback = "Don't be discouraged. Keep practicing, and you'll improve!";
+      suggestions =
+        "Start with slower-paced audio and focus on understanding every word. Gradually move to more complex listening exercises. Consider replaying difficult sections to catch missed details.";
+    }
+
+    // Return score, feedback, and suggestions
+    return { score, feedback, suggestions };
+  } catch (error) {
+    console.error("Error calculating score and feedback:", error);
+    throw error;
+  }
+};
+
+export { analyzeReadingAssessment, analyseListeningAssessment };

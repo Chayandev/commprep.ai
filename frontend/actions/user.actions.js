@@ -127,6 +127,9 @@ export const getReadingAssessmentAnslysis = createAsyncThunk(
       const response = await fetch(`${BASE_URL}/analyzeReadingAssessment`, {
         method: "POST",
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: reqData,
       });
 
@@ -139,6 +142,36 @@ export const getReadingAssessmentAnslysis = createAsyncThunk(
         );
       }
       console.log("analyze reading assessment", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
+
+//action//getListeningAssessmentAnalysis
+export const getListeningAssessmentAnalysis = createAsyncThunk(
+  "analysis/listeningAssessmentAnalysis",
+  async (answers, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/analyzeListeningAssessments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(answers),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during analysis of listening assesments."
+        );
+      }
+      console.log("analyze listening assessment", result);
       return result;
     } catch (error) {
       return rejectWithValue(error.message || "Something went wrong");

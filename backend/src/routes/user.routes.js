@@ -17,7 +17,10 @@ import {
   getListeningAssessments,
   getReadingAssessments,
 } from "../controllers/user.operations.controller.js";
-import { analyzeReadingAssessment } from "../controllers/assessment.analysis.controller.js";
+import {
+  analyseListeningAssessment,
+  analyzeReadingAssessment,
+} from "../controllers/assessment.analysis.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router();
@@ -51,5 +54,10 @@ router
     upload.fields([{ name: "audio", maxCount: 1 }]),
     analyzeReadingAssessment
   );
-router.route("/getListeningAssessments").get(verifyJWT, getListeningAssessments);
+router
+  .route("/getListeningAssessments")
+  .get(verifyJWT, getListeningAssessments);
+router
+  .route("/analyzeListeningAssessments")
+  .post(verifyJWT, analyseListeningAssessment);
 export default router;

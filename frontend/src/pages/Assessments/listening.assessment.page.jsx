@@ -1,20 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
-import { Card, CardContent, Button, Typography } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
 import Progress from "../../components/Progress"; // Assuming Progress component is defined
 import { ChevronRight, Play, Pause, Loader2, ChevronLeft } from "lucide-react";
 import { RadioGroup, FormControlLabel, Radio } from "@mui/material";
 // Assuming Textarea component is defined
 import TextArea from "../../components/TextArea";
 import { useNavigate } from "react-router-dom";
+import { getListeningAssessmentAnalysis } from "../../../actions/user.actions";
+import { toast } from "react-toastify";
+import LoadingBar from "react-top-loading-bar";
 
 export default function ListeningAssessmentPractice() {
   const navigate = useNavigate();
   const { assessments, selectedAssessmentIndex } = useSelector(
     (state) => state.operation
   );
+  const { isAnalyzing, result } = useSelector(
+    (state) => state.assessmentAnalysis
+  );
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isSubmiting, setIsSubmitting] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioCurrentTime, setAudioCurrentTime] = useState(0);
   const [assessmentTime, setAssessmentTime] = useState(0);
@@ -30,7 +34,8 @@ export default function ListeningAssessmentPractice() {
   const timerRef = useRef(null);
   const [assessment, setAssessment] = useState(null);
   const isErrorState = selectedAssessmentIndex === -1;
-
+  const [progress, setProgress] = useState(0);
+  const dispatch = useDispatch();
   // Extract data from the selected assessment
   useEffect(() => {
     if (!isErrorState) setAssessment(assessments[selectedAssessmentIndex]);
@@ -101,25 +106,49 @@ export default function ListeningAssessmentPractice() {
 
   const handleAnswerChange = (questionIndex, answer) => {
     setAnswers({ ...answers, [questionIndex]: answer });
+    console.log(answers);
   };
 
   const handleSubmit = async () => {
     setIsSubmitted(true);
-    setIsSubmitting(true);
     if (audioRef.current) audioRef.current.pause();
     if (timerRef.current) clearInterval(timerRef.current);
+    console.log("Submitting answers:", answers);
 
-    // Simulating API call to backend for feedback
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setFeedback({
-      score: 2,
-      totalQuestions: questions.length,
-      feedback:
-        "Good attempt! You've shown a solid understanding of the topic.",
-      suggestion:
-        "To improve, focus on listening for specific details and practice summarizing main ideas concisely.",
-    });
-    setIsSubmitting(false);
+    if (!answers && answers.length < 0) {
+      toast.error("Answers are missing or invalid");
+      return;
+    }
+
+    dispatch(
+      getListeningAssessmentAnalysis({
+        answers: answers,
+        assessmentID: assessment._id,
+      })
+    )
+      .unwrap()
+      .then((result) => {
+        console.log(result);
+        setProgress(70);
+        setFeedback(result);
+      })
+      .catch((error) => {
+        // Show the error message as a toast error
+        toast.error(error || "An error occurred during Listening Analysis.", {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        console.error("Error during ListeningAssessment Analysis:", error);
+      })
+      .finally(() => {
+        setProgress(100);
+      });
   };
 
   const handleBack = () => {
@@ -158,6 +187,12 @@ export default function ListeningAssessmentPractice() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
+      <LoadingBar
+        color="#02cbc3"
+        progress={progress}
+        height={4}
+        onLoaderFinished={() => setProgress(0)}
+      />
       <main className="w-[90%] m-auto block py-6">
         {isErrorState ? (
           <div className="text-red-600 text-center">
@@ -315,7 +350,7 @@ export default function ListeningAssessmentPractice() {
                   </>
                 ) : (
                   <div className="prose max-w-none">
-                    {isSubmiting ? (
+                    {isAnalyzing ? (
                       <div className="flex flex-col items-center justify-center h-64">
                         <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-600 mx-auto mb-4"></div>
                         <p className="mt-4 text-xl text-gray-600">
@@ -329,15 +364,24 @@ export default function ListeningAssessmentPractice() {
                         </h2>
                         <div className="bg-teal-50 border-l-4 border-teal-500 p-4 mb-6">
                           <p className="text-xl font-semibold text-teal-800">
-                            Score: {feedback.score} out of{" "}
-                            {feedback.totalQuestions} correct
+                            {`Score: ${result?.score} out of ${
+                              questions.length
+                            }${
+                              questions.length > 1 ? " questions" : " question"
+                            }  ${result?.score / 10} is correct`}
                           </p>
                         </div>
                         <div className="mb-6">
                           <h3 className="text-2xl font-semibold mb-2 text-gray-700">
                             Feedback
                           </h3>
-                          <p className="text-gray-600">{feedback.feedback}</p>
+                          <p className="text-gray-600">{result?.feedback}</p>
+                        </div>
+                        <div>
+                          <h3 className="text-2xl font-semibold mb-2 text-gray-700">
+                            Suggestion for Improvement
+                          </h3>
+                          <p className="text-gray-600">{result?.suggestions}</p>
                         </div>
                       </>
                     )}
@@ -466,9 +510,9 @@ export default function ListeningAssessmentPractice() {
           <button
             onClick={handleBack} // Add click handler for navigation
             className={`flex mt-8 items-center justify-center px-4 py-2 border rounded-md transition-all duration-200  text-teal-600 border-teal-600 hover:bg-teal-50 ${
-              isSubmiting ? "cursor-not-allowed" : ""
+              isAnalyzing ? "cursor-not-allowed" : ""
             }`}
-            disabled={isSubmiting}
+            disabled={isAnalyzing}
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
             Back to Main Page
