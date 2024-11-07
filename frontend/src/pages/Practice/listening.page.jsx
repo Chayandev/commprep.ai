@@ -23,8 +23,8 @@ export default function ListeningAssessments() {
   const { isProcessing, assessments } = useSelector((state) => state.operation);
 
   const handleSelectAssessment = (index) => {
-    // dispatch(selectAssessment(index));
-    // navigate(`/practice/reading/assessment/${index + 1}`);
+    dispatch(selectAssessment(index));
+    navigate(`/practice/listening/assessment/${index + 1}`);
   };
 
   useEffect(() => {

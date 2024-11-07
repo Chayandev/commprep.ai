@@ -20,8 +20,10 @@ import Progress from "../../components/Progress";
 import { getReadingAssessmentAnslysis } from "../../../actions/user.actions";
 import { toast } from "react-toastify";
 import LoadingBar from "react-top-loading-bar";
+import useFullScreen from "../../components/Hooks/FullScreenHook.js";
 
 export default function ReadingAssessmentPractice() {
+  //useFullScreen();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [progress, setProgress] = useState(0);
@@ -40,7 +42,8 @@ export default function ReadingAssessmentPractice() {
   const [recordingComplete, setRecordingComplete] = useState(false);
   const timerRef = useRef(null);
   const [timeLeft, setTimeLeft] = useState(0);
-
+  const timeDisplayRef = useRef(null);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
 
@@ -74,7 +77,7 @@ export default function ReadingAssessmentPractice() {
   };
 
   const handleBack = () => {
-    dispatch(changeLayout());
+    //dispatch(changeLayout());
     navigate("/practice/reading");
   };
 
@@ -191,29 +194,21 @@ export default function ReadingAssessmentPractice() {
     hard: "bg-[#fc900c] text-[#803d00]",
   };
 
-  // Extract feedback and suggestions
-  const feedbackLines = result?.feedback
-    .split("#") // Split the feedback by period and space
-    .filter((line) => line.trim() !== ""); // Remove any empty lines
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 120); // Adjust this value as needed
+    };
 
-  const suggestionLines = result?.suggestion
-    .split("#") // Split the suggestions by period and space
-    .filter((line) => line.trim() !== ""); // Remove any empty lines
+    window.addEventListener("scroll", handleScroll);
 
-  // Add a period at the end of the last line if it doesn't already have one
-  // if (
-  //   feedbackLines?.length > 0 &&
-  //   !feedbackLines[feedbackLines?.length - 1].endsWith(".")
-  // ) {
-  //   feedbackLines[feedbackLines?.length - 1] += ".";
-  // }
-
-  // if (
-  //   suggestionLines?.length > 0 &&
-  //   !suggestionLines[suggestionLines?.length - 1].endsWith(".")
-  // ) {
-  //   suggestionLines[suggestionLines?.length - 1] += ".";
-  // }
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
@@ -223,14 +218,14 @@ export default function ReadingAssessmentPractice() {
         height={4}
         onLoaderFinished={() => setProgress(0)}
       />
-      <main className="w-[90%] mx-auto py-6">
+      <main className="w-[90%] m-auto block py-6">
         {isErrorState ? (
           <div className="text-red-600 text-center">
             <h3>Error: Assessment Cancelled or Not Available</h3>
             <p>Please select a valid assessment to continue.</p>
           </div>
         ) : (
-          <div className="flex flex-col xl:flex-row  gap-8">
+          <div className="flex flex-col-reverse xl:flex-row  gap-8">
             {/* Left Column - Passage */}
             <div className="flex-[3] bg-white rounded-lg shadow-md p-8">
               <div
@@ -364,7 +359,7 @@ export default function ReadingAssessmentPractice() {
             </div>
 
             {/* Right Column - Recording Interface */}
-            <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-lg shadow-md p-8">
+            <div className="flex-1 flex flex-col items-center bg-white rounded-lg shadow-md p-8">
               <div className="mb-8 text-center">
                 <h3 className="text-2xl font-bold mb-2 text-gray-800">
                   Recording
@@ -374,8 +369,33 @@ export default function ReadingAssessmentPractice() {
                 </p>
               </div>
 
+              {/* <div
+                className={`mb-6 text-4xl font-bold px-6 py-3 rounded-full shadow-inner ${
+                  timeLeft > 10
+                    ? "text-teal-600 bg-teal-50"
+                    : timeLeft > 5
+                    ? "text-yellow-600 bg-yellow-50"
+                    : "text-red-600 bg-red-50"
+                }`}
+              >
+                {timeLeft > 0 ? `${timeLeft}s` : "Time's up!"}
+              </div> */}
+
               {/* Timer Display */}
-              <div className="mb-6 text-4xl font-bold text-teal-600 bg-teal-50 px-6 py-3 rounded-full shadow-inner">
+              <div
+                ref={timeDisplayRef}
+                className={`mb-6 text-4xl text-teal-600 bg-teal-50 font-bold px-6 py-3 rounded-full shadow-inner transition-all duration-300 ease-in-out ${
+                  isScrolled
+                    ? "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-10"
+                    : ""
+                }${
+                  timeLeft > 10
+                    ? "text-teal-600 bg-teal-50"
+                    : timeLeft > 5
+                    ? "text-yellow-600 bg-yellow-50 blink"
+                    : "text-red-600 bg-red-50 blink"
+                }`}
+              >
                 {timeLeft > 0 ? `${timeLeft}s` : "Time's up!"}
               </div>
 
@@ -387,7 +407,7 @@ export default function ReadingAssessmentPractice() {
                     ? "bg-gradient-to-r from-orange-400 to-red-500 shadow-lg scale-110"
                     : "bg-gradient-to-r from-teal-400 to-teal-500"
                 }`}
-                disabled={isAnalyzing || feedbackReceived}
+                disabled={isAnalyzing || feedbackReceived || recordingComplete}
               >
                 {isRecording ? (
                   <Square

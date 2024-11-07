@@ -106,7 +106,7 @@ const addListeningAssessment = asyncHandelr(async (req, res) => {
   console.log(evaluationCriteria);
 
   // Input validation (basic checks)
-  if (!difficulty || !evaluationCriteria || !mcqQuestions || !saqQuestions) {
+  if (!difficulty || !evaluationCriteria || !mcqQuestions) {
     return res.status(400).json({
       message: "Invalid input data",
     });
@@ -114,7 +114,7 @@ const addListeningAssessment = asyncHandelr(async (req, res) => {
 
   // Parse JSON strings into objects for nested fields
   const parsedMcqQuestions = JSON.parse(mcqQuestions);
-  const parsedSaqQuestions = JSON.parse(saqQuestions);
+  //const parsedSaqQuestions = JSON.parse(saqQuestions);
   const parsedEvaluationCriteria = JSON.parse(evaluationCriteria);
 
   let audioLocalPath;
@@ -145,10 +145,10 @@ const addListeningAssessment = asyncHandelr(async (req, res) => {
       options: mcq.options,
       correctOption: mcq.correctOption,
     })),
-    saqQuestions: parsedSaqQuestions.map((saq) => ({
-      question: saq.question,
-      expectedAnswer: saq.expectedAnswer,
-    })),
+    // saqQuestions: parsedSaqQuestions.map((saq) => ({
+    //   question: saq.question,
+    //   expectedAnswer: saq.expectedAnswer,
+    // })),
     evaluationCriteria: parsedEvaluationCriteria,
   });
 
@@ -192,6 +192,7 @@ const getListeningAssessments = asyncHandelr(async (req, res) => {
     },
     {
       $project: {
+        audioFileUrl:1,
         passage: 1,
         difficulty: 1,
         evaluationCriteria: 1,

@@ -1,5 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getReadingAssessmentAnslysis } from "../../actions/user.actions";
+import {
+  getListeningAssessmentAnalysis,
+  getReadingAssessmentAnslysis,
+} from "../../actions/user.actions";
 
 const initialState = {
   isAnalyzing: false,
@@ -22,6 +25,24 @@ const assessmentAnalysisSlice = createSlice({
       state.result = action.payload?.data;
     });
     builder.addCase(getReadingAssessmentAnslysis.rejected, (state, _) => {
+      state.isAnalyzing = false;
+      state.result = null;
+    });
+
+    //analysis of listening assessment
+
+    builder.addCase(getListeningAssessmentAnalysis.pending, (state, _) => {
+      state.isAnalyzing = true;
+      state.result = null;
+    });
+    builder.addCase(
+      getListeningAssessmentAnalysis.fulfilled,
+      (state, action) => {
+        state.isAnalyzing = false;
+        state.result = action.payload?.data;
+      }
+    );
+    builder.addCase(getListeningAssessmentAnalysis.rejected, (state, _) => {
       state.isAnalyzing = false;
       state.result = null;
     });

@@ -77,9 +77,9 @@ export default function Practice() {
               Ready to elevate your communication game?
             </p>
             <div className="flex justify-center sm:justify-start">
-              <button className="mt-4 bg-gradient-to-r from-teal-500 to-blue-600 text-white font-semibold py-2 px-4 rounded-full transition-all duration-200 hover:shadow-lg hover:scale-105">
+              <div className="mt-4 bg-gradient-to-r from-teal-500 to-blue-600 text-white font-semibold py-2 px-4 rounded-full transition-all duration-200 hover:shadow-lg hover:scale-105">
                 Start Your Journey
-              </button>
+              </div>
             </div>
 
             <div className="mt-8">

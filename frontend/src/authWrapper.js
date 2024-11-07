@@ -4,7 +4,8 @@ import { autoLoginUser } from "../actions/auth.actions.js";
 
 const authWrapper = async () => {
   console.log("authwrapper");
-  await store.dispatch(autoLoginUser());
+  const res = await store.dispatch(autoLoginUser());
+  //console.log(res);
 };
 
 export default authWrapper;
