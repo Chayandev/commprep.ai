@@ -192,6 +192,7 @@ const getListeningAssessments = asyncHandelr(async (req, res) => {
     },
     {
       $project: {
+        audioFileUrl:1,
         passage: 1,
         difficulty: 1,
         evaluationCriteria: 1,

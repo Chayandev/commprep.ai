@@ -212,6 +212,7 @@ const autoLoginUser = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
 
   if (!accessToken && refreshToken) {
+    console.log("generating new accesstoken using accesstoken");
     try {
       const decodedToken = jwt.verify(
         refreshToken,

@@ -26,6 +26,7 @@ import FullScreenLayout from "./fullScreenLayout.jsx";
 import { store } from "./app/store.js";
 import { Provider } from "react-redux";
 import ListeningAssessments from "./pages/Practice/listening.page.jsx";
+import ListeningAssessmentPractice from "./pages/Assessments/listening.assessment.page.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -36,6 +37,10 @@ const router = createBrowserRouter(
         <Route
           path="practice/reading/assessment/:assessmentId"
           element={<ReadingAssessmentPractice />}
+        />
+        <Route
+          path="practice/listening/assessment/:assessmentId"
+          element={<ListeningAssessmentPractice />}
         />
       </Route>
 

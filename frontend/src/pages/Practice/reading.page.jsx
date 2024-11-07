@@ -6,6 +6,7 @@ import { selectAssessment } from "../../features/userOperationSlice";
 import { useNavigate } from "react-router-dom";
 import AssessmentHeader from "../../components/AssessmentHeader.jsx";
 import AssessmentCard from "../../components/AssessmentCard.jsx";
+import NoAssessmentsFound from "../../components/NoAssessmentFound.jsx";
 
 export default function ReadingAssessments() {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ export default function ReadingAssessments() {
             </div>
           ) : (
             <div className="flex justify-center mt-10">
-              <NoAssessmentsFound />{" "}
+              <NoAssessmentsFound />
               {/* Display NoAssessmentsFound in the main content area */}
             </div>
           )}
