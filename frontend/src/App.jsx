@@ -4,11 +4,10 @@ import Footer from "./components/Footer/footer.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ScrollToTop from "./components/ScrollArea.jsx";
-import { Provider, useDispatch } from "react-redux";
-import { store } from "./app/store.js";
+
 import authWrapper from "./authWrapper.js";
 function App() {
-  authWrapper();
+  
   return (
     <>
  

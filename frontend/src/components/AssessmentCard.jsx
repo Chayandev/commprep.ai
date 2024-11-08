@@ -17,7 +17,7 @@ const AssessmentCard = ({
   return (
     <Card
       sx={{
-        backgroundColor: assessment.isCompleted ? "grey.200" : "common.white",
+        backgroundColor: assessment.isCompleted ? "#f0fdfa" : "common.white",
         py: 2,
         overflow: "hidden",
         transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
@@ -27,7 +27,7 @@ const AssessmentCard = ({
         },
       }}
       className={`relative ${
-        assessment.isCompleted ? "bg-gray-50" : "bg-white"
+        assessment.isCompleted ? "bg-teal-50" : "bg-white"
       } py-4 overflow-hidden shadow-md hover:shadow-lg transition-transform transform hover:scale-105`}
     >
       <span

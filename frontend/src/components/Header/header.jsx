@@ -7,17 +7,22 @@ import { User, LogOut } from "lucide-react";
 import NavIconItem from "../NavIconItem.jsx";
 import LoadingBar from "react-top-loading-bar";
 import { toast } from "react-toastify";
+import authWrapper from "../../authWrapper.js";
 
 const Header = () => {
   const [progress, setProgress] = useState(0);
   const dispatch = useDispatch();
-  const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
- 
+  const { isAuthenticated, isProcessing } = useSelector((state) => state.auth);
+
   const navigate = useNavigate();
   const location = useLocation(); // Access the current location
 
   useEffect(() => {
-    if (!isLoading) {
+    authWrapper();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!isProcessing) {
       // Redirect logic on initial load
       if (isAuthenticated && location.pathname === "/") {
         navigate("/practice");
@@ -25,7 +30,7 @@ const Header = () => {
         navigate("/home");
       }
     }
-  }, [isAuthenticated, isLoading, navigate, location.pathname]);
+  }, [isAuthenticated, isProcessing, navigate, location.pathname]);
 
   const handleLogout = async () => {
     setProgress(10);
@@ -100,7 +105,7 @@ const Header = () => {
           </Link>
 
           {/* Loading State */}
-          {isLoading ? (
+          {isProcessing ? (
             <span className="text-center">Loading....</span>
           ) : !isAuthenticated ? (
             <div className="flex items-baseline space-x-4">

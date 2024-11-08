@@ -50,7 +50,7 @@ export default function ListeningAssessmentPractice() {
   useEffect(() => {
     const audioElement = new Audio(AUDIO_URL);
     audioElement.onloadedmetadata = () => {
-      const audioDuration = audioElement?.duration; // Get audio file duration
+      const audioDuration = audioElement?.duration || 0; // Get audio file duration
       setAudioDuration(audioDuration);
       const evaluationTime = assessment?.evaluationCriteria?.timeToComplete; // Default time if not provided
       setAssessmentTime(evaluationTime); // Ensure the assessment time doesn't exceed the audio duration
@@ -450,43 +450,47 @@ export default function ListeningAssessmentPractice() {
                 </div>
 
                 {/* Circular Timer */}
-                <div className="relative w-48 h-48 mb-8">
-                  <svg className="w-full h-full" viewBox="0 0 100 100">
-                    <circle
-                      className="text-gray-200"
-                      strokeWidth="4"
-                      stroke="currentColor"
-                      fill="transparent"
-                      r="47"
-                      cx="50"
-                      cy="50"
-                    />
-                    <circle
-                      className={`${getTimerColor()} transition-all duration-3000 ease-in-out`}
-                      strokeWidth="4"
-                      strokeDasharray={47 * 2 * Math.PI}
-                      strokeDashoffset={
-                        47 * 2 * Math.PI * (1 - assessmentTime / TOTAL_TIME)
-                      }
-                      strokeLinecap="round"
-                      stroke="currentColor"
-                      fill="transparent"
-                      r="47"
-                      cx="50"
-                      cy="50"
-                      transform="rotate(-90 50 50)"
-                    />
-                  </svg>
-                  <div
-                    className={`absolute inset-0 flex items-center justify-center text-3xl font-bold ${getTimerColor()} ${
-                      assessmentTime <= 10 ? "animate-pulse" : ""
-                    }`}
-                  >
-                    {assessmentTime > 0
-                      ? formatTime(assessmentTime)
-                      : "Times Up"}
+                {isAudioLoaded ? (
+                  <div className="relative w-48 h-48 mb-8">
+                    <svg className="w-full h-full" viewBox="0 0 100 100">
+                      <circle
+                        className="text-gray-200"
+                        strokeWidth="4"
+                        stroke="currentColor"
+                        fill="transparent"
+                        r="47"
+                        cx="50"
+                        cy="50"
+                      />
+                      <circle
+                        className={`${getTimerColor()} transition-all duration-3000 ease-in-out`}
+                        strokeWidth="4"
+                        strokeDasharray={47 * 2 * Math.PI}
+                        strokeDashoffset={
+                          47 * 2 * Math.PI * (1 - assessmentTime / TOTAL_TIME)
+                        }
+                        strokeLinecap="round"
+                        stroke="currentColor"
+                        fill="transparent"
+                        r="47"
+                        cx="50"
+                        cy="50"
+                        transform="rotate(-90 50 50)"
+                      />
+                    </svg>
+                    <div
+                      className={`absolute inset-0 flex items-center justify-center text-3xl font-bold ${getTimerColor()} ${
+                        assessmentTime <= 10 ? "animate-pulse" : ""
+                      }`}
+                    >
+                      {assessmentTime > 0
+                        ? formatTime(assessmentTime)
+                        : "Times Up"}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  ""
+                )}
 
                 <div className="w-full">
                   <h4 className="text-xl font-semibold mb-4 text-gray-700">
