@@ -1,13 +1,11 @@
-import https from "https";
-import fs from "fs";
 import connectDB from "./db/index.js";
 import { app } from "./app.js";
 
-// SSL certificate and key using environment variables
-const sslOptions = {
-  key: fs.readFileSync(process.env.SSL_KEY_PATH),
-  cert: fs.readFileSync(process.env.SSL_CERT_PATH),
-};
+// // SSL certificate and key using environment variables
+// const sslOptions = {
+//   key: fs.readFileSync(process.env.SSL_KEY_PATH),
+//   cert: fs.readFileSync(process.env.SSL_CERT_PATH),
+// };
 
 // Connect to MongoDB
 connectDB()
