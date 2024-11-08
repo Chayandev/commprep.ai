@@ -21,13 +21,14 @@ app.use(cookieParser());
 
 import userRouter from "./routes/user.routes.js";
 
-app.use("/", (req, res, next) => {
-  res.send("Commprep.ai Server");
-});
+
 
 //routes decalration
 app.use("/api/v1/users", userRouter);
 
+app.use("/", (req, res, next) => {
+  res.send("Commprep.ai Server");
+});
 // Error handling middleware
 // Error handling middleware
 app.use((err, req, res, next) => {
