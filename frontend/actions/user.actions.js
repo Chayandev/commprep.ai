@@ -123,9 +123,6 @@ export const getReadingAssessmentAnslysis = createAsyncThunk(
       const response = await fetch(`${BASE_URL}/analyzeReadingAssessment`, {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: reqData,
       });
 
