@@ -1,10 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   BASE_URL,
-  GET_ALL_READING_ASSESMENTS,
-  REFRESH_ACCESSTOKEN_ROUTE,
-  SEND_VERIFICATION_CODE,
-  VERIFY_USER_EMAIL_ROUTE,
 } from "../constants";
 
 //action/send-verificationcode
@@ -12,7 +8,7 @@ export const sendVerificationCode = createAsyncThunk(
   "verify/sendVerificationCode",
   async (email, { rejectWithValue }) => {
     try {
-      const response = await fetch(SEND_VERIFICATION_CODE, {
+      const response = await fetch(`${BASE_URL}/sendVerificationCode`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,7 +35,7 @@ export const verifyUserEmail = createAsyncThunk(
   "verify/emailVerification",
   async (verificationCode, { rejectWithValue }) => {
     try {
-      const response = await fetch(VERIFY_USER_EMAIL_ROUTE, {
+      const response = await fetch(`${BASE_URL}/verify-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,7 +62,7 @@ export const getAllReadingAssessments = createAsyncThunk(
   "operation/getAllReadingAssesments",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(GET_ALL_READING_ASSESMENTS, {
+      const response = await fetch(`${BASE_URL}/getReadingAssessments`, {
         method: "GET",
         credentials: "include",
         headers: {

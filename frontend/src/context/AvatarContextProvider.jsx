@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import UserContext from "./UserContext";
-import { FETCH_AVATER_ROUTE } from "../../constants";
+import { BASE_URL } from "../../constants";
 
 const AvatarContextProvider = ({ children }) => {
   const [avatars, setAvatars] = useState([]);
@@ -9,9 +9,7 @@ const AvatarContextProvider = ({ children }) => {
   const fetchAvatars = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-         FETCH_AVATER_ROUTE
-      );
+      const response = await fetch(`${BASE_URL}/avatars`);
       const result = await response.json();
       if (result.success && result.statusCode === 200) {
         setAvatars(result.data);
