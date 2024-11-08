@@ -210,6 +210,29 @@ export default function ReadingAssessmentPractice() {
     };
   }, []);
 
+  // Extract feedback and suggestions
+  const feedbackLines = result?.feedback
+    .split("#") // Split the feedback by period and space
+    .filter((line) => line.trim() !== ""); // Remove any empty lines
+
+  const suggestionLines = result?.suggestion
+    .split("#") // Split the suggestions by period and space
+    .filter((line) => line.trim() !== ""); // Remove any empty lines
+
+  // Add a period at the end of the last line if it doesn't already have one
+  if (
+    feedbackLines?.length > 0 &&
+    !feedbackLines[feedbackLines?.length - 1].endsWith(".")
+  ) {
+    feedbackLines[feedbackLines?.length - 1] += ".";
+  }
+
+  if (
+    suggestionLines?.length > 0 &&
+    !suggestionLines[suggestionLines?.length - 1].endsWith(".")
+  ) {
+    suggestionLines[suggestionLines?.length - 1] += ".";
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
       <LoadingBar

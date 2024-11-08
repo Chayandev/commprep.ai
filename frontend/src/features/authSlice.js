@@ -9,7 +9,6 @@ import {
 
 const initialState = {
   user: null,
-  isLoading: false,
   isProcessing: false,
   isAuthenticated: false,
 };
@@ -46,18 +45,18 @@ const authSlice = createSlice({
 
     //auto-login
     builder.addCase(autoLoginUser.pending, (state) => {
-      state.isLoading = true;
+      state.isProcessing = true;
       state.user = null;
       state.isAuthenticated = false;
     });
     builder.addCase(autoLoginUser.fulfilled, (state, action) => {
-      state.isLoading = false;
+      state.isProcessing = false;
       state.user = action.payload?.data;
       state.isAuthenticated = true;
     });
 
     builder.addCase(autoLoginUser.rejected, (state, action) => {
-      state.isLoading = false;
+      state.isProcessing = false;
       state.user = null;
       state.isAuthenticated = false;
     });
