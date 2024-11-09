@@ -7,16 +7,14 @@ import ScrollToTop from "./components/ScrollArea.jsx";
 
 import authWrapper from "./authWrapper.js";
 function App() {
-  
+  authWrapper();
   return (
     <>
- 
-        <ToastContainer />
-        <Header />
-        <ScrollToTop />
-        <Outlet />
-        <Footer />
- 
+      <ToastContainer />
+      <Header />
+      <ScrollToTop />
+      <Outlet />
+      <Footer />
     </>
   );
 }

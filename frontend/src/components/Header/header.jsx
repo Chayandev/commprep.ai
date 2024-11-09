@@ -7,7 +7,7 @@ import { User, LogOut } from "lucide-react";
 import NavIconItem from "../NavIconItem.jsx";
 import LoadingBar from "react-top-loading-bar";
 import { toast } from "react-toastify";
-import authWrapper from "../../authWrapper.js";
+import useHideOnRoutes from "../Hooks/useHideOnRoutes.js";
 
 const Header = () => {
   const [progress, setProgress] = useState(0);
@@ -15,11 +15,7 @@ const Header = () => {
   const { isAuthenticated, isProcessing } = useSelector((state) => state.auth);
 
   const navigate = useNavigate();
-  const location = useLocation(); // Access the current location
-
-  useEffect(() => {
-    authWrapper();
-  }, [dispatch]);
+  const shouldHideHeader = useHideOnRoutes();
 
   useEffect(() => {
     if (!isProcessing) {
@@ -83,6 +79,8 @@ const Header = () => {
       {label}
     </NavLink>
   );
+  // Only render the header if the current route is not in the hideHeaderRoutes
+  // if (shouldHideHeader) return null;
 
   return (
     <header className="shadow sticky z-50 top-0">
@@ -92,59 +90,63 @@ const Header = () => {
         height={4}
         onLoaderFinished={() => setProgress(0)}
       />
-      <nav className="bg-white/80 backdrop-blur-md shadow-md">
-        <div className="flex justify-between items-center h-16 mx-auto w-[80%]">
-          <Link to="/home" className="flex-shrink-0">
-            <img
-              src={logo}
-              alt="Commprep.ai logo"
-              width={180}
-              height={60}
-              className="h-10 w-auto"
-            />
-          </Link>
+      {!shouldHideHeader ? (
+        <nav className="bg-white/80 backdrop-blur-md shadow-md">
+          <div className="flex justify-between items-center h-16 mx-auto w-[80%]">
+            <Link to="/home" className="flex-shrink-0">
+              <img
+                src={logo}
+                alt="Commprep.ai logo"
+                width={180}
+                height={60}
+                className="h-10 w-auto"
+              />
+            </Link>
 
-          {/* Loading State */}
-          {isProcessing ? (
-            <span className="text-center">Loading....</span>
-          ) : !isAuthenticated ? (
-            <div className="flex items-baseline space-x-4">
-              <Link
-                to="/login"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium border border-gray-500"
-              >
-                Log in
-              </Link>
-              <Link
-                to="/signup"
-                className="text-white bg-black hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Sign up
-              </Link>
-            </div>
-          ) : (
-            <div className="flex justify-between items-center w-full">
-              {/* Middle Navigation Links */}
-              <ul className="flex flex-grow justify-center space-x-8">
-                {renderNavLink("/practice", "Practice")}
-                {renderNavLink("/takeTest", "Test")}
-                {renderNavLink("/feedback", "Feedback")}
-                {renderNavLink("/contact", "Contact")}
-              </ul>
-              {/* Right Side Profile and Notification Icons */}
-              <div className="flex items-center space-x-4">
-                <NavIconItem to="/profile" icon={User} />
-                <button
-                  onClick={handleLogout}
-                  className="items-center p-2 rounded-md text-gray-600 hover:text-gray-700 hover:bg-gray-200/60 transition-all duration-200 hover:scale-110"
+            {/* Loading State */}
+            {isProcessing ? (
+              <span className="text-center">Loading....</span>
+            ) : !isAuthenticated ? (
+              <div className="flex items-baseline space-x-4">
+                <Link
+                  to="/login"
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium border border-gray-500"
                 >
-                  <LogOut className="h-5 w-5" />
-                </button>
+                  Log in
+                </Link>
+                <Link
+                  to="/signup"
+                  className="text-white bg-black hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Sign up
+                </Link>
               </div>
-            </div>
-          )}
-        </div>
-      </nav>
+            ) : (
+              <div className="flex justify-between items-center w-full">
+                {/* Middle Navigation Links */}
+                <ul className="flex flex-grow justify-center space-x-8">
+                  {renderNavLink("/practice", "Practice")}
+                  {renderNavLink("/takeTest", "Test")}
+                  {renderNavLink("/feedback", "Feedback")}
+                  {renderNavLink("/contact", "Contact")}
+                </ul>
+                {/* Right Side Profile and Notification Icons */}
+                <div className="flex items-center space-x-4">
+                  <NavIconItem to="/profile" icon={User} />
+                  <button
+                    onClick={handleLogout}
+                    className="items-center p-2 rounded-md text-gray-600 hover:text-gray-700 hover:bg-gray-200/60 transition-all duration-200 hover:scale-110"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </nav>
+      ) : (
+        ""
+      )}
     </header>
   );
 };

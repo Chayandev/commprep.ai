@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import {
   createBrowserRouter,
@@ -22,7 +21,6 @@ import LoadingPage from "./components/LoadingPage.jsx";
 import ResetPassword from "./pages/RestPassword/resetPassword.page.jsx";
 import ReadingAssessments from "./pages/Practice/reading.page.jsx";
 import ReadingAssessmentPractice from "./pages/Assessments/reading.assessment.page.jsx";
-import FullScreenLayout from "./fullScreenLayout.jsx";
 import { store } from "./app/store.js";
 import { Provider } from "react-redux";
 import ListeningAssessments from "./pages/Practice/listening.page.jsx";
@@ -32,8 +30,7 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       {/* Full-Screen Layout Routes (without Header/Footer) */}
-
-      <Route element={<FullScreenLayout />}>
+      {/* <Route element={<FullScreenLayout />}>
         <Route
           path="practice/reading/assessment/:assessmentId"
           element={<ReadingAssessmentPractice />}
@@ -42,7 +39,7 @@ const router = createBrowserRouter(
           path="practice/listening/assessment/:assessmentId"
           element={<ListeningAssessmentPractice />}
         />
-      </Route>
+      </Route> */}
 
       {/* Main Layout Routes (with Header/Footer) */}
       <Route path="/" element={<App />}>
@@ -58,17 +55,25 @@ const router = createBrowserRouter(
         <Route path="takeTest" element={<TakeTest />} />
         <Route path="contact" element={<Contact />} />
         <Route path="feedback" element={<Feedback />} />
+
+        <Route
+          path="practice/reading/assessment/:assessmentId"
+          element={<ReadingAssessmentPractice />}
+        />
+        <Route
+          path="practice/listening/assessment/:assessmentId"
+          element={<ListeningAssessmentPractice />}
+        />
+
       </Route>
     </>
   )
 );
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Provider store={store}>
-      <AvatarContextProvider>
-        <RouterProvider router={router} />
-      </AvatarContextProvider>
-    </Provider>
-  </StrictMode>
+  <Provider store={store}>
+    <AvatarContextProvider>
+      <RouterProvider router={router} />
+    </AvatarContextProvider>
+  </Provider>
 );
