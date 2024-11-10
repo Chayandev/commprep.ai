@@ -47,6 +47,8 @@ export default function ReadingAssessmentPractice() {
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
 
+  useFullScreen();
+
   useEffect(() => {
     if (!isErrorState) {
       setTimeLeft(
@@ -197,7 +199,7 @@ export default function ReadingAssessmentPractice() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 120); // Adjust this value as needed
+      setIsScrolled(scrollPosition > 100); // Adjust this value as needed
     };
 
     window.addEventListener("scroll", handleScroll);

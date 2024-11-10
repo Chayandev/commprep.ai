@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, Typography } from "@mui/material";
 import { CheckCircle, Clock } from "lucide-react";
 
@@ -8,6 +8,8 @@ const AssessmentCard = ({
   handleSelectAssessment,
   logo,
 }) => {
+  
+
   const difficultyColor = {
     easy: "bg-[#aada27]",
     medium: "bg-[#fdc324]",
