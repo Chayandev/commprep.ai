@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 //The schema for MCQ questions
-const questionSchema = new Schema({
+const mcqSchema = new Schema({
   question: {
     type: String,
     required: true,
@@ -41,7 +41,7 @@ const listeningAssessmentSchema = new Schema(
       enum: ["easy", "medium", "hard"],
       required: true,
     },
-    mcqQuestions: [questionSchema],
+    mcqQuestions: [mcqSchema],
     saqQuestions: [saqSchema],
     evaluationCriteria: {
       timeToComplete: {
