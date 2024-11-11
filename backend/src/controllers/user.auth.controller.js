@@ -22,7 +22,7 @@ const refreshTokenMaxAge = convertToMilliseconds(
 //options to secure cookies
 const options = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
+  secure: true,
   sameSite: "None",
   path: "/", // Allow cookie across the app
 };

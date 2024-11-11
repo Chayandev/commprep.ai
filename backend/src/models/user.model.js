@@ -2,6 +2,104 @@ import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
+const progressSchema = new Schema(
+  {
+    // user: {
+    //   type: Schema.Types.ObjectId,
+    //   ref: "User",
+    // },
+    reading: {
+      completionParcentage: {
+        type: Number,
+        default: 0,
+      },
+      assessments: [
+        {
+          assessmentId: {
+            type: Schema.Types.ObjectId,
+            ref: "ReadingAssessment",
+          },
+          takenAt: {
+            type: Date,
+          },
+          evaluationResult: {
+            overallScore: {
+              type: Number,
+            },
+          },
+        },
+      ],
+    },
+    listening: {
+      completionParcentage: {
+        type: Number,
+        default: 0,
+      },
+      assessments: [
+        {
+          assessmentId: {
+            type: Schema.Types.ObjectId,
+            ref: "ListeningAssessment",
+          },
+          takenAt: {
+            type: Date,
+          },
+          evaluationResult: {
+            overallScore: {
+              type: Number,
+            },
+          },
+        },
+      ],
+    },
+    grammer: {
+      completionParcentage: {
+        type: Number,
+        default: 0,
+      },
+      assessments: [
+        {
+          assessmentId: {
+            type: Schema.Types.ObjectId,
+            ref: "GrammerAssessment",
+          },
+          takenAt: {
+            type: Date,
+          },
+          evaluationResult: {
+            overallScore: {
+              type: Number,
+            },
+          },
+        },
+      ],
+    },
+    vocabulary: {
+      completionParcentage: {
+        type: Number,
+        default: 0,
+      },
+      assessments: [
+        {
+          assessmentId: {
+            type: Schema.Types.ObjectId,
+            ref: "VocabularyAssessment",
+          },
+          takenAt: {
+            type: Date,
+          },
+          evaluationResult: {
+            overallScore: {
+              type: Number,
+            },
+          },
+        },
+      ],
+    },
+  },
+  { timestamps: true }
+);
+
 const userSchema = new Schema(
   {
     username: {
@@ -32,8 +130,13 @@ const userSchema = new Schema(
       type: String,
     },
     progress: {
-      type: Schema.Types.ObjectId,
-      ref: "Progress",
+      type: progressSchema,
+      default: () => ({
+        reading: { completionParcentage: 0, assessments: [] },
+        listening: { completionParcentage: 0, assessments: [] },
+        grammer: { completionParcentage: 0, assessments: [] },
+        vocabulary: { completionParcentage: 0, assessments: [] },
+      }),
     },
     achivements: [
       {

@@ -5,6 +5,7 @@ import fs from "fs"; // Import the fs module to read files
 import { AssemblyAI } from "assemblyai";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
+import { User } from "../models/user.model.js";
 
 const assemblyClient = new AssemblyAI({
   apiKey: process.env.ASSEMBLYAI_API_KEY,
@@ -67,6 +68,46 @@ const analyzeReadingAssessment = asyncHandelr(async (req, res) => {
     },
     { new: true } // Return the updated document
   );
+
+  // Find user and update progress for completed assessments only
+  const user = await User.findById(req.user._id);
+
+  // Check if this assessment is already completed in user's progress
+  const existingAssessmentIndex = user.progress.reading.assessments.findIndex(
+    (assessment) => assessment.assessmentId.toString() === assessmentID
+  );
+
+  if (existingAssessmentIndex === -1) {
+    // Add this completed assessment to the user's progress
+    user.progress.reading.assessments.push({
+      assessmentId: assessmentID,
+      takenAt: new Date(),
+      evaluationResult: {
+        overallScore: response.overallScore,
+      },
+    });
+  } else {
+    // If already exists, update the score and takenAt date
+    user.progress.reading.assessments[existingAssessmentIndex] = {
+      assessmentId: assessmentID,
+      takenAt: new Date(),
+      evaluationResult: {
+        overallScore: response.overallScore,
+      },
+    };
+  }
+
+  // Retrieve the total number of available reading assessments
+  const totalAvailableAssessments = await ReadingAssessment.countDocuments();
+
+  // Calculate the updated completion percentage based on available assessments
+  const completedAssessments = user.progress.reading.assessments.length;
+
+  user.progress.reading.completionParcentage =
+    (completedAssessments / totalAvailableAssessments) * 100;
+
+  // Save the user's progress
+  await user.save();
 
   // Return the transcription result
   return res
