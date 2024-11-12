@@ -70,6 +70,7 @@ const listeningAssessmentSchema = new Schema(
   { timestamps: true }
 );
 
+export { mcqSchema };
 export const ListeningAssessment = mongoose.model(
   "ListeningAssessment",
   listeningAssessmentSchema
