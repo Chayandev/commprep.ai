@@ -35,6 +35,9 @@ export default function ListeningAssessmentPractice() {
   const [assessment, setAssessment] = useState(null);
   const isErrorState = selectedAssessmentIndex === -1;
   const [progress, setProgress] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const timeDisplayRef = useRef(null);
+
   const dispatch = useDispatch();
   // Extract data from the selected assessment
   useEffect(() => {
@@ -155,12 +158,25 @@ export default function ListeningAssessmentPractice() {
     navigate("/practice/listening");
   };
 
-  const getTimerColor = () => {
-    const timeLeft = assessmentTime - audioCurrentTime;
-    if (timeLeft <= 10) return "text-red-600";
-    if (timeLeft <= 20) return "text-orange-600";
-    return "text-teal-600";
+  const getTimeLeft = () => {
+    return assessmentTime - audioCurrentTime;
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 100); // Adjust this value as needed
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -202,18 +218,42 @@ export default function ListeningAssessmentPractice() {
         ) : (
           <>
             <div className="mb-8 bg-white border border-gray-300 rounded-lg shadow-sm">
-              <div className="p-6">
-                <h1 className="text-3xl font-bold text-gray-800">
-                  Environmental Challenges Listening Test
-                </h1>
-                <div
-                  className={` mt-2 inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                    difficultyColor[assessment?.difficulty] ||
-                    "bg-gray-200 text-gray-800"
-                  }`}
-                >
-                  Difficulty: {assessment?.difficulty}
+              <div className=" flex  justify-between items-center p-6">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800">
+                    Environmental Challenges Listening Test
+                  </h1>
+                  <div
+                    className={` mt-2 inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                      difficultyColor[assessment?.difficulty] ||
+                      "bg-gray-200 text-gray-800"
+                    }`}
+                  >
+                    Difficulty: {assessment?.difficulty}
+                  </div>
                 </div>
+                {isAudioLoaded ? (
+                  <div
+                    ref={timeDisplayRef}
+                    className={`mb-6 text-4xl text-teal-600 bg-teal-50 font-bold px-6 py-3 rounded-full shadow-inner transition-all duration-300 ease-in-out ${
+                      isScrolled
+                        ? "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-10"
+                        : ""
+                    }${
+                      assessmentTime > 20
+                        ? "text-teal-600 bg-teal-50"
+                        : assessmentTime > 5
+                        ? "text-yellow-600 bg-yellow-50 blink"
+                        : "text-red-600 bg-red-50 blink"
+                    }`}
+                  >
+                    {assessmentTime > 0
+                      ? formatTime(assessmentTime)
+                      : "Times Up"}
+                  </div>
+                ) : (
+                  ""
+                )}
               </div>
             </div>
 
@@ -449,7 +489,7 @@ export default function ListeningAssessmentPractice() {
                   </ul>
                 </div>
 
-                {/* Circular Timer */}
+                {/* Circular Timer
                 {isAudioLoaded ? (
                   <div className="relative w-48 h-48 mb-8">
                     <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -490,7 +530,7 @@ export default function ListeningAssessmentPractice() {
                   </div>
                 ) : (
                   ""
-                )}
+                )} */}
 
                 <div className="w-full">
                   <h4 className="text-xl font-semibold mb-4 text-gray-700">

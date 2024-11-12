@@ -7,7 +7,10 @@ function Progress({ value, className = "", indicatorClassName = "" }) {
       <div className="overflow-hidden h-full rounded-full bg-gray-200">
         <div
           className={`h-full rounded-full ${indicatorClassName}`}
-          style={{ width: `${value}%` }}
+          style={{
+            width: `${value}%`,
+            transition: "width 3s ease-in-out", // Add smooth animation
+          }}
         ></div>
       </div>
     </div>
