@@ -1,8 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  
-  BASE_URL,
-} from "../constants";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const registerUser = createAsyncThunk(
   "auth/register",
