@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import UserContext from "./UserContext";
-import { BASE_URL } from "../../constants";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const AvatarContextProvider = ({ children }) => {
   const [avatars, setAvatars] = useState([]);
