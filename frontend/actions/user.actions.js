@@ -1,7 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  BASE_URL,
-} from "../constants";
+import { BASE_URL } from "../constants";
 
 //action/send-verificationcode
 export const sendVerificationCode = createAsyncThunk(
@@ -108,6 +106,35 @@ export const getAllListeningAssessments = createAsyncThunk(
         );
       }
       console.log("getAllListeningAssessments", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
+
+//action/getGrammarAssessments
+export const getAllGrammarAssessments = createAsyncThunk(
+  "operation/getAllGrammarAssessments",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/getGrammarAssessments`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during fetching grammar assesments."
+        );
+      }
+      console.log("getALlGrammarAssessments", result);
       return result;
     } catch (error) {
       return rejectWithValue(error.message || "Something went wrong");

@@ -25,6 +25,7 @@ import { store } from "./app/store.js";
 import { Provider } from "react-redux";
 import ListeningAssessments from "./pages/Practice/listening.page.jsx";
 import ListeningAssessmentPractice from "./pages/Assessments/listening.assessment.page.jsx";
+import GrammarAssessments from "./pages/Practice/grammar.page.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -52,6 +53,7 @@ const router = createBrowserRouter(
         <Route path="practice" element={<Practice />} />
         <Route path="practice/reading" element={<ReadingAssessments />} />
         <Route path="practice/listening" element={<ListeningAssessments />} />
+        <Route path="practice/grammar" element={<GrammarAssessments />} />
         <Route path="takeTest" element={<TakeTest />} />
         <Route path="contact" element={<Contact />} />
         <Route path="feedback" element={<Feedback />} />
@@ -64,7 +66,6 @@ const router = createBrowserRouter(
           path="practice/listening/assessment/:assessmentId"
           element={<ListeningAssessmentPractice />}
         />
-
       </Route>
     </>
   )

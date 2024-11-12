@@ -33,7 +33,7 @@ const CategoryCard = ({ category }) => {
           {category.description}
         </Typography>
         <Progress
-          value={category.progress}
+          value={category.progress || 0}
           className="h-2 my-4 rounded-full bg-gray-200"
           indicatorClassName={`bg-gradient-to-r ${category.color}`}
         />
