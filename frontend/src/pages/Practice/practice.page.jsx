@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import { useSelector } from "react-redux";
 import {
   Book,
@@ -17,14 +17,20 @@ const CategoryCard = React.lazy(() => import("../../components/CategoryCard"));
 
 export default function Practice() {
   const user = useSelector((state) => state.auth.user);
-  const progressPercentage = 0;
+  const progressPercentage = Math.round(
+    (user?.progress?.reading?.completionParcentage +
+      user?.progress?.listening?.completionParcentage +
+      user?.progress?.grammer?.completionParcentage +
+      user?.progress?.vocabulary?.completionParcentage) /
+      4
+  );
 
   const categories = [
     {
       name: "Reading",
       icon: Mic,
       description: "Boost comprehension through active reading skills.",
-      progress: 0,
+      progress: Math.round(user?.progress?.reading?.completionParcentage) || 0,
       color: "from-pink-500 to-rose-500",
       path: "reading", // Add path for navigation
     },
@@ -32,7 +38,8 @@ export default function Practice() {
       name: "Listening",
       icon: Headphones,
       description: "Sharpen listening to grasp spoken language quickly.",
-      progress: 0,
+      progress:
+        Math.round(user?.progress?.listening?.completionParcentage) || 0,
       color: "from-purple-500 to-indigo-500",
       path: "listening", // Add path for navigation
     },
@@ -40,23 +47,23 @@ export default function Practice() {
       name: "Grammar",
       icon: MessageSquare,
       description: "Master rules for clear, effective communication.",
-      progress: 0,
+      progress: Math.round(user?.progress?.grammer?.completionParcentage) || 0,
       color: "from-green-500 to-emerald-500",
       path: "grammar", // Add path for navigation
     },
-    {
-      name: "Sentence Correction",
-      icon: MessageSquare,
-      description: "Perfect sentence structure with real-time feedback.",
-      progress: 0,
-      color: "from-yellow-500 to-amber-500",
-      path: "sentence-correction", // Add path for navigation
-    },
+    // {
+    //   name: "Sentence Correction",
+    //   icon: MessageSquare,
+    //   description: "Perfect sentence structure with real-time feedback.",
+    //   progress: 0,
+    //   color: "from-yellow-500 to-amber-500",
+    //   path: "sentence-correction", // Add path for navigation
+    // },
     {
       name: "Vocabulary",
       icon: Book,
       description: "Expand your lexicon for richer conversations.",
-      progress: 0,
+      progress: user?.progress?.vocabulary?.completionParcentage,
       color: "from-blue-500 to-cyan-500",
       path: "vocabulary", // Add path for navigation
     },
