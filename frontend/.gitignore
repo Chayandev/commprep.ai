@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 constants.js
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production

@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { BASE_URL } from "../constants";
+const BASE_URL=import.meta.env.VITE_BASE_URL
 
 //action/send-verificationcode
 export const sendVerificationCode = createAsyncThunk(
