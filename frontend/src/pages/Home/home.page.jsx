@@ -136,7 +136,7 @@ export default function Home() {
           <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
             <div className="inline-flex rounded-md shadow">
               <button className="bg-white text-lg font-semibold text-teal-600 hover:bg-teal-50 py-3 px-8 rounded-md">
-                <Link to="/signup">Get started</Link>
+                <Link to="/practice">Get started</Link>
               </button>
             </div>
             <div className="ml-3 inline-flex rounded-md shadow">

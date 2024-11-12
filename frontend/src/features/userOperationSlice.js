@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  getAllGrammarAssessments,
   getAllListeningAssessments,
   getAllReadingAssessments,
 } from "../../actions/user.actions.js";
@@ -43,7 +44,7 @@ const userOperationSlice = createSlice({
     });
 
     //fetching all listening assessments
-    builder.addCase(getAllListeningAssessments.pending, (state, action) => {
+    builder.addCase(getAllListeningAssessments.pending, (state, _) => {
       state.isProcessing = true;
       state.assessments = null;
       state.selectedAssessmentIndex = -1;
@@ -54,6 +55,23 @@ const userOperationSlice = createSlice({
       state.selectedAssessmentIndex = -1;
     });
     builder.addCase(getAllListeningAssessments.rejected, (state, _) => {
+      state.isProcessing = false;
+      state.assessments = null;
+      state.selectedAssessmentIndex = -1;
+    });
+
+    //fetching all grammar assessments
+    builder.addCase(getAllGrammarAssessments.pending, (state, _) => {
+      state.isProcessing = true;
+      state.assessments = null;
+      state.selectedAssessmentIndex = -1;
+    });
+    builder.addCase(getAllGrammarAssessments.fulfilled, (state, action) => {
+      state.isProcessing = false;
+      state.assessments = action.payload?.data;
+      state.selectedAssessmentIndex = -1;
+    });
+    builder.addCase(getAllGrammarAssessments.rejected, (state, _) => {
       state.isProcessing = false;
       state.assessments = null;
       state.selectedAssessmentIndex = -1;

@@ -18,10 +18,10 @@ const CategoryCard = React.lazy(() => import("../../components/CategoryCard"));
 export default function Practice() {
   const user = useSelector((state) => state.auth.user);
   const progressPercentage = Math.round(
-    (user?.progress?.reading?.completionParcentage +
-      user?.progress?.listening?.completionParcentage +
-      user?.progress?.grammer?.completionParcentage +
-      user?.progress?.vocabulary?.completionParcentage) /
+    (user?.progress?.reading?.completionPercentage +
+      user?.progress?.listening?.completionPercentage +
+      user?.progress?.grammar?.completionPercentage +
+      user?.progress?.vocabulary?.completionPercentage) /
       4
   );
 
@@ -30,7 +30,7 @@ export default function Practice() {
       name: "Reading",
       icon: Mic,
       description: "Boost comprehension through active reading skills.",
-      progress: Math.round(user?.progress?.reading?.completionParcentage) || 0,
+      progress: Math.round(user?.progress?.reading?.completionPercentage) || 0,
       color: "from-pink-500 to-rose-500",
       path: "reading", // Add path for navigation
     },
@@ -39,7 +39,7 @@ export default function Practice() {
       icon: Headphones,
       description: "Sharpen listening to grasp spoken language quickly.",
       progress:
-        Math.round(user?.progress?.listening?.completionParcentage) || 0,
+        Math.round(user?.progress?.listening?.completionPercentage) || 0,
       color: "from-purple-500 to-indigo-500",
       path: "listening", // Add path for navigation
     },
@@ -47,7 +47,7 @@ export default function Practice() {
       name: "Grammar",
       icon: MessageSquare,
       description: "Master rules for clear, effective communication.",
-      progress: Math.round(user?.progress?.grammer?.completionParcentage) || 0,
+      progress: Math.round(user?.progress?.grammar?.completionPercentage) || 0,
       color: "from-green-500 to-emerald-500",
       path: "grammar", // Add path for navigation
     },
@@ -63,7 +63,7 @@ export default function Practice() {
       name: "Vocabulary",
       icon: Book,
       description: "Expand your lexicon for richer conversations.",
-      progress: user?.progress?.vocabulary?.completionParcentage,
+      progress: user?.progress?.vocabulary?.completionPercentage,
       color: "from-blue-500 to-cyan-500",
       path: "vocabulary", // Add path for navigation
     },
@@ -96,12 +96,12 @@ export default function Practice() {
                 Your Progress
               </h2>
               <Progress
-                value={progressPercentage}
+                value={progressPercentage || 0}
                 className="mt-4 h-4 rounded-full bg-gray-200"
                 indicatorClassName="bg-gradient-to-r from-teal-500 to-blue-600"
               />
               <p className="mt-2 text-lg text-gray-600">
-                {progressPercentage}% of goals achieved
+                {progressPercentage || 0}% of goals achieved
               </p>
             </div>
 
