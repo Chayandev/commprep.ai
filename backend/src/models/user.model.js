@@ -4,12 +4,8 @@ import bcrypt from "bcrypt";
 
 const progressSchema = new Schema(
   {
-    // user: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: "User",
-    // },
     reading: {
-      completionParcentage: {
+      completionPercentage: {
         type: Number,
         default: 0,
       },
@@ -31,7 +27,7 @@ const progressSchema = new Schema(
       ],
     },
     listening: {
-      completionParcentage: {
+      completionPercentage: {
         type: Number,
         default: 0,
       },
@@ -52,8 +48,8 @@ const progressSchema = new Schema(
         },
       ],
     },
-    grammer: {
-      completionParcentage: {
+    grammar: {
+      completionPercentage: {
         type: Number,
         default: 0,
       },
@@ -61,7 +57,7 @@ const progressSchema = new Schema(
         {
           assessmentId: {
             type: Schema.Types.ObjectId,
-            ref: "GrammerAssessment",
+            ref: "GrammarAssessment",
           },
           takenAt: {
             type: Date,
@@ -75,7 +71,7 @@ const progressSchema = new Schema(
       ],
     },
     vocabulary: {
-      completionParcentage: {
+      completionPercentage: {
         type: Number,
         default: 0,
       },
@@ -132,10 +128,10 @@ const userSchema = new Schema(
     progress: {
       type: progressSchema,
       default: () => ({
-        reading: { completionParcentage: 0, assessments: [] },
-        listening: { completionParcentage: 0, assessments: [] },
-        grammer: { completionParcentage: 0, assessments: [] },
-        vocabulary: { completionParcentage: 0, assessments: [] },
+        reading: { completionPercentage: 0, assessments: [] },
+        listening: { completionPercentage: 0, assessments: [] },
+        grammar: { completionPercentage: 0, assessments: [] },
+        vocabulary: { completionPercentage: 0, assessments: [] },
       }),
     },
     achivements: [
