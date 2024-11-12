@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { mcqSchema } from "./listeningAssessment.model";
+import { mcqSchema } from "./listeningAssessment.model.js";
 
 const grammarAssessmentSchema = new Schema(
   {
