@@ -1,3 +1,4 @@
+import { GrammarAssesment } from "../models/grammarAssessment.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
 import { ApiError } from "../utils/ApiErros.js";
@@ -100,10 +101,10 @@ const getReadingAssessments = asyncHandelr(async (req, res) => {
 const addListeningAssessment = asyncHandelr(async (req, res) => {
   const { difficulty, mcqQuestions, saqQuestions, evaluationCriteria } =
     req.body;
-  console.log(difficulty);
-  console.log(mcqQuestions);
-  console.log(saqQuestions);
-  console.log(evaluationCriteria);
+  // console.log(difficulty);
+  // console.log(mcqQuestions);
+  // console.log(saqQuestions);
+  // console.log(evaluationCriteria);
 
   // Input validation (basic checks)
   if (!difficulty || !evaluationCriteria || !mcqQuestions) {
@@ -192,7 +193,7 @@ const getListeningAssessments = asyncHandelr(async (req, res) => {
     },
     {
       $project: {
-        audioFileUrl:1,
+        audioFileUrl: 1,
         passage: 1,
         difficulty: 1,
         evaluationCriteria: 1,
@@ -223,9 +224,107 @@ const getListeningAssessments = asyncHandelr(async (req, res) => {
 });
 //********************************************************** */
 
+/*
+ *
+ * adding all grammar assessments
+ *
+ *
+ */
+
+const addGrammarAssessments = asyncHandelr(async (req, res) => {
+  const { difficulty, mcqQuestions, evaluationCriteria } = req.body;
+
+  if (!difficulty || !evaluationCriteria || !mcqQuestions) {
+    return res.status(400).json({
+      message: "Invalid input data",
+    });
+  }
+
+  // Parse JSON strings into objects for nested fields
+  const parsedMcqQuestions = JSON.parse(mcqQuestions);
+  //const parsedSaqQuestions = JSON.parse(saqQuestions);
+  const parsedEvaluationCriteria = JSON.parse(evaluationCriteria);
+
+  const newAssessment = await GrammarAssesment.create({
+    difficulty,
+    mcqQuestions: parsedMcqQuestions.map((mcq) => ({
+      question: mcq.question,
+      options: mcq.options,
+      correctOption: mcq.correctOption,
+    })),
+    evaluationCriteria: parsedEvaluationCriteria,
+  });
+
+  console.log(newAssessment);
+
+  return res
+    .status(201)
+    .json(
+      new ApiResponse(200, null, "Grammar assessment created successfully")
+    );
+});
+
+//**************************************************** */
+/*
+ *
+ *get all thhe grammar assessments
+ *
+ *
+ */
+const getGrammarAssessments = asyncHandelr(async (req, res) => {
+  const userId = req.user._id;
+
+  const assessments = await GrammarAssesment.aggregate([
+    {
+      $addFields: {
+        userCompletion: {
+          $arrayElemAt: [
+            {
+              $filter: {
+                input: "$assessmentCompleters",
+                as: "completer",
+                cond: { $eq: ["$$completer.userId", userId] },
+              },
+            },
+            0,
+          ],
+        },
+      },
+    },
+    {
+      $project: {
+        difficulty: 1,
+        evaluationCriteria: 1,
+        mcqQuestions: 1,
+        isCompleted: {
+          $cond: {
+            if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
+            then: true,
+            else: false,
+          },
+        },
+        score: { $ifNull: ["$userCompletion.score", null] },
+        completedAt: { $ifNull: ["$userCompletion.completedAt", null] },
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        assessments,
+        "Grammar assessments fetched successfully"
+      )
+    );
+});
+
 export {
   addReadingAssessment,
   getReadingAssessments,
   addListeningAssessment,
   getListeningAssessments,
+  addGrammarAssessments,
+  getGrammarAssessments,
 };
