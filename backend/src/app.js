@@ -4,15 +4,14 @@ import cookieParser from "cookie-parser";
 import { ApiError } from "./utils/ApiErros.js";
 const app = express();
 
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.CORS_ORIGIN
-        : "http://localhost:5173",
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: ["https://commprep-ai.vercel.app", "http://localhost:5173"], // Allow both local and production origins
+  credentials: true, // If you need cookies or authentication headers
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Enable preflight across all routes
+
 // Set a larger limit for incoming request bodies
 app.use(express.json({ limit: "10mb" })); // Example limit
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
