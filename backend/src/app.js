@@ -1,4 +1,4 @@
-import express from "express";
+import express, { json } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { ApiError } from "./utils/ApiErros.js";
@@ -21,14 +21,15 @@ app.use(cookieParser());
 
 import userRouter from "./routes/user.routes.js";
 
-
-
 //routes decalration
 app.use("/api/v1/users", userRouter);
 
-app.use("/", (req, res, next) => {
-  res.send("Commprep.ai Server");
+app.use("*", (req, res, next) => {
+  res.send({
+    msg: "Commprep.ai server",
+  });
 });
+
 // Error handling middleware
 // Error handling middleware
 app.use((err, req, res, next) => {
