@@ -231,31 +231,31 @@ const getListeningAssessments = asyncHandelr(async (req, res) => {
  *
  */
 
-const addGrammarAssessments = asyncHandelr(async (req, res) => {
-  const { difficulty, mcqQuestions, evaluationCriteria } = req.body;
+const addGrammarAssessment = asyncHandelr(async (req, res) => {
+  const { difficulty, evaluationCriteria, mcqQuestions } = req.body;
 
+  console.log("Received Difficulty:", difficulty);
+  console.log("Received MCQ Questions:", mcqQuestions);
+  console.log("Received Evaluation Criteria:", evaluationCriteria);
+
+  // Check if the required fields are present
   if (!difficulty || !evaluationCriteria || !mcqQuestions) {
     return res.status(400).json({
       message: "Invalid input data",
     });
   }
 
-  // Parse JSON strings into objects for nested fields
-  const parsedMcqQuestions = JSON.parse(mcqQuestions);
-  //const parsedSaqQuestions = JSON.parse(saqQuestions);
-  const parsedEvaluationCriteria = JSON.parse(evaluationCriteria);
-
   const newAssessment = await GrammarAssesment.create({
     difficulty,
-    mcqQuestions: parsedMcqQuestions.map((mcq) => ({
+    mcqQuestions: mcqQuestions.map((mcq) => ({
       question: mcq.question,
       options: mcq.options,
       correctOption: mcq.correctOption,
     })),
-    evaluationCriteria: parsedEvaluationCriteria,
+    evaluationCriteria,
   });
 
-  console.log(newAssessment);
+  console.log("New Assessment Created:", newAssessment);
 
   return res
     .status(201)
@@ -325,6 +325,6 @@ export {
   getReadingAssessments,
   addListeningAssessment,
   getListeningAssessments,
-  addGrammarAssessments,
+  addGrammarAssessment,
   getGrammarAssessments,
 };

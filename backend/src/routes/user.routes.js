@@ -12,7 +12,7 @@ import {
 } from "../controllers/user.auth.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
-  addGrammarAssessments,
+  addGrammarAssessment,
   addListeningAssessment,
   addReadingAssessment,
   getGrammarAssessments,
@@ -45,7 +45,7 @@ router
     upload.fields([{ name: "audio", maxCount: 1 }]),
     addListeningAssessment
   );
-router.route("/addGrammarAssessments").post(addGrammarAssessments);
+router.route("/addGrammarAssessment").post(addGrammarAssessment);
 
 //secure routes
 router.route("/logout").post(verifyJWT, logoutUser);
@@ -64,5 +64,5 @@ router
   .route("/analyzeListeningAssessments")
   .post(verifyJWT, analyseListeningAssessment);
 
-router.route("getGrammarAssessments").get(verifyJWT, getGrammarAssessments);
+router.route("/getGrammarAssessments").get(verifyJWT, getGrammarAssessments);
 export default router;
