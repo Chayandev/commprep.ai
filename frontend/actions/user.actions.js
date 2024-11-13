@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-const BASE_URL = import.meta.env.VITE_VERCEL_BASE_URL;
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
+console.log(BASE_URL);
 //action/send-verificationcode
 export const sendVerificationCode = createAsyncThunk(
   "verify/sendVerificationCode",
