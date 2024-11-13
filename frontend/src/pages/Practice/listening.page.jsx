@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useState } from "react";
-import logo from "/ic_reading.png";
+import logo from "/ic_listening.png";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllListeningAssessments } from "../../../actions/user.actions";
 import { selectAssessment } from "../../features/userOperationSlice";
