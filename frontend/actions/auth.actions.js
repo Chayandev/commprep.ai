@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-const BASE_URL = import.meta.env.VITE_BASE_URL;
+const BASE_URL = import.meta.env.VITE_VERCEL_BASE_URL;
 
 export const registerUser = createAsyncThunk(
   "auth/register",
