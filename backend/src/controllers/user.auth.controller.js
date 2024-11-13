@@ -173,17 +173,7 @@ const loginUser = asyncHandler(async (req, res) => {
       ...options,
       maxAge: refreshTokenMaxAge, // Optionally set for refresh token as well
     })
-    .json(
-      new ApiResponse(
-        200,
-        {
-          user: loggedinUser,
-          accessToken,
-          refreshToken,
-        },
-        "User logged in Successfully!"
-      )
-    );
+    .json(new ApiResponse(200, loggedinUser, "User logged in Successfully!"));
 });
 
 //log out
