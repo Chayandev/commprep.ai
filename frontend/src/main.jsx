@@ -44,8 +44,8 @@ const router = createBrowserRouter(
 
       {/* Main Layout Routes (with Header/Footer) */}
       <Route path="/" element={<App />}>
-        <Route path="" element={<LoadingPage />} />
-        <Route path="home" element={<Home />} />
+        {/* <Route path="" element={<LoadingPage />} /> */}
+        <Route path="" element={<Home />} />
         <Route path="login" element={<Login />} />
         <Route path="resetPassword" element={<ResetPassword />} />
         <Route path="signup" element={<Signup />} />
