@@ -27,9 +27,10 @@ import userRouter from "./routes/user.routes.js";
 app.use("/api/v1/users", userRouter);
 
 app.use("*", (req, res, next) => {
-  res.send({
-    msg: "Commprep.ai server",
-  });
+  res.status(200).json({
+    statusCode:200,
+    message:"commprep.ai server"
+  })
 });
 
 // Error handling middleware
