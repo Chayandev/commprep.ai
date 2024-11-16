@@ -5,7 +5,12 @@ import { ApiError } from "./utils/ApiErros.js";
 const app = express();
 
 const corsOptions = {
-  origin: ["https://commprep-ai.vercel.app", "http://localhost:5173","http://localhost:5174","*"], // Allow both local and production origins
+  origin: [
+    "https://commprep-ai.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "*",
+  ], // Allow both local and production origins
   credentials: true, // If you need cookies or authentication headers
 };
 
@@ -27,10 +32,11 @@ import userRouter from "./routes/user.routes.js";
 app.use("/api/v1/users", userRouter);
 
 app.use("*", (req, res, next) => {
+  console.log("hit alive endpoint");
   res.status(200).json({
-    statusCode:200,
-    message:"commprep.ai server"
-  })
+    statusCode: 200,
+    message: "commprep.ai server",
+  });
 });
 
 // Error handling middleware
