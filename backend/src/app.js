@@ -5,7 +5,7 @@ import { ApiError } from "./utils/ApiErros.js";
 const app = express();
 
 const corsOptions = {
-  origin: ["https://commprep-ai.vercel.app", "http://localhost:5173","http://localhost:5174"], // Allow both local and production origins
+  origin: ["https://commprep-ai.vercel.app", "http://localhost:5173","http://localhost:5174","*"], // Allow both local and production origins
   credentials: true, // If you need cookies or authentication headers
 };
 
