@@ -24,7 +24,7 @@ const Header = () => {
       if (isAuthenticated && location.pathname === "/") {
         navigate("/practice");
       } else if (!isAuthenticated && location.pathname === "/") {
-        navigate("/home");
+        navigate("/");
       }
     }
   }, [isAuthenticated, isProcessing, navigate]);
@@ -40,7 +40,7 @@ const Header = () => {
           autoClose: 1000,
           theme: "light",
         });
-        navigate("/home");
+        navigate("/");
       })
       .catch((error) => {
         toast.error(error || "An error occurred during Logout.", {
@@ -83,7 +83,7 @@ const Header = () => {
       {!shouldHideHeader ? (
         <nav className="bg-white/80 backdrop-blur-md shadow-md">
           <div className="flex justify-between items-center h-16 mx-auto w-[80%]">
-            <Link to="/home" className="flex-shrink-0">
+            <Link to="/" className="flex-shrink-0">
               <img
                 src={logo}
                 alt="Commprep.ai logo"
