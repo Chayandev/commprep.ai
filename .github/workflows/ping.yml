@@ -2,7 +2,7 @@ name: Keep App Alive
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Ping every 1 hour at the start of the hour
+    - cron: '5 * * * *'  # Ping every 5 hour at the start of the hour
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
