@@ -68,5 +68,5 @@ router
 router.route("/getGrammarAssessments").get(verifyJWT, getGrammarAssessments);
 router
   .route("/analyzeGrammarAssessments")
-  .get(verifyJWT, analyzeGrammarAssessment);
+  .post(verifyJWT, analyzeGrammarAssessment);
 export default router;

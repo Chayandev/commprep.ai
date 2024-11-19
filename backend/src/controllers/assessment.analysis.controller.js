@@ -231,28 +231,6 @@ const analyzeListeningAssessment = asyncHandelr(async (req, res) => {
     .json(new ApiResponse(200, response, "Successfully Analyzed"));
 });
 
-/**
- * Calculate score and feedback for a listening assessment.
- */
-const calculateScore = async (assessmentModel, answers, assessmentID) => {
-  const assessment = await assessmentModel.findById(assessmentID).exec();
-
-  if (!assessment) throw new ApiError(400, "Assessment not found");
-
-  let score = 0;
-  const totalQuestions = assessment.mcqQuestions.length;
-
-  // Calculate score based on correct answers
-  assessment.mcqQuestions.forEach((question, index) => {
-    const userAnswer = answers[index.toString()];
-    if (userAnswer && userAnswer === question.options[question.correctOption]) {
-      score += 1;
-    }
-  });
-
-  return { score, totalQuestions, assessment };
-};
-
 const generateFeedbackAndSuggestions = async (score, totalQuestions) => {
   let feedback = "";
   let suggestions = "";
@@ -287,7 +265,7 @@ const analyzeGrammarAssessment = asyncHandelr(async (req, res) => {
 
   // Update grammar assessment completion record
   await updateAssessmentCompletion(
-    ListeningAssessment,
+    GrammarAssessment,
     assessmentID,
     req.user._id,
     score
@@ -342,7 +320,27 @@ async function updateAssessmentCompletion(model, assessmentID, userID, score) {
     );
   }
 }
+/**
+ * Calculate score
+ */
+const calculateScore = async (assessmentModel, answers, assessmentID) => {
+  const assessment = await assessmentModel.findById(assessmentID).exec();
 
+  if (!assessment) throw new ApiError(400, "Assessment not found");
+
+  let score = 0;
+  const totalQuestions = assessment.mcqQuestions.length;
+
+  // Calculate score based on correct answers
+  assessment.mcqQuestions.forEach((question, index) => {
+    const userAnswer = answers[index.toString()];
+    if (userAnswer && userAnswer === question.options[question.correctOption]) {
+      score += 1;
+    }
+  });
+
+  return { score, totalQuestions, assessment };
+};
 /**
  * Update user progress for completed assessments.
  */
