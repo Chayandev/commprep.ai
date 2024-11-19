@@ -7,11 +7,16 @@ import TimeDisplay from "../../components/TimeDisplay";
 import { FormControlLabel, Radio, RadioGroup, Switch } from "@mui/material";
 import { CheckCircle2, ChevronLeft, ChevronRight, XCircle } from "lucide-react";
 import Progress from "../../components/Progress";
+import { getGrammarAssessmentAnalysis } from "../../../actions/user.actions";
+import { toast } from "react-toastify";
 
 export default function GrammarAssessmentPractice() {
   const navigate = useNavigate();
   const { assessments, selectedAssessmentIndex } = useSelector(
     (state) => state.operation
+  );
+  const { isAnalyzing, result } = useSelector(
+    (state) => state.assessmentAnalysis
   );
   const [assessment, setAssessment] = useState(null);
   const isErrorState = selectedAssessmentIndex === -1;
@@ -30,6 +35,7 @@ export default function GrammarAssessmentPractice() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [questions, setQuestions] = useState(null);
   const answeredQuestionsCount = Object.keys(answers).length;
+
   // Extract data from the selected assessment
   useEffect(() => {
     if (!isErrorState) {
@@ -101,8 +107,43 @@ export default function GrammarAssessmentPractice() {
 
   const handleSubmit = () => {
     // handle submit
-    if (timerRef.current) clearInterval(timerRef.current);
     setIsSubmitted(true);
+    if (timerRef.current) clearInterval(timerRef.current);
+    console.log("Submitting answers:", answers);
+
+    if (!answers && answers.length < 0) {
+      toast.error("Answers are missing or invalid");
+      return;
+    }
+    dispatch(
+      getGrammarAssessmentAnalysis({
+        answers: answers,
+        assessmentID: assessment._id,
+      })
+    )
+      .unwrap()
+      .then((result) => {
+        console.log(result);
+        setProgress(70);
+        //setAssessment(result?.assessment);
+      })
+      .catch((error) => {
+        // Show the error message as a toast error
+        toast.error(error || "An error occurred during Listening Analysis.", {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        console.error("Error during ListeningAssessment Analysis:", error);
+      })
+      .finally(() => {
+        setProgress(100);
+      });
   };
   const renderQuestion = (question, index) => (
     <div
@@ -152,22 +193,28 @@ export default function GrammarAssessmentPractice() {
               id={`q${index}-option${optionIndex}`}
               disabled={isSubmitted}
               className={`text-lg w-full ${
-                isSubmitted && optionIndex === question.correctOption
+                isSubmitted &&
+                !isAnalyzing &&
+                optionIndex ===
+                  result?.assessment?.mcqQuestions[index]?.correctOption
                   ? "bg-green-100"
                   : isSubmitted && answers[index] === option
                   ? "bg-red-100"
                   : ""
               }`}
             />
-
-            {isSubmitted &&
-              (option === question.correctAnswer ? (
+            {isSubmitted && !isAnalyzing ? (
+              optionIndex ===
+              result?.assessment?.mcqQuestions[index]?.correctOption ? (
                 <CheckCircle2 className="text-green-500 h-5 w-5" />
               ) : (
                 answers[index] === option && (
                   <XCircle className="text-red-500 h-5 w-5" />
                 )
-              ))}
+              )
+            ) : (
+              ""
+            )}
           </div>
         ))}
       </RadioGroup>
@@ -228,11 +275,11 @@ export default function GrammarAssessmentPractice() {
                 {questions && questions.length > 0 && (
                   <div>
                     {layout === "card" ? (
-                      isSubmitted ? (
+                      isSubmitted && !isAnalyzing ? (
                         <div>
                           <div className="bg-teal-50 border-l-4 border-teal-500 p-4 mb-6">
                             <p className="text-xl font-semibold text-teal-800">
-                              Your score: {calculateScore()} out of{" "}
+                              Your score: {result?.score} out of{" "}
                               {questions?.length}
                             </p>
                           </div>
@@ -303,17 +350,30 @@ export default function GrammarAssessmentPractice() {
                     )}
                   </div>
                 )}
-                {isSubmitted && (
-                  <div className="mt-8 w-full bg-teal-50 border border-teal-500 rounded-lg shadow-sm">
-                    <div className="p-6">
-                      <h3 className="text-2xl font-bold mb-4 text-teal-800">
-                        Assessment Completed!
-                      </h3>
-                      <p className="text-teal-600">
-                        Thank you for completing the grammer assessment.
+                {isSubmitted ? (
+                  isAnalyzing ? (
+                    <div className="flex flex-col items-center justify-center h-64">
+                      <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-600 mx-auto mb-4"></div>
+                      <p className="mt-4 text-xl text-gray-600">
+                        Analyzing your responses...
                       </p>
                     </div>
-                  </div>
+                  ) : (
+                    result && (
+                      <div className="mt-8 w-full bg-teal-50 border border-teal-500 rounded-lg shadow-sm">
+                        <div className="p-6">
+                          <h3 className="text-2xl font-bold mb-4 text-teal-800">
+                            Assessment Completed!
+                          </h3>
+                          <p className="text-teal-600">
+                            Thank you for completing the grammer assessment.
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  )
+                ) : (
+                  ""
                 )}
               </div>
               {/* Right Column - Timer and Instructions */}

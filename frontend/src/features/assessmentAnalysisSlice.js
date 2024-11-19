@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  getGrammarAssessmentAnalysis,
   getListeningAssessmentAnalysis,
   getReadingAssessmentAnslysis,
 } from "../../actions/user.actions";
@@ -11,12 +12,11 @@ const initialState = {
 
 const assessmentAnalysisSlice = createSlice({
   name: "assessmentAnalysis",
-  initialState: initialState,
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
-    //analysis of reading assessments
-
-    builder.addCase(getReadingAssessmentAnslysis.pending, (state, _) => {
+    // Reading Assessment Analysis
+    builder.addCase(getReadingAssessmentAnslysis.pending, (state) => {
       state.isAnalyzing = true;
       state.result = null;
     });
@@ -24,14 +24,13 @@ const assessmentAnalysisSlice = createSlice({
       state.isAnalyzing = false;
       state.result = action.payload?.data;
     });
-    builder.addCase(getReadingAssessmentAnslysis.rejected, (state, _) => {
+    builder.addCase(getReadingAssessmentAnslysis.rejected, (state) => {
       state.isAnalyzing = false;
       state.result = null;
     });
 
-    //analysis of listening assessment
-
-    builder.addCase(getListeningAssessmentAnalysis.pending, (state, _) => {
+    // Listening Assessment Analysis
+    builder.addCase(getListeningAssessmentAnalysis.pending, (state) => {
       state.isAnalyzing = true;
       state.result = null;
     });
@@ -42,7 +41,21 @@ const assessmentAnalysisSlice = createSlice({
         state.result = action.payload?.data;
       }
     );
-    builder.addCase(getListeningAssessmentAnalysis.rejected, (state, _) => {
+    builder.addCase(getListeningAssessmentAnalysis.rejected, (state) => {
+      state.isAnalyzing = false;
+      state.result = null;
+    });
+
+    // Grammar Assessment Analysis
+    builder.addCase(getGrammarAssessmentAnalysis.pending, (state) => {
+      state.isAnalyzing = true;
+      state.result = null;
+    });
+    builder.addCase(getGrammarAssessmentAnalysis.fulfilled, (state, action) => {
+      state.isAnalyzing = false;
+      state.result = action.payload?.data;
+    });
+    builder.addCase(getGrammarAssessmentAnalysis.rejected, (state) => {
       state.isAnalyzing = false;
       state.result = null;
     });
