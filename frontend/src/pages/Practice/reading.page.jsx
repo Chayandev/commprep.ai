@@ -49,7 +49,7 @@ export default function ReadingAssessments() {
       ) : (
         <main className="w-[90%] lg:w-[80%] mx-auto py-6">
           <AssessmentHeader
-            title="Listening Assessments"
+            title="Reading Assessments"
             difficulty={difficulty}
             showCompleted={showCompleted}
             onDifficultyChange={handleChange}

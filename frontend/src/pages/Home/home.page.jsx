@@ -112,7 +112,7 @@ export default function Home() {
             {features.map((feature) => (
               <Card
                 key={feature.name}
-                className="border-none shadow-lg hover:shadow-xl transition-shadow duration-300"
+                className="border border-secondary shadow-lg hover:shadow-xl transition-shadow duration-300"
               >
                 <div className="flex items-center text-lg font-semibold text-gray-900">
                   <feature.icon className="h-6 w-6 text-teal-600 mr-3" />

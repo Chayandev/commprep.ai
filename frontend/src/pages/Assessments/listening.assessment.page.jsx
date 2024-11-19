@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { getListeningAssessmentAnalysis } from "../../../actions/user.actions";
 import { toast } from "react-toastify";
 import LoadingBar from "react-top-loading-bar";
+import TakeAssessmentHeader from "../../components/TakeAssessmentHeader";
+import TimeDisplay from "../../components/TimeDisplay";
 
 export default function ListeningAssessmentPractice() {
   const navigate = useNavigate();
@@ -49,18 +51,49 @@ export default function ListeningAssessmentPractice() {
   const mcqQuestions = assessment?.mcqQuestions || [];
   const saqQuestions = assessment?.saqQuestions || [];
   const questions = [...mcqQuestions, ...saqQuestions];
-
   useEffect(() => {
-    const audioElement = new Audio(AUDIO_URL);
-    audioElement.onloadedmetadata = () => {
-      const audioDuration = audioElement?.duration || 0; // Get audio file duration
-      setAudioDuration(audioDuration);
-      const evaluationTime = assessment?.evaluationCriteria?.timeToComplete; // Default time if not provided
-      setAssessmentTime(evaluationTime); // Ensure the assessment time doesn't exceed the audio duration
-      setIsAudioLoaded(true);
-      setTotalTime(evaluationTime);
+    const loadAudio = async () => {
+      try {
+        const audioElement = new Audio(AUDIO_URL);
+        audioElement.onloadedmetadata = () => {
+          const audioDuration = audioElement?.duration || 0;
+          setAudioDuration(audioDuration);
+
+          const evaluationTime =
+            assessment?.evaluationCriteria?.timeToComplete || audioDuration; // Use audio duration if timeToComplete is missing
+          setAssessmentTime(evaluationTime);
+          setIsAudioLoaded(true);
+          setTotalTime(evaluationTime);
+        };
+      } catch (error) {
+        console.error("Error loading audio:", error);
+        toast.error("Failed to load audio. Please try again later.", {
+          position: "top-center",
+          autoClose: 2000,
+        });
+      }
     };
+
+    if (AUDIO_URL) loadAudio();
   }, [AUDIO_URL]);
+
+  const togglePlayPause = async () => {
+    try {
+      if (!isAudioLoaded) {
+        throw new Error("Audio not loaded yet.");
+      }
+
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        await audioRef.current.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error("Error during audio playback:", error);
+      toast.error("Audio playback failed. Please try again.");
+    }
+  };
 
   useEffect(() => {
     if (isAudioLoaded) {
@@ -76,25 +109,13 @@ export default function ListeningAssessmentPractice() {
       setAssessmentTime((prevTime) => {
         if (prevTime === 0) {
           clearInterval(timerRef.current);
-          handleSubmit();
+          if (isAudioLoaded) handleSubmit();
           //return assessmentTime;
         }
         return prevTime - 1;
       });
     }, 1000);
   };
-
-  const togglePlayPause = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else if (!isAudioPlayedOnce) {
-      audioRef.current
-        .play()
-        .catch((error) => console.error("Audio playback failed:", error));
-    }
-    setIsPlaying(!isPlaying);
-  };
-
   const formatTime = (seconds) => {
     // Round the seconds to remove any fractional values
     const roundedSeconds = Math.floor(seconds);
@@ -108,8 +129,10 @@ export default function ListeningAssessmentPractice() {
   };
 
   const handleAnswerChange = (questionIndex, answer) => {
-    setAnswers({ ...answers, [questionIndex]: answer });
-    console.log(answers);
+    setAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionIndex]: answer,
+    }));
   };
 
   const handleSubmit = async () => {
@@ -156,10 +179,6 @@ export default function ListeningAssessmentPractice() {
 
   const handleBack = () => {
     navigate("/practice/listening");
-  };
-
-  const getTimeLeft = () => {
-    return assessmentTime - audioCurrentTime;
   };
 
   useEffect(() => {
@@ -219,38 +238,19 @@ export default function ListeningAssessmentPractice() {
           <>
             <div className="mb-8 bg-white border border-gray-300 rounded-lg shadow-sm">
               <div className=" flex  justify-between items-center p-6">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-800">
-                    Environmental Challenges Listening Test
-                  </h1>
-                  <div
-                    className={` mt-2 inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                      difficultyColor[assessment?.difficulty] ||
-                      "bg-gray-200 text-gray-800"
-                    }`}
-                  >
-                    Difficulty: {assessment?.difficulty}
-                  </div>
-                </div>
+                <TakeAssessmentHeader
+                  title={
+                    assessment?.title ||
+                    `Listening Assessment ${selectedAssessmentIndex + 1}`
+                  }
+                  assessment={assessment}
+                />
                 {isAudioLoaded ? (
-                  <div
+                  <TimeDisplay
                     ref={timeDisplayRef}
-                    className={`mb-6 text-4xl text-teal-600 bg-teal-50 font-bold px-6 py-3 rounded-full shadow-inner transition-all duration-300 ease-in-out ${
-                      isScrolled
-                        ? "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-10"
-                        : ""
-                    }${
-                      assessmentTime > 20
-                        ? "text-teal-600 bg-teal-50"
-                        : assessmentTime > 5
-                        ? "text-yellow-600 bg-yellow-50 blink"
-                        : "text-red-600 bg-red-50 blink"
-                    }`}
-                  >
-                    {assessmentTime > 0
-                      ? formatTime(assessmentTime)
-                      : "Times Up"}
-                  </div>
+                    timeLeft={assessmentTime}
+                    isScrolled={isScrolled}
+                  />
                 ) : (
                   ""
                 )}
@@ -365,7 +365,7 @@ export default function ListeningAssessmentPractice() {
                                       },
                                     },
                                   }}
-                                  className="text-lg"
+                                  className="text-lg w-full"
                                 />
                               </div>
                             )
@@ -404,11 +404,9 @@ export default function ListeningAssessmentPractice() {
                         </h2>
                         <div className="bg-teal-50 border-l-4 border-teal-500 p-4 mb-6">
                           <p className="text-xl font-semibold text-teal-800">
-                            {`Score: ${result?.score} out of ${
+                            {`Your Score: ${result?.score} out of ${
                               questions.length
-                            }${
-                              questions.length > 1 ? " questions" : " question"
-                            }  ${result?.score / 10} is correct`}
+                            } ${result?.score / 10}`}
                           </p>
                         </div>
                         <div className="mb-6">
@@ -532,7 +530,7 @@ export default function ListeningAssessmentPractice() {
                   ""
                 )} */}
 
-                <div className="w-full">
+                <div className="w-full flex flex-col ">
                   <h4 className="text-xl font-semibold mb-4 text-gray-700">
                     Your Progress:
                   </h4>

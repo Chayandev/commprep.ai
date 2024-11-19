@@ -21,6 +21,7 @@ import { getReadingAssessmentAnslysis } from "../../../actions/user.actions";
 import { toast } from "react-toastify";
 import LoadingBar from "react-top-loading-bar";
 import useFullScreen from "../../components/Hooks/FullScreenHook.js";
+import TimeDisplay from "../../components/TimeDisplay.jsx";
 
 export default function ReadingAssessmentPractice() {
   //useFullScreen();
@@ -199,7 +200,7 @@ export default function ReadingAssessmentPractice() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 100); // Adjust this value as needed
+      setIsScrolled(scrollPosition > 120); // Adjust this value as needed
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -212,29 +213,32 @@ export default function ReadingAssessmentPractice() {
     };
   }, []);
 
-  // Extract feedback and suggestions
-  const feedbackLines = result?.feedback
-    .split("#") // Split the feedback by period and space
-    .filter((line) => line.trim() !== ""); // Remove any empty lines
+  if (result && feedbackReceived) {
+    // Extract feedback and suggestions
+    const feedbackLines = result?.feedback
+      .split("#") // Split the feedback by period and space
+      .filter((line) => line.trim() !== ""); // Remove any empty lines
 
-  const suggestionLines = result?.suggestion
-    .split("#") // Split the suggestions by period and space
-    .filter((line) => line.trim() !== ""); // Remove any empty lines
+    const suggestionLines = result?.suggestion
+      .split("#") // Split the suggestions by period and space
+      .filter((line) => line.trim() !== ""); // Remove any empty lines
 
-  // Add a period at the end of the last line if it doesn't already have one
-  if (
-    feedbackLines?.length > 0 &&
-    !feedbackLines[feedbackLines?.length - 1].endsWith(".")
-  ) {
-    feedbackLines[feedbackLines?.length - 1] += ".";
+    // Add a period at the end of the last line if it doesn't already have one
+    if (
+      feedbackLines?.length > 0 &&
+      !feedbackLines[feedbackLines?.length - 1].endsWith(".")
+    ) {
+      feedbackLines[feedbackLines?.length - 1] += ".";
+    }
+
+    if (
+      suggestionLines?.length > 0 &&
+      !suggestionLines[suggestionLines?.length - 1].endsWith(".")
+    ) {
+      suggestionLines[suggestionLines?.length - 1] += ".";
+    }
   }
 
-  if (
-    suggestionLines?.length > 0 &&
-    !suggestionLines[suggestionLines?.length - 1].endsWith(".")
-  ) {
-    suggestionLines[suggestionLines?.length - 1] += ".";
-  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
       <LoadingBar
@@ -384,7 +388,7 @@ export default function ReadingAssessmentPractice() {
             </div>
 
             {/* Right Column - Recording Interface */}
-            <div className="flex-1 flex flex-col items-center bg-white rounded-lg shadow-md p-8">
+            <div className=" sticky top-24 flex-1 flex flex-col items-center bg-white rounded-lg shadow-md p-8">
               <div className="mb-8 text-center">
                 <h3 className="text-2xl font-bold mb-2 text-gray-800">
                   Recording
@@ -407,22 +411,11 @@ export default function ReadingAssessmentPractice() {
               </div> */}
 
               {/* Timer Display */}
-              <div
+              <TimeDisplay
                 ref={timeDisplayRef}
-                className={`mb-6 text-4xl text-teal-600 bg-teal-50 font-bold px-6 py-3 rounded-full shadow-inner transition-all duration-300 ease-in-out ${
-                  isScrolled
-                    ? "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-10"
-                    : ""
-                }${
-                  timeLeft > 10
-                    ? "text-teal-600 bg-teal-50"
-                    : timeLeft > 5
-                    ? "text-yellow-600 bg-yellow-50 blink"
-                    : "text-red-600 bg-red-50 blink"
-                }`}
-              >
-                {timeLeft > 0 ? `${timeLeft}s` : "Time's up!"}
-              </div>
+                timeLeft={timeLeft}
+                isScrolled={isScrolled}
+              />
 
               {/* Microphone Button */}
               <button
