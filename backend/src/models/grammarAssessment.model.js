@@ -36,7 +36,7 @@ const grammarAssessmentSchema = new Schema(
   { timestamps: true }
 );
 
-export const GrammarAssesment = mongoose.model(
+export const GrammarAssessment = mongoose.model(
   "GrammarAssessment",
   grammarAssessmentSchema
 );

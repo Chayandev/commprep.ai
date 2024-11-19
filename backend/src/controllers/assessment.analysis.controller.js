@@ -6,6 +6,8 @@ import { AssemblyAI } from "assemblyai";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 import { User } from "../models/user.model.js";
+import { GrammarAssessment } from "../models/grammarAssessment.model.js";
+import { VocabularyAssessment } from "../models/vocabularyAssessment.js";
 
 // Initialize the AssemblyAI client with the API key
 const assemblyClient = new AssemblyAI({
@@ -188,21 +190,28 @@ async function analyzeAgainstPassageAndGenerateFeedback(
 /**
  * Analyzes listening assessment responses and updates the user's progress.
  */
-const analyseListeningAssessment = asyncHandelr(async (req, res) => {
+const analyzeListeningAssessment = asyncHandelr(async (req, res) => {
   const { answers, assessmentID } = req.body;
 
   if (!answers || !assessmentID)
     throw new ApiError(400, "Incomplete request data");
 
   // Calculate score and feedback for listening assessment
-  const response = await calculateScore(answers, assessmentID);
-
+  const { score, totalQuestions } = await calculateScore(
+    ListeningAssessment,
+    answers,
+    assessmentID
+  );
+  const { feedback, suggestions } = await generateFeedbackAndSuggestions(
+    score,
+    totalQuestions
+  );
   // Update listening assessment completion record
   await updateAssessmentCompletion(
     ListeningAssessment,
     assessmentID,
     req.user._id,
-    response.score
+    score
   );
 
   // Update user's progress in listening assessments
@@ -210,9 +219,11 @@ const analyseListeningAssessment = asyncHandelr(async (req, res) => {
     User,
     req.user._id,
     assessmentID,
-    response.score,
+    score,
     "listening"
   );
+
+  const response = { score, feedback, suggestions };
 
   // Return the analysis result
   return res
@@ -223,8 +234,8 @@ const analyseListeningAssessment = asyncHandelr(async (req, res) => {
 /**
  * Calculate score and feedback for a listening assessment.
  */
-const calculateScore = async (answers, assessmentID) => {
-  const assessment = await ListeningAssessment.findById(assessmentID).exec();
+const calculateScore = async (assessmentModel, answers, assessmentID) => {
+  const assessment = await assessmentModel.findById(assessmentID).exec();
 
   if (!assessment) throw new ApiError(400, "Assessment not found");
 
@@ -239,10 +250,13 @@ const calculateScore = async (answers, assessmentID) => {
     }
   });
 
-  const scorePercentage = (score / totalQuestions) * 100;
+  return { score, totalQuestions, assessment };
+};
+
+const generateFeedbackAndSuggestions = async (score, totalQuestions) => {
   let feedback = "";
   let suggestions = "";
-
+  const scorePercentage = (score / totalQuestions) * 100;
   if (scorePercentage >= 80) {
     feedback = "Excellent job! Your listening skills are impressive.";
     suggestions = "Try challenging yourself with more complex audio.";
@@ -254,8 +268,41 @@ const calculateScore = async (answers, assessmentID) => {
     suggestions = "Start with slower-paced audio for better understanding.";
   }
 
-  return { score, feedback, suggestions };
+  return { feedback, suggestions };
 };
+/**
+ * Analyzes grammar assessment responses and updates the user's progress.
+ */
+const analyzeGrammarAssessment = asyncHandelr(async (req, res) => {
+  const { answers, assessmentID } = req.body;
+
+  if (!answers || !assessmentID)
+    throw new ApiError(400, "Incomplete request data");
+
+  const { score, assessment } = await calculateScore(
+    GrammarAssessment,
+    answers,
+    assessmentID
+  );
+
+  // Update grammar assessment completion record
+  await updateAssessmentCompletion(
+    ListeningAssessment,
+    assessmentID,
+    req.user._id,
+    score
+  );
+
+  // Update user's progress in grammar assessments
+  await updateUserProgress(User, req.user._id, assessmentID, score, "grammar");
+
+  const response = { score, assessment };
+
+  // Return the analysis result
+  return res
+    .status(201)
+    .json(new ApiResponse(200, response, "Successfully Analyzed"));
+});
 
 /**
  * Update the assessment completion status for a user.
@@ -356,4 +403,8 @@ async function updateUserProgress(
   await user.save();
 }
 
-export { analyzeReadingAssessment, analyseListeningAssessment };
+export {
+  analyzeReadingAssessment,
+  analyzeListeningAssessment,
+  analyzeGrammarAssessment,
+};

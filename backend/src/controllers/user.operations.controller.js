@@ -1,4 +1,4 @@
-import { GrammarAssesment } from "../models/grammarAssessment.model.js";
+import { GrammarAssessment } from "../models/grammarAssessment.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
 import { ApiError } from "../utils/ApiErros.js";
@@ -245,7 +245,7 @@ const addGrammarAssessment = asyncHandelr(async (req, res) => {
     });
   }
 
-  const newAssessment = await GrammarAssesment.create({
+  const newAssessment = await GrammarAssessment.create({
     difficulty,
     mcqQuestions: mcqQuestions.map((mcq) => ({
       question: mcq.question,
@@ -274,7 +274,7 @@ const addGrammarAssessment = asyncHandelr(async (req, res) => {
 const getGrammarAssessments = asyncHandelr(async (req, res) => {
   const userId = req.user._id;
 
-  const assessments = await GrammarAssesment.aggregate([
+  const assessments = await GrammarAssessment.aggregate([
     {
       $addFields: {
         userCompletion: {
@@ -295,7 +295,10 @@ const getGrammarAssessments = asyncHandelr(async (req, res) => {
       $project: {
         difficulty: 1,
         evaluationCriteria: 1,
-        mcqQuestions: 1,
+        mcqQuestions: {
+          question: 1,
+          options: 1,
+        },
         isCompleted: {
           $cond: {
             if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
