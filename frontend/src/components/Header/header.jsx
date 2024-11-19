@@ -123,13 +123,7 @@ const Header = () => {
                         {renderNavLink("/takeTest", "Test")}
                         {renderNavLink("/feedback", "Feedback")}
                         {renderNavLink("/contact", "Contact")}
-                        <Link
-                          to="/profile"
-                          className="flex items-center space-x-2 mt-4"
-                        >
-                          <NavIconItem icon={User} />
-                          <span>Profile</span>
-                        </Link>
+                        <NavIconItem to="/profile" icon={User} text="Profile" />
                         <button
                           onClick={handleLogout}
                           className="p-2 rounded-md hover:text-gray-700 hover:bg-gray-200/60 transition-all duration-200"
