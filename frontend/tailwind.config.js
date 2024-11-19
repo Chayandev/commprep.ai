@@ -26,6 +26,10 @@ export default {
           "100%": { transform: "rotate(-360deg) scale(10)" },
         },
       },
+      // Add custom easing function for the spring effect
+      transitionTimingFunction: {
+        spring: "cubic-bezier(0.39, 0.58, 0.26, 1.02)", // Custom spring-like timing
+      },
     },
   },
   plugins: [],
