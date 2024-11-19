@@ -20,7 +20,8 @@ import {
   getReadingAssessments,
 } from "../controllers/user.operations.controller.js";
 import {
-  analyseListeningAssessment,
+  analyzeGrammarAssessment,
+  analyzeListeningAssessment,
   analyzeReadingAssessment,
 } from "../controllers/assessment.analysis.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -62,7 +63,10 @@ router
   .get(verifyJWT, getListeningAssessments);
 router
   .route("/analyzeListeningAssessments")
-  .post(verifyJWT, analyseListeningAssessment);
+  .post(verifyJWT, analyzeListeningAssessment);
 
 router.route("/getGrammarAssessments").get(verifyJWT, getGrammarAssessments);
+router
+  .route("/analyzeGrammarAssessments")
+  .get(verifyJWT, analyzeGrammarAssessment);
 export default router;
