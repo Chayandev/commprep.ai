@@ -199,3 +199,33 @@ export const getListeningAssessmentAnalysis = createAsyncThunk(
     }
   }
 );
+
+//action//getGrammarAssessmentAnalysis
+export const getGrammarAssessmentAnalysis = createAsyncThunk(
+  "analysis/grammarAssessmentAnalysis",
+  async (answers, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/analyzeGrammarAssessments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(answers),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during analysis of grammar assesments."
+        );
+      }
+      console.log("analyze grammar assessment", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);

@@ -27,7 +27,7 @@ export default function ListeningAssessmentPractice() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [feedback, setFeedback] = useState(null);
+  // const [feedback, setFeedback] = useState(null);
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
   const [AUDIO_DURATION, setAudioDuration] = useState(0);
   const [TOTAL_TIME, setTotalTime] = useState(0);
@@ -156,7 +156,7 @@ export default function ListeningAssessmentPractice() {
       .then((result) => {
         console.log(result);
         setProgress(70);
-        setFeedback(result);
+       // setFeedback(result);
       })
       .catch((error) => {
         // Show the error message as a toast error
@@ -390,7 +390,7 @@ export default function ListeningAssessmentPractice() {
                   </>
                 ) : (
                   <div className="prose max-w-none">
-                    {isAnalyzing ? (
+                    {isAnalyzing && result? (
                       <div className="flex flex-col items-center justify-center h-64">
                         <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-600 mx-auto mb-4"></div>
                         <p className="mt-4 text-xl text-gray-600">
@@ -406,7 +406,7 @@ export default function ListeningAssessmentPractice() {
                           <p className="text-xl font-semibold text-teal-800">
                             {`Your Score: ${result?.score} out of ${
                               questions.length
-                            } ${result?.score / 10}`}
+                            }`}
                           </p>
                         </div>
                         <div className="mb-6">
@@ -445,7 +445,7 @@ export default function ListeningAssessmentPractice() {
                     </button>
                   )}
                 </div>
-                {feedback && (
+                {result && (
                   <div className="mt-8 w-full bg-teal-50 border border-teal-500 rounded-lg shadow-sm">
                     <div className="p-6">
                       <h3 className="text-2xl font-bold mb-4 text-teal-800">
