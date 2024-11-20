@@ -168,7 +168,7 @@ export default function Signup() {
           className="h-20 w-auto bg-transparent"
         />
       </div>
-      <Card className="w-full max-w-3xl p-4 overflow-hidden tra">
+      <Card className="w-full max-w-3xl p-4 overflow-hidden">
         <CardHeader
           title={
             <Typography
