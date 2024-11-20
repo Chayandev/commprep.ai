@@ -1,9 +1,6 @@
 import React from "react";
+import ComingSoon from "../../components/CommingSoon";
 
 export default function TakeTest() {
-  return (
-    <>
-      <h2>Take Test</h2>
-    </>
-  );
+  return <ComingSoon page="Test" />;
 }

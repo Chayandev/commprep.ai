@@ -13,11 +13,17 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import CustomTextField from "../../components/CustomTextField";
-import { Star, StarIcon } from "lucide-react";
+import { StarIcon } from "lucide-react";
 import { EmojiEmotionsRounded } from "@mui/icons-material";
+import { useDispatch, useSelector } from "react-redux";
+import { addUserFeedback } from "../../../actions/user.actions";
+import { toast } from "react-toastify";
+import LoadingBar from "react-top-loading-bar";
 
 export default function Feedback() {
-  const [isSubmitting, setIsubmitting] = useState(false);
+  const dispatch = useDispatch();
+  const { isProcessing, message } = useSelector((state) => state.operation);
+  const [progress, setProgress] = useState(0);
   const [consent, setConsent] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [rating, setRating] = useState(null);
@@ -34,21 +40,55 @@ export default function Feedback() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add logic to handle form submission here (e.g., API call)
-
-    // Clear all fields
-    setFormValues({
-      title: "",
-      feedback: "",
-      feedbacktype: "",
-    });
-    setRating(null); // Reset rating
-    setConsent(false); // Reset consent checkbox
-    setShowSnackbar(true); // Show snackbar for confirmation
+    const feedback = {
+      title: formValues.title,
+      feedbackDescription: formValues.feedback,
+      feedbackType: formValues.feedbacktype,
+      rating: rating,
+    };
+    setProgress(20);
+    // Dispatch the addUser feedback action on submit
+    dispatch(addUserFeedback(feedback))
+      .unwrap()
+      .then((result) => {
+        setProgress(70);
+        // Clear all fields
+        setFormValues({
+          title: "",
+          feedback: "",
+          feedbacktype: "",
+        });
+        setRating(null); // Reset rating
+        setConsent(false); // Reset consent checkbox
+        setShowSnackbar(true); // Show snackbar for confirmation
+      })
+      .catch((error) => {
+        // Show the error message as a toast error
+        toast.error(error || "An error occurred during adding feedback", {
+          position: "top-center",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        console.error("Error during adding feedback:", error);
+      })
+      .finally(() => {
+        setProgress(100);
+      });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
+      <LoadingBar
+        color="#02cbc3"
+        progress={progress}
+        height={4}
+        onLoaderFinished={() => setProgress(0)}
+      />
       <main className="w-[90%] lg:w-[80%] mx-auto py-6 items-center flex justify-center">
         <Card className="w-full max-w-3xl p-4 overflow-hidden">
           <div className="flex justify-center items-center ">
@@ -138,6 +178,7 @@ export default function Feedback() {
                   align="center"
                   color="#03ccc2"
                   gutterBottom
+                  style={{ fontWeight: 600 }}
                 >
                   Rate your overall experience
                 </Typography>
@@ -162,7 +203,7 @@ export default function Feedback() {
                 </div>
               </div>
 
-              <div className="flex items-center">
+              <div className="flex flex-col md:flex-row items-center ">
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -185,14 +226,14 @@ export default function Feedback() {
               </div>
               <button
                 type="submit"
-                disabled={isSubmitting || !consent}
+                disabled={isProcessing || !consent}
                 className={`w-full py-2 rounded-md shadow-md text-white inline-flex items-center justify-center ${
-                  isSubmitting || !consent
+                  isProcessing || !consent
                     ? "bg-teal-700 cursor-not-allowed"
                     : "bg-primary hover:bg-teal-700"
                 }`}
               >
-                {isSubmitting && (
+                {isProcessing && (
                   <svg
                     aria-hidden="true"
                     role="status"
@@ -211,7 +252,7 @@ export default function Feedback() {
                     ></path>
                   </svg>
                 )}
-                {isSubmitting ? "Processing..." : "Submit Feedback"}
+                {isProcessing ? "Processing..." : "Submit Feedback"}
               </button>
             </form>
           </CardContent>
