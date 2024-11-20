@@ -1,3 +1,4 @@
+import { UserFeedback } from "../models/feedback.model.js";
 import { GrammarAssessment } from "../models/grammarAssessment.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
@@ -323,6 +324,55 @@ const getGrammarAssessments = asyncHandelr(async (req, res) => {
     );
 });
 
+//***************************************************************** */
+
+/*
+ *
+ * collect feedback and store
+ *
+ *
+ */
+
+const addUserFeedback = asyncHandelr(async (req, res) => {
+  const { title, feedbackDescription, feedbackType, rating } = req.body;
+  // Validate the required fields
+  if (!title || !feedbackDescription || !feedbackType) {
+    return res.status(400).json(new ApiError(400, "All fields are required."));
+  }
+  // Check if the user already has feedback stored
+  const existingUserFeedback = await UserFeedback.findOne({
+    userId: req.user._id,
+  });
+
+  if (existingUserFeedback) {
+    // If feedbacks exist, push the new feedback into the array
+    existingUserFeedback.feedbacks.push(
+      title,
+      feedbackDescription,
+      feedbackType,
+      rating
+    );
+    await existingUserFeedback.save();
+  } else {
+    // If no feedback exists, create a new record for the user
+    const newFeedback = new UserFeedback({
+      userId: req.user._id,
+      feedbacks: [
+        {
+          title,
+          feedbackDescription,
+          feedbackType,
+          rating,
+        },
+      ],
+    });
+    await newFeedback.save();
+  }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, null, "Successfully added feedback"));
+});
 export {
   addReadingAssessment,
   getReadingAssessments,
@@ -330,4 +380,5 @@ export {
   getListeningAssessments,
   addGrammarAssessment,
   getGrammarAssessments,
+  addUserFeedback,
 };

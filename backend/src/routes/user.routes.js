@@ -15,6 +15,7 @@ import {
   addGrammarAssessment,
   addListeningAssessment,
   addReadingAssessment,
+  addUserFeedback,
   getGrammarAssessments,
   getListeningAssessments,
   getReadingAssessments,
@@ -69,4 +70,6 @@ router.route("/getGrammarAssessments").get(verifyJWT, getGrammarAssessments);
 router
   .route("/analyzeGrammarAssessments")
   .post(verifyJWT, analyzeGrammarAssessment);
+
+router.route("/addUserFeedback").post(verifyJWT, addUserFeedback);
 export default router;
