@@ -1,4 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { json } from "react-router-dom";
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 console.log(BASE_URL);
@@ -143,6 +144,24 @@ export const getAllGrammarAssessments = createAsyncThunk(
   }
 );
 
+//action//addUserFeedback
+export const addUserFeedback = createAsyncThunk(
+  "operation/addUserFeedback",
+  async (feedback, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/addUserFeedback`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(feedback),
+      });
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
 //action/readingAssesmentAnalysis
 export const getReadingAssessmentAnslysis = createAsyncThunk(
   "analysis/readingAssessmentAnalysis",

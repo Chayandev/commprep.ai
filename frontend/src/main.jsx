@@ -27,6 +27,8 @@ import ListeningAssessments from "./pages/Practice/listening.page.jsx";
 import ListeningAssessmentPractice from "./pages/Assessments/listening.assessment.page.jsx";
 import GrammarAssessments from "./pages/Practice/grammar.page.jsx";
 import GrammarAssessmentPractice from "./pages/Assessments/grammar.assessment.page.jsx";
+import VocabularyAssessments from "./pages/Practice/vocabulary.page.jsx";
+import Profile from "./pages/Profile/profile.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -55,9 +57,11 @@ const router = createBrowserRouter(
         <Route path="practice/reading" element={<ReadingAssessments />} />
         <Route path="practice/listening" element={<ListeningAssessments />} />
         <Route path="practice/grammar" element={<GrammarAssessments />} />
+        <Route path="practice/vocabulary" element={<VocabularyAssessments />} />
         <Route path="takeTest" element={<TakeTest />} />
         <Route path="contact" element={<Contact />} />
         <Route path="feedback" element={<Feedback />} />
+        <Route path="profile" element={<Profile />} />
 
         <Route
           path="practice/reading/assessment/:assessmentId"
@@ -67,7 +71,7 @@ const router = createBrowserRouter(
           path="practice/listening/assessment/:assessmentId"
           element={<ListeningAssessmentPractice />}
         />
-          <Route
+        <Route
           path="practice/grammar/assessment/:assessmentId"
           element={<GrammarAssessmentPractice />}
         />

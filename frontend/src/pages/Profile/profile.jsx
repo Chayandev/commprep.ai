@@ -1,9 +1,6 @@
 import React from "react";
+import ComingSoon from "../../components/CommingSoon";
 
 export default function Profile() {
-  return (
-    <>
-      <h2>Profile</h2>
-    </>
-  );
+  return <ComingSoon page="Profile" />;
 }
