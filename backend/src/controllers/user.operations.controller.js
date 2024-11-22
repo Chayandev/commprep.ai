@@ -2,6 +2,7 @@ import { UserFeedback } from "../models/feedback.model.js";
 import { GrammarAssessment } from "../models/grammarAssessment.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
+import { VocabularyAssessment } from "../models/vocabularyAssessment.js";
 import { ApiError } from "../utils/ApiErros.js";
 import { ApiResponse } from "../utils/ApiResonse.js";
 import { asyncHandelr } from "../utils/asyncHandler.js";
@@ -373,6 +374,31 @@ const addUserFeedback = asyncHandelr(async (req, res) => {
     .status(201)
     .json(new ApiResponse(200, null, "Successfully added feedback"));
 });
+
+const getEachTotalAssessmentCount = asyncHandelr(async (req, res) => {
+  const totalReadingAssessments = await ReadingAssessment.countDocuments();
+  const totalListeningAssessments = await ListeningAssessment.countDocuments();
+  const totalGrammarAssessments = await GrammarAssessment.countDocuments();
+  const totalVocabularyAssessments =
+    await VocabularyAssessment.countDocuments();
+
+  return res.status(201).json(
+    new ApiResponse(
+      200,
+      {
+        totalReadingAssessments,
+        totalListeningAssessments,
+        totalGrammarAssessments,
+        totalVocabularyAssessments,
+      },
+      "Sucessfully get the total assessments count"
+    )
+  );
+  // Calculate the completion percentage
+  // const completedAssessments = progressType.assessments.length;
+  // progressType.completionPercentage =
+  //   Math.floor((completedAssessments / totalAvailableAssessments) * 100) || 0;
+});
 export {
   addReadingAssessment,
   getReadingAssessments,
@@ -381,4 +407,5 @@ export {
   addGrammarAssessment,
   getGrammarAssessments,
   addUserFeedback,
+  getEachTotalAssessmentCount
 };

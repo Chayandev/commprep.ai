@@ -5,10 +5,10 @@ import bcrypt from "bcrypt";
 const progressSchema = new Schema(
   {
     reading: {
-      completionPercentage: {
-        type: Number,
-        default: 0,
-      },
+      // completionPercentage: {
+      //   type: Number,
+      //   default: 0,
+      // },
       assessments: [
         {
           assessmentId: {
@@ -27,10 +27,10 @@ const progressSchema = new Schema(
       ],
     },
     listening: {
-      completionPercentage: {
-        type: Number,
-        default: 0,
-      },
+      // completionPercentage: {
+      //   type: Number,
+      //   default: 0,
+      // },
       assessments: [
         {
           assessmentId: {
@@ -49,10 +49,10 @@ const progressSchema = new Schema(
       ],
     },
     grammar: {
-      completionPercentage: {
-        type: Number,
-        default: 0,
-      },
+      // completionPercentage: {
+      //   type: Number,
+      //   default: 0,
+      // },
       assessments: [
         {
           assessmentId: {
@@ -71,10 +71,10 @@ const progressSchema = new Schema(
       ],
     },
     vocabulary: {
-      completionPercentage: {
-        type: Number,
-        default: 0,
-      },
+      // completionPercentage: {
+      //   type: Number,
+      //   default: 0,
+      // },
       assessments: [
         {
           assessmentId: {
@@ -128,10 +128,10 @@ const userSchema = new Schema(
     progress: {
       type: progressSchema,
       default: () => ({
-        reading: { completionPercentage: 0, assessments: [] },
-        listening: { completionPercentage: 0, assessments: [] },
-        grammar: { completionPercentage: 0, assessments: [] },
-        vocabulary: { completionPercentage: 0, assessments: [] },
+        reading: { assessments: [] },
+        listening: { assessments: [] },
+        grammar: { assessments: [] },
+        vocabulary: { assessments: [] },
       }),
     },
     achivements: [

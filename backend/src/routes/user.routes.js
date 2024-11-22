@@ -16,6 +16,7 @@ import {
   addListeningAssessment,
   addReadingAssessment,
   addUserFeedback,
+  getEachTotalAssessmentCount,
   getGrammarAssessments,
   getListeningAssessments,
   getReadingAssessments,
@@ -72,4 +73,7 @@ router
   .post(verifyJWT, analyzeGrammarAssessment);
 
 router.route("/addUserFeedback").post(verifyJWT, addUserFeedback);
+router
+  .route("/getEachAssessmentCount")
+  .get(verifyJWT, getEachTotalAssessmentCount);
 export default router;
