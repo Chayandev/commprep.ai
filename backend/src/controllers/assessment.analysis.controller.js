@@ -382,21 +382,21 @@ async function updateUserProgress(
   }
 
   // Get the total number of assessments for the given type
-  const AssessmentModel =
-    type === "reading"
-      ? ReadingAssessment
-      : type === "listening"
-      ? ListeningAssessment
-      : type === "grammar"
-      ? GrammarAssessment
-      : VocabularyAssessment;
+  // const AssessmentModel =
+  //   type === "reading"
+  //     ? ReadingAssessment
+  //     : type === "listening"
+  //     ? ListeningAssessment
+  //     : type === "grammar"
+  //     ? GrammarAssessment
+  //     : VocabularyAssessment;
 
-  const totalAvailableAssessments = await AssessmentModel.countDocuments();
+  //const totalAvailableAssessments = await AssessmentModel.countDocuments();
 
   // Calculate the completion percentage
-  const completedAssessments = progressType.assessments.length;
-  progressType.completionPercentage =
-    Math.floor((completedAssessments / totalAvailableAssessments) * 100) || 0;
+  // const completedAssessments = progressType.assessments.length;
+  // progressType.completionPercentage =
+  //   Math.floor((completedAssessments / totalAvailableAssessments) * 100) || 0;
 
   await user.save();
 }
