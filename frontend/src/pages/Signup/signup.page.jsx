@@ -57,7 +57,7 @@ export default function Signup() {
       fetchAvatars();
       setHasFetchedAvatars(true); // Set it to true after trying to fetch once
     }
-    if (avatars.length !== 0) {
+    if (avatars.length !== 0 && !selectedAvatar) {
       setSelectedAvatar(avatars[0].public_id);
     }
   }, [avatars, fetchAvatars, hasFetchedAvaters]);
@@ -294,7 +294,7 @@ export default function Signup() {
                 ) : avatars.length > 0 ? (
                   <RadioGroup
                     value={selectedAvatar}
-                    onChange={setSelectedAvatar}
+                    onChange={(e) => setSelectedAvatar(e.target.value)}
                   >
                     <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 p-2">
                       {avatars.map((avatar) => (

@@ -248,3 +248,30 @@ export const getGrammarAssessmentAnalysis = createAsyncThunk(
     }
   }
 );
+
+export const getEachTotalAssessmentCount=createAsyncThunk(
+  "operation/getEachTotlaAssessmentCount",
+  async (_,{ rejectWithValue }) => {
+  try {
+    const response = await fetch(`${BASE_URL}/getEachAssessmentCount`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message ||
+          "An error occurred during fetching count of each  assesments."
+      );
+    }
+    console.log("getEachAssessmentCount", result);
+    return result;
+  } catch (error) {
+    return rejectWithValue(error.message || "Something went wrong");
+  }
+});

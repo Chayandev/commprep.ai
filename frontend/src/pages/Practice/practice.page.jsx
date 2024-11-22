@@ -1,79 +1,111 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { useSelector } from "react-redux";
-import {
-  Book,
-  Headphones,
-  MessageSquare,
-  Mic,
-  VolumeX,
-  SpeechIcon,
-} from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { Mic, Headphones, MessageSquare, Book } from "lucide-react";
 import Progress from "../../components/Progress";
 import "../../App.css";
 import LazyLoadingCard from "../../components/LazyLoadingCard";
+import { getEachTotalAssessmentCount } from "../../../actions/user.actions";
+
 const CategoryCard = React.lazy(() => import("../../components/CategoryCard"));
-//import CategoryCard from "../../components/CategoryCard";
 
 export default function Practice() {
   const user = useSelector((state) => state.auth.user);
-  const progressPercentage = Math.round(
-    (user?.progress?.reading?.completionPercentage +
-      user?.progress?.listening?.completionPercentage +
-      user?.progress?.grammar?.completionPercentage +
-      user?.progress?.vocabulary?.completionPercentage) /
-      4
+  const { isProcessing, totalAssessmentCount } = useSelector(
+    (state) => state.operation
   );
+  const [progressPercentage, setProgressPercentage] = useState(0);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getEachTotalAssessmentCount());
+  }, [dispatch]);
+
+  useMemo(() => {
+    if (totalAssessmentCount && user?.progress) {
+      const totalAssessments =
+        (totalAssessmentCount.totalReadingAssessments || 0) +
+        (totalAssessmentCount.totalListeningAssessments || 0) +
+        (totalAssessmentCount.totalGrammarAssessments || 0) +
+        (totalAssessmentCount.totalVocabularyAssessments || 0);
+
+      const totalCompletedAssessments =
+        (user.progress.reading?.assessments?.length || 0) +
+        (user.progress.listening?.assessments?.length || 0) +
+        (user.progress.grammar?.assessments?.length || 0) +
+        (user.progress.vocabulary?.assessments?.length || 0);
+
+      setProgressPercentage(
+        totalAssessments
+          ? Math.round((totalCompletedAssessments / totalAssessments) * 100)
+          : 0
+      );
+    }
+  }, [totalAssessmentCount, user]);
+
+  const calculateProgress = (completed = 0, total = 0) => {
+    return total > 0 ? Math.round((completed / total) * 100) : 0;
+  };
 
   const categories = [
     {
       name: "Reading",
       icon: Mic,
       description: "Boost comprehension through active reading skills.",
-      progress: Math.round(user?.progress?.reading?.completionPercentage) || 0,
+      progress: calculateProgress(
+        user?.progress?.reading?.assessments?.length,
+        totalAssessmentCount?.totalReadingAssessments
+      ),
       color: "from-pink-500 to-rose-500",
-      path: "reading", // Add path for navigation
+      path: "reading",
     },
     {
       name: "Listening",
       icon: Headphones,
       description: "Sharpen listening to grasp spoken language quickly.",
-      progress:
-        Math.round(user?.progress?.listening?.completionPercentage) || 0,
+      progress: calculateProgress(
+        user?.progress?.listening?.assessments?.length,
+        totalAssessmentCount?.totalListeningAssessments
+      ),
       color: "from-purple-500 to-indigo-500",
-      path: "listening", // Add path for navigation
+      path: "listening",
     },
     {
       name: "Grammar",
       icon: MessageSquare,
       description: "Master rules for clear, effective communication.",
-      progress: Math.round(user?.progress?.grammar?.completionPercentage) || 0,
+      progress: calculateProgress(
+        user?.progress?.grammar?.assessments?.length,
+        totalAssessmentCount?.totalGrammarAssessments
+      ),
       color: "from-green-500 to-emerald-500",
-      path: "grammar", // Add path for navigation
+      path: "grammar",
     },
-    // {
-    //   name: "Sentence Correction",
-    //   icon: MessageSquare,
-    //   description: "Perfect sentence structure with real-time feedback.",
-    //   progress: 0,
-    //   color: "from-yellow-500 to-amber-500",
-    //   path: "sentence-correction", // Add path for navigation
-    // },
     {
       name: "Vocabulary",
       icon: Book,
       description: "Expand your lexicon for richer conversations.",
-      progress: user?.progress?.vocabulary?.completionPercentage,
+      progress: calculateProgress(
+        user?.progress?.vocabulary?.assessments?.length,
+        totalAssessmentCount?.totalVocabularyAssessments
+      ),
       color: "from-blue-500 to-cyan-500",
-      path: "vocabulary", // Add path for navigation
+      path: "vocabulary",
     },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <p className="text-lg font-semibold">Loading...</p>
+          </div>
+        </div>
+      )}
       <main className="w-[90%] lg:w-[80%] mx-auto py-6">
         <div className="relative px-4 py-6 sm:px-0">
-          <div className=" relative rounded-lg border border-gray-300/50 p-6 bg-white shadow-xl">
+          <div className="relative rounded-lg border border-gray-300/50 p-6 bg-white shadow-xl">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center sm:text-left">
               Welcome back,{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-blue-600">
@@ -81,7 +113,6 @@ export default function Practice() {
               </span>
               !
             </h1>
-
             <p className="mt-2 text-lg text-gray-600 text-center sm:text-left">
               Ready to elevate your communication game?
             </p>
@@ -90,7 +121,6 @@ export default function Practice() {
                 Start Your Journey
               </div>
             </div>
-
             <div className="mt-8">
               <h2 className="text-2xl font-semibold text-gray-900">
                 Your Progress
@@ -104,11 +134,10 @@ export default function Practice() {
                 {progressPercentage || 0}% of goals achieved
               </p>
             </div>
-
             <div className="mt-12 grid gap-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
               {categories.map((category) => (
                 <Suspense key={uuidv4()} fallback={<LazyLoadingCard />}>
-                  <CategoryCard key={category.name} category={category} />
+                  <CategoryCard category={category} />
                 </Suspense>
               ))}
             </div>
