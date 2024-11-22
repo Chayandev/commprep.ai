@@ -4,6 +4,7 @@ import {
   getAllGrammarAssessments,
   getAllListeningAssessments,
   getAllReadingAssessments,
+  getEachTotalAssessmentCount,
 } from "../../actions/user.actions.js";
 
 const initialState = {
@@ -11,6 +12,7 @@ const initialState = {
   assessments: null,
   selectedAssessmentIndex: -1,
   message: null,
+  totalAssessmentCount:null
 };
 
 const userOperationSlice = createSlice({
@@ -92,6 +94,21 @@ const userOperationSlice = createSlice({
       state.isProcessing = false;
       state.message = null;
     });
+
+    //getEachTotalAssessments
+    builder.addCase(getEachTotalAssessmentCount.pending,(state,_)=>{
+      state.isProcessing=true;
+      state.totalAssessmentCount=null;
+    })
+    builder.addCase(getEachTotalAssessmentCount.fulfilled,(state,action)=>{
+      state.isProcessing=false;
+      state.totalAssessmentCount=action.payload?.data
+    })
+    //getEachTotalAssessments
+    builder.addCase(getEachTotalAssessmentCount.rejected,(state,_)=>{
+      state.isProcessing=false;
+      state.totalAssessmentCount=null;
+    })
   },
 });
 

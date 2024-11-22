@@ -213,31 +213,37 @@ export default function ReadingAssessmentPractice() {
     };
   }, []);
 
-  if (result && feedbackReceived) {
-    // Extract feedback and suggestions
-    const feedbackLines = result?.feedback
-      .split("#") // Split the feedback by period and space
-      .filter((line) => line.trim() !== ""); // Remove any empty lines
+  //if (result && feedbackReceived) {
+  // Extract feedback and suggestions safely with defaults
+  const feedbackLines = result?.feedback
+    ? result.feedback
+        .split("#") // Split feedback by "#"
+        .map((line) => line.trim()) // Trim extra spaces
+        .filter((line) => line !== "") // Remove empty lines
+        .map((line, index, array) => {
+          // Add a period if the last line doesn't have one
+          if (index === array.length - 1 && !line.endsWith(".")) {
+            return `${line}.`;
+          }
+          return line;
+        })
+    : []; // Default to an empty array if feedback is missing
 
-    const suggestionLines = result?.suggestion
-      .split("#") // Split the suggestions by period and space
-      .filter((line) => line.trim() !== ""); // Remove any empty lines
+  const suggestionLines = result?.suggestion
+    ? result.suggestion
+        .split("#") // Split suggestions by "#"
+        .map((line) => line.trim()) // Trim extra spaces
+        .filter((line) => line !== "") // Remove empty lines
+        .map((line, index, array) => {
+          // Add a period if the last line doesn't have one
+          if (index === array.length - 1 && !line.endsWith(".")) {
+            return `${line}.`;
+          }
+          return line;
+        })
+    : []; // Default to an empty array if suggestions are missing
 
-    // Add a period at the end of the last line if it doesn't already have one
-    if (
-      feedbackLines?.length > 0 &&
-      !feedbackLines[feedbackLines?.length - 1].endsWith(".")
-    ) {
-      feedbackLines[feedbackLines?.length - 1] += ".";
-    }
-
-    if (
-      suggestionLines?.length > 0 &&
-      !suggestionLines[suggestionLines?.length - 1].endsWith(".")
-    ) {
-      suggestionLines[suggestionLines?.length - 1] += ".";
-    }
-  }
+  //}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
