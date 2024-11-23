@@ -200,6 +200,7 @@ const getListeningAssessments = asyncHandelr(async (req, res) => {
         passage: 1,
         difficulty: 1,
         evaluationCriteria: 1,
+        title:1,
         mcqQuestions: 1,
         saqQuestions: 1,
         isCompleted: {
