@@ -11,6 +11,7 @@ const AssessmentCard = React.lazy(() =>
 import { v4 as uuidv4 } from "uuid";
 import LazyLoadingCard from "../../components/LazyLoadingCard.jsx";
 import LoadingUI from "../../components/LoadingUI.jsx";
+import { getAllVocabularyAssessments } from "../../../actions/user.actions.js";
 
 export default function VocabularyAssessments() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function VocabularyAssessments() {
   };
 
   useEffect(() => {
-  //  dispatch(getAllGrammarAssessments());
+   dispatch(getAllVocabularyAssessments());
   }, [dispatch]);
 
   const filteredAssessments = assessments?.filter(
