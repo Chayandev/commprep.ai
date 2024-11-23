@@ -16,7 +16,7 @@ const TimeDisplay = forwardRef(({ timeLeft, isScrolled }, ref) => {
 
   // Determine classes based on conditions
   const baseClasses =
-    "mb-6 text-4xl font-bold px-6 py-3 rounded-full shadow-inner transition-all duration-300 ease-in-out";
+    "mb-6  text-2xl md:text-4xl font-bold px-6 py-3 rounded-full shadow-inner transition-all duration-300 ease-in-out";
   const scrolledClasses = isScrolled
     ? "fixed bottom-12 left-1/2 transform -translate-x-1/2 z-10"
     : "";

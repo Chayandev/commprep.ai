@@ -26,7 +26,7 @@ export default function GrammarAssessmentPractice() {
   const timerRef = useRef(null);
   const timeRef = useRef(null); // Ref to store the latest assessment time
   const [TOTAL_TIME, setTotalTime] = useState(0);
-  const [assessmentTime, setAssessmentTime] = useState(0);
+  const [assessmentTime, setAssessmentTime] = useState(null);
   const dispatch = useDispatch();
 
   const [layout, setLayout] = useState("card"); // 'card' or 'list'
@@ -246,11 +246,13 @@ export default function GrammarAssessmentPractice() {
                   }
                   assessment={assessment}
                 />
-                <TimeDisplay
-                  ref={timeDisplayRef}
-                  timeLeft={assessmentTime}
-                  isScrolled={isScrolled}
-                />
+                {assessmentTime && (
+                  <TimeDisplay
+                    ref={timeDisplayRef}
+                    timeLeft={assessmentTime}
+                    isScrolled={isScrolled}
+                  />
+                )}
               </div>
             </div>
 

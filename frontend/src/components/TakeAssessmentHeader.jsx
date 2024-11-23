@@ -9,7 +9,7 @@ const TakeAssessmentHeader = ({ title, assessment }) => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{title}</h1>
       <div
         className={` mt-2 inline-block px-3 py-1 rounded-full text-sm font-medium ${
           difficultyColor[assessment?.difficulty] || "bg-gray-200 text-gray-800"
