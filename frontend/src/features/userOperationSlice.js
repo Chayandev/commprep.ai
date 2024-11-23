@@ -4,6 +4,7 @@ import {
   getAllGrammarAssessments,
   getAllListeningAssessments,
   getAllReadingAssessments,
+  getAllVocabularyAssessments,
   getEachTotalAssessmentCount,
 } from "../../actions/user.actions.js";
 
@@ -12,7 +13,7 @@ const initialState = {
   assessments: null,
   selectedAssessmentIndex: -1,
   message: null,
-  totalAssessmentCount:null
+  totalAssessmentCount: null,
 };
 
 const userOperationSlice = createSlice({
@@ -81,6 +82,23 @@ const userOperationSlice = createSlice({
       state.selectedAssessmentIndex = -1;
     });
 
+    //fetching all Vocalbulary assessments
+    builder.addCase(getAllVocabularyAssessments.pending, (state, _) => {
+      state.isProcessing = true;
+      state.assessments = null;
+      state.selectedAssessmentIndex = -1;
+    });
+    builder.addCase(getAllVocabularyAssessments.fulfilled, (state, action) => {
+      state.isProcessing = false;
+      state.assessments = action.payload?.data;
+      state.selectedAssessmentIndex = -1;
+    });
+    builder.addCase(getAllVocabularyAssessments.rejected, (state, _) => {
+      state.isProcessing = false;
+      state.assessments = null;
+      state.selectedAssessmentIndex = -1;
+    });
+
     //add user feedbacks
     builder.addCase(addUserFeedback.pending, (state, _) => {
       state.isProcessing = true;
@@ -96,19 +114,19 @@ const userOperationSlice = createSlice({
     });
 
     //getEachTotalAssessments
-    builder.addCase(getEachTotalAssessmentCount.pending,(state,_)=>{
-      state.isProcessing=true;
-      state.totalAssessmentCount=null;
-    })
-    builder.addCase(getEachTotalAssessmentCount.fulfilled,(state,action)=>{
-      state.isProcessing=false;
-      state.totalAssessmentCount=action.payload?.data
-    })
+    builder.addCase(getEachTotalAssessmentCount.pending, (state, _) => {
+      state.isProcessing = true;
+      state.totalAssessmentCount = null;
+    });
+    builder.addCase(getEachTotalAssessmentCount.fulfilled, (state, action) => {
+      state.isProcessing = false;
+      state.totalAssessmentCount = action.payload?.data;
+    });
     //getEachTotalAssessments
-    builder.addCase(getEachTotalAssessmentCount.rejected,(state,_)=>{
-      state.isProcessing=false;
-      state.totalAssessmentCount=null;
-    })
+    builder.addCase(getEachTotalAssessmentCount.rejected, (state, _) => {
+      state.isProcessing = false;
+      state.totalAssessmentCount = null;
+    });
   },
 });
 

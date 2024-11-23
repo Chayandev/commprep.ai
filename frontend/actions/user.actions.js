@@ -144,6 +144,35 @@ export const getAllGrammarAssessments = createAsyncThunk(
   }
 );
 
+//action/getVocabularyAssessments
+export const getAllVocabularyAssessments = createAsyncThunk(
+  "operation/getAllVocabularyAssessments",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/getVocabularyAssessments`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during fetching Vocabulary assesments."
+        );
+      }
+      console.log("getALlVocabularyAssessments", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
+
 //action//addUserFeedback
 export const addUserFeedback = createAsyncThunk(
   "operation/addUserFeedback",
