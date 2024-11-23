@@ -42,7 +42,7 @@ export default function ReadingAssessmentPractice() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingComplete, setRecordingComplete] = useState(false);
   const timerRef = useRef(null);
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(null);
   const timeDisplayRef = useRef(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
@@ -417,12 +417,13 @@ export default function ReadingAssessmentPractice() {
               </div> */}
 
               {/* Timer Display */}
-              <TimeDisplay
-                ref={timeDisplayRef}
-                timeLeft={timeLeft}
-                isScrolled={isScrolled}
-              />
-
+              {timeLeft && (
+                <TimeDisplay
+                  ref={timeDisplayRef}
+                  timeLeft={timeLeft}
+                  isScrolled={isScrolled}
+                />
+              )}
               {/* Microphone Button */}
               <button
                 onClick={toggleRecording}

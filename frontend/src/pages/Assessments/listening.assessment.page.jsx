@@ -23,7 +23,7 @@ export default function ListeningAssessmentPractice() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioCurrentTime, setAudioCurrentTime] = useState(0);
-  const [assessmentTime, setAssessmentTime] = useState(0);
+  const [assessmentTime, setAssessmentTime] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -234,18 +234,17 @@ export default function ListeningAssessmentPractice() {
             <h3>Error: Assessment Cancelled or Not Available</h3>
             <p>Please select a valid assessment to continue.</p>
           </div>
-        ) : (
+        ) : assessment &&(
           <>
             <div className="mb-8 bg-white border border-gray-300 rounded-lg shadow-sm">
               <div className=" flex  justify-between items-center p-6">
                 <TakeAssessmentHeader
                   title={
-                    assessment?.title ||
-                    `Listening Assessment ${selectedAssessmentIndex + 1}`
+                    assessment?.title 
                   }
                   assessment={assessment}
                 />
-                {isAudioLoaded ? (
+                {isAudioLoaded && assessmentTime ? (
                   <TimeDisplay
                     ref={timeDisplayRef}
                     timeLeft={assessmentTime}
@@ -426,7 +425,7 @@ export default function ListeningAssessmentPractice() {
                   </div>
                 )}
                 {/* Navigation Buttons */}
-                <div className="mt-8 flex justify-between">
+                <div className="mt-8 flex justify-end">
                   {currentQuestion < questions.length - 1 ? (
                     <button
                       className="flex items-center bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md"
