@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import ShimmerCard from "../../components/ShimmerCard";
 import { Typography } from "@mui/material";
 
+const cloudinaryBaseImaegUrl = import.meta.env.VITE_CLOUDINARY_IMAGE_FOLDER_BASE_URL;
 const CategoryCard = React.lazy(() =>
   import("../../components/ProfileCategoryCard")
 );
@@ -14,8 +15,6 @@ const CategoryCard = React.lazy(() =>
 export default function Profile() {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
-  const cloudinaryBaseImaegUrl =
-    "https://res.cloudinary.com/dosqbjprt/image/upload/v1728997216/";
   console.log(user);
   const { isProcessing, totalAssessmentCount } = useSelector(
     (state) => state.operation
