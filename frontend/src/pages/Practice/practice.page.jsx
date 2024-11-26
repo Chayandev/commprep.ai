@@ -6,8 +6,9 @@ import Progress from "../../components/Progress";
 import "../../App.css";
 import LazyLoadingCard from "../../components/LazyLoadingCard";
 import { getEachTotalAssessmentCount } from "../../../actions/user.actions";
-
+import { calculateProgress } from "../../utils/formalCalculation";
 const CategoryCard = React.lazy(() => import("../../components/CategoryCard"));
+
 
 export default function Practice() {
   const user = useSelector((state) => state.auth.user);
@@ -42,10 +43,6 @@ export default function Practice() {
       );
     }
   }, [totalAssessmentCount, user]);
-
-  const calculateProgress = (completed = 0, total = 0) => {
-    return total > 0 ? Math.round((completed / total) * 100) : 0;
-  };
 
   const categories = [
     {

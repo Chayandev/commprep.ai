@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import LoadingBar from "react-top-loading-bar";
 import TakeAssessmentHeader from "../../components/TakeAssessmentHeader";
 import TimeDisplay from "../../components/TimeDisplay";
+import AssessmentError from "../../components/AssessmentError";
 
 export default function ListeningAssessmentPractice() {
   const navigate = useNavigate();
@@ -230,10 +231,7 @@ export default function ListeningAssessmentPractice() {
       />
       <main className="w-[90%] m-auto block py-6">
         {isErrorState ? (
-          <div className="text-red-600 text-center">
-            <h3>Error: Assessment Cancelled or Not Available</h3>
-            <p>Please select a valid assessment to continue.</p>
-          </div>
+          <AssessmentError/>
         ) : assessment &&(
           <>
             <div className="mb-8 bg-white border border-gray-300 rounded-lg shadow-sm">
