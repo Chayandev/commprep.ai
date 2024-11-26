@@ -4,20 +4,17 @@ import { useNavigate } from "react-router-dom";
 import LoadingBar from "react-top-loading-bar";
 import TakeAssessmentHeader from "../../components/TakeAssessmentHeader";
 import TimeDisplay from "../../components/TimeDisplay";
-import {  ChevronLeft } from "lucide-react";
-import { getGrammarAssessmentAnalysis } from "../../../actions/user.actions";
+import { ChevronLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import AssessmentError from "../../components/AssessmentError";
 import McqBasedAssessmentUi from "../../components/McqBassesAssessmentUI";
 
-export default function GrammarAssessmentPractice() {
+export default function VocabularyAssessmentPractice() {
   const navigate = useNavigate();
   const { assessments, selectedAssessmentIndex } = useSelector(
     (state) => state.operation
   );
-  const { isAnalyzing } = useSelector(
-    (state) => state.assessmentAnalysis
-  );
+  const { isAnalyzing } = useSelector((state) => state.assessmentAnalysis);
   const [assessment, setAssessment] = useState(null);
   const isErrorState = selectedAssessmentIndex === -1;
   const [progress, setProgress] = useState(0);
@@ -111,12 +108,7 @@ export default function GrammarAssessmentPractice() {
       toast.error("Answers are missing or invalid");
       return;
     }
-    dispatch(
-      getGrammarAssessmentAnalysis({
-        answers: answers,
-        assessmentID: assessment._id,
-      })
-    )
+    dispatch()
       .unwrap()
       .then((result) => {
         console.log(result);
@@ -161,7 +153,7 @@ export default function GrammarAssessmentPractice() {
                 <TakeAssessmentHeader
                   title={
                     assessment?.title ||
-                    `Grammer Assessment ${selectedAssessmentIndex + 1}`
+                    `Vocabulary Assessment ${selectedAssessmentIndex + 1}`
                   }
                   assessment={assessment}
                 />
@@ -176,7 +168,7 @@ export default function GrammarAssessmentPractice() {
             </div>
 
             <McqBasedAssessmentUi
-              assessmentName={"grammar"}
+              assessmentName={"vocabulary"}
               questions={questions}
               handleSubmit={handleSubmit}
               layout={layout}

@@ -62,6 +62,9 @@ export default function Signup() {
     }
   }, [avatars, fetchAvatars, hasFetchedAvaters]);
 
+  // useEffect(() => {
+  //   console.log(selectedAvatar);
+  // }, [setSelectedAvatar,selectedAvatar]);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormValues((prev) => ({
@@ -294,7 +297,7 @@ export default function Signup() {
                 ) : avatars.length > 0 ? (
                   <RadioGroup
                     value={selectedAvatar}
-                    onChange={(e) => setSelectedAvatar(e.target.value)}
+                    onChange={setSelectedAvatar}
                   >
                     <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 p-2">
                       {avatars.map((avatar) => (

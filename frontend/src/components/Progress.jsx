@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 function Progress({ value, className = "", indicatorClassName = "" }) {
   return (
     <div className={`relative w-full ${className}`}>
-      <div className="overflow-hidden h-full rounded-full bg-gray-200">
+      <div className="overflow-hidden h-full rounded-full bg-gray-300/50">
         <div
           className={`h-full rounded-full ${indicatorClassName}`}
           style={{

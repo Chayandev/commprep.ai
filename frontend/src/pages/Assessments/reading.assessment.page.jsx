@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import LoadingBar from "react-top-loading-bar";
 import useFullScreen from "../../components/Hooks/FullScreenHook.js";
 import TimeDisplay from "../../components/TimeDisplay.jsx";
+import AssessmentError from "../../components/AssessmentError.jsx";
 
 export default function ReadingAssessmentPractice() {
   //useFullScreen();
@@ -255,10 +256,7 @@ export default function ReadingAssessmentPractice() {
       />
       <main className="w-[90%] m-auto block py-6">
         {isErrorState ? (
-          <div className="text-red-600 text-center">
-            <h3>Error: Assessment Cancelled or Not Available</h3>
-            <p>Please select a valid assessment to continue.</p>
-          </div>
+          <AssessmentError />
         ) : (
           <div className="flex flex-col-reverse xl:flex-row  gap-8">
             {/* Left Column - Passage */}
