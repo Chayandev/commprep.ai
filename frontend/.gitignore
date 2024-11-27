@@ -28,3 +28,5 @@ constants.js
 .env
 .env.test
 .env.production
+
+console.log
