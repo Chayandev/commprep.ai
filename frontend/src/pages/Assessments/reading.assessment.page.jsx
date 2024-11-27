@@ -258,7 +258,7 @@ export default function ReadingAssessmentPractice() {
         {isErrorState ? (
           <AssessmentError />
         ) : (
-          <div className="flex flex-col-reverse xl:flex-row  gap-8">
+          <div className="flex flex-col-reverse md:flex-row  gap-8">
             {/* Left Column - Passage */}
             <div className="flex-[3] bg-white rounded-lg shadow-md p-8">
               <div
@@ -392,7 +392,7 @@ export default function ReadingAssessmentPractice() {
             </div>
 
             {/* Right Column - Recording Interface */}
-            <div className="sticky top-24 flex-1 flex flex-col items-center bg-white rounded-lg shadow-md p-8">
+            <div className=" md:sticky top-24 flex-1 flex flex-col items-center bg-white rounded-lg shadow-md p-8">
               <div className="mb-8 text-center">
                 <h3 className="text-2xl font-bold mb-2 text-gray-800">
                   Recording
