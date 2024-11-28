@@ -135,7 +135,7 @@ export default function ListeningAssessmentPractice() {
       setAssessmentTime((prevTime) => {
         if (prevTime === 0) {
           clearInterval(timerRef.current);
-          if (isAudioLoaded) handleSubmit();
+          //if (isAudioLoaded) handleSubmit();
           //return assessmentTime;
         }
         return prevTime - 1;

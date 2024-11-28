@@ -278,6 +278,36 @@ export const getGrammarAssessmentAnalysis = createAsyncThunk(
   }
 );
 
+//action//getGrammarAssessmentAnalysis
+export const getVocabularyAssessmentAnalysis = createAsyncThunk(
+  "analysis/vocabularyAssessmentAnalysis",
+  async (answers, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/analyzeVocabularyAssessments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(answers),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during analysis of vocabulary assesments."
+        );
+      }
+      console.log("analyze vocabulary assessment", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
+
 export const getEachTotalAssessmentCount=createAsyncThunk(
   "operation/getEachTotlaAssessmentCount",
   async (_,{ rejectWithValue }) => {

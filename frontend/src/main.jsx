@@ -29,6 +29,7 @@ import GrammarAssessments from "./pages/Practice/grammar.page.jsx";
 import GrammarAssessmentPractice from "./pages/Assessments/grammar.assessment.page.jsx";
 import VocabularyAssessments from "./pages/Practice/vocabulary.page.jsx";
 import Profile from "./pages/Profile/profile.jsx";
+import VocabularyAssessmentPractice from "./pages/Assessments/vocabulary.assessment.page.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -74,6 +75,10 @@ const router = createBrowserRouter(
         <Route
           path="practice/grammar/assessment/:assessmentId"
           element={<GrammarAssessmentPractice />}
+        />
+        <Route
+          path="practice/vocabulary/assessment/:assessmentId"
+          element={<VocabularyAssessmentPractice />}
         />
       </Route>
     </>

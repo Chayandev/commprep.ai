@@ -2,7 +2,7 @@ import { UserFeedback } from "../models/feedback.model.js";
 import { GrammarAssessment } from "../models/grammarAssessment.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
-import { VocabularyAssessment } from "../models/vocabularyAssessment.js";
+import { VocabularyAssessment } from "../models/vocabularyAssessment.model.js";
 import { ApiError } from "../utils/ApiErros.js";
 import { ApiResponse } from "../utils/ApiResonse.js";
 import { asyncHandelr } from "../utils/asyncHandler.js";
@@ -101,7 +101,7 @@ const getReadingAssessments = asyncHandelr(async (req, res) => {
  */
 
 const addListeningAssessment = asyncHandelr(async (req, res) => {
-  const { title,difficulty, mcqQuestions, saqQuestions, evaluationCriteria } =
+  const { title, difficulty, mcqQuestions, saqQuestions, evaluationCriteria } =
     req.body;
   // console.log(difficulty);
   // console.log(mcqQuestions);
@@ -142,7 +142,7 @@ const addListeningAssessment = asyncHandelr(async (req, res) => {
   console.log("audioFileUrl", audioFileUrl);
   const newAssessment = await ListeningAssessment.create({
     audioFileUrl: audioFileUrl.url,
-    title:title,
+    title: title,
     difficulty,
     mcqQuestions: parsedMcqQuestions.map((mcq) => ({
       question: mcq.question,
@@ -200,7 +200,7 @@ const getListeningAssessments = asyncHandelr(async (req, res) => {
         passage: 1,
         difficulty: 1,
         evaluationCriteria: 1,
-        title:1,
+        title: 1,
         mcqQuestions: 1,
         saqQuestions: 1,
         isCompleted: {
@@ -331,6 +331,104 @@ const getGrammarAssessments = asyncHandelr(async (req, res) => {
 
 /*
  *
+ * adding all vocabulary assessments
+ *
+ *
+ */
+const addVocabularyAssessment = asyncHandelr(async (req, res) => {
+  const { difficulty, evaluationCriteria, mcqQuestions } = req.body;
+
+  console.log("Received Difficulty:", difficulty);
+  console.log("Received MCQ Questions:", mcqQuestions);
+  console.log("Received Evaluation Criteria:", evaluationCriteria);
+
+  // Check if the required fields are present
+  if (!difficulty || !evaluationCriteria || !mcqQuestions) {
+    return res.status(400).json({
+      message: "Invalid input data",
+    });
+  }
+
+  const newAssessment = await VocabularyAssessment.create({
+    difficulty,
+    mcqQuestions: mcqQuestions.map((mcq) => ({
+      question: mcq.question,
+      options: mcq.options,
+      correctOption: mcq.correctOption,
+    })),
+    evaluationCriteria,
+  });
+
+  console.log("New Assessment Created:", newAssessment);
+
+  return res
+    .status(201)
+    .json(
+      new ApiResponse(200, null, "Vocabulary assessment created successfully")
+    );
+});
+
+//**************************************************** */
+/*
+ *
+ *get all thhe vocabulary assessments
+ *
+ *
+ */
+const getVocabularyAssessments = asyncHandelr(async (req, res) => {
+  const userId = req.user._id;
+
+  const assessments = await VocabularyAssessment.aggregate([
+    {
+      $addFields: {
+        userCompletion: {
+          $arrayElemAt: [
+            {
+              $filter: {
+                input: "$assessmentCompleters",
+                as: "completer",
+                cond: { $eq: ["$$completer.userId", userId] },
+              },
+            },
+            0,
+          ],
+        },
+      },
+    },
+    {
+      $project: {
+        difficulty: 1,
+        evaluationCriteria: 1,
+        mcqQuestions: {
+          question: 1,
+          options: 1,
+        },
+        isCompleted: {
+          $cond: {
+            if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
+            then: true,
+            else: false,
+          },
+        },
+        score: { $ifNull: ["$userCompletion.score", null] },
+        completedAt: { $ifNull: ["$userCompletion.completedAt", null] },
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        assessments,
+        "Vocabulary assessments fetched successfully"
+      )
+    );
+});
+
+/*
+ *
  * collect feedback and store
  *
  *
@@ -408,6 +506,8 @@ export {
   getListeningAssessments,
   addGrammarAssessment,
   getGrammarAssessments,
+  addVocabularyAssessment,
+  getVocabularyAssessments,
   addUserFeedback,
-  getEachTotalAssessmentCount
+  getEachTotalAssessmentCount,
 };

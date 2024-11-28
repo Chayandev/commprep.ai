@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import LoadingBar from "react-top-loading-bar";
 import TakeAssessmentHeader from "../../components/TakeAssessmentHeader";
 import TimeDisplay from "../../components/TimeDisplay";
-import {  ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { getGrammarAssessmentAnalysis } from "../../../actions/user.actions";
 import { toast } from "react-toastify";
 import AssessmentError from "../../components/AssessmentError";
@@ -15,9 +15,7 @@ export default function GrammarAssessmentPractice() {
   const { assessments, selectedAssessmentIndex } = useSelector(
     (state) => state.operation
   );
-  const { isAnalyzing } = useSelector(
-    (state) => state.assessmentAnalysis
-  );
+  const { isAnalyzing } = useSelector((state) => state.assessmentAnalysis);
   const [assessment, setAssessment] = useState(null);
   const isErrorState = selectedAssessmentIndex === -1;
   const [progress, setProgress] = useState(0);
@@ -188,19 +186,19 @@ export default function GrammarAssessmentPractice() {
               handleAnswerChange={handleAnswerChange}
               answeredQuestionsCount={answeredQuestionsCount}
             />
-            <div className="w-full flex justify-center">
-              <button
-                onClick={handleBack} // Add click handler for navigation
-                className={`flex mt-8 items-center justify-center px-4 py-2 border rounded-md transition-all duration-200  text-teal-600 border-teal-600 hover:bg-teal-50 
-                }`}
-                disabled={isAnalyzing}
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Back to Main Page
-              </button>
-            </div>
           </>
         )}
+        <div className="w-full flex justify-center">
+          <button
+            onClick={handleBack} // Add click handler for navigation
+            className={`flex mt-8 items-center justify-center px-4 py-2 border rounded-md transition-all duration-200  text-teal-600 border-teal-600 hover:bg-teal-50 
+                }`}
+            disabled={isAnalyzing}
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back to Main Page
+          </button>
+        </div>
       </main>
     </div>
   );
