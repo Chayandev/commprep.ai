@@ -8,6 +8,7 @@ import { ChevronLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import AssessmentError from "../../components/AssessmentError";
 import McqBasedAssessmentUi from "../../components/McqBassesAssessmentUI";
+import { getVocabularyAssessmentAnalysis } from "../../../actions/user.actions";
 
 export default function VocabularyAssessmentPractice() {
   const navigate = useNavigate();
@@ -95,7 +96,7 @@ export default function VocabularyAssessmentPractice() {
     }));
   };
   const handleBack = () => {
-    navigate("/practice/listening");
+    navigate("/practice/vocabulary");
   };
 
   const handleSubmit = () => {
@@ -108,7 +109,12 @@ export default function VocabularyAssessmentPractice() {
       toast.error("Answers are missing or invalid");
       return;
     }
-    dispatch()
+    dispatch(
+      getVocabularyAssessmentAnalysis({
+        answers: answers,
+        assessmentID: assessment._id,
+      })
+    )
       .unwrap()
       .then((result) => {
         console.log(result);
@@ -180,19 +186,19 @@ export default function VocabularyAssessmentPractice() {
               handleAnswerChange={handleAnswerChange}
               answeredQuestionsCount={answeredQuestionsCount}
             />
-            <div className="w-full flex justify-center">
-              <button
-                onClick={handleBack} // Add click handler for navigation
-                className={`flex mt-8 items-center justify-center px-4 py-2 border rounded-md transition-all duration-200  text-teal-600 border-teal-600 hover:bg-teal-50 
-                }`}
-                disabled={isAnalyzing}
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Back to Main Page
-              </button>
-            </div>
           </>
         )}
+        <div className="w-full flex justify-center">
+          <button
+            onClick={handleBack} // Add click handler for navigation
+            className={`flex mt-8 items-center justify-center px-4 py-2 border rounded-md transition-all duration-200  text-teal-600 border-teal-600 hover:bg-teal-50 
+                }`}
+            disabled={isAnalyzing}
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back to Main Page
+          </button>
+        </div>
       </main>
     </div>
   );
