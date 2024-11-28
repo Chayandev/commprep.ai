@@ -7,7 +7,7 @@ import { ReadingAssessment } from "../models/readingAssessments.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 import { User } from "../models/user.model.js";
 import { GrammarAssessment } from "../models/grammarAssessment.model.js";
-import { VocabularyAssessment } from "../models/vocabularyAssessment.js";
+import { VocabularyAssessment } from "../models/vocabularyAssessment.model.js";
 
 // Initialize the AssemblyAI client with the API key
 const assemblyClient = new AssemblyAI({
@@ -81,6 +81,7 @@ const analyzeReadingAssessment = asyncHandelr(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, response, "Successfully transcribed"));
 });
+//*************************************************************************************/
 
 /**
  * Analyze transcription data against an actual passage and generate feedback.
@@ -186,9 +187,12 @@ async function analyzeAgainstPassageAndGenerateFeedback(
     suggestion,
   };
 }
+//*************************************************************************************/
 
 /**
+ *
  * Analyzes listening assessment responses and updates the user's progress.
+ *
  */
 const analyzeListeningAssessment = asyncHandelr(async (req, res) => {
   const { answers, assessmentID } = req.body;
@@ -248,8 +252,12 @@ const generateFeedbackAndSuggestions = async (score, totalQuestions) => {
 
   return { feedback, suggestions };
 };
+//*************************************************************************************/
+
 /**
+ *
  * Analyzes grammar assessment responses and updates the user's progress.
+ *
  */
 const analyzeGrammarAssessment = asyncHandelr(async (req, res) => {
   const { answers, assessmentID } = req.body;
@@ -273,6 +281,49 @@ const analyzeGrammarAssessment = asyncHandelr(async (req, res) => {
 
   // Update user's progress in grammar assessments
   await updateUserProgress(User, req.user._id, assessmentID, score, "grammar");
+
+  const response = { score, assessment };
+
+  // Return the analysis result
+  return res
+    .status(201)
+    .json(new ApiResponse(200, response, "Successfully Analyzed"));
+});
+//*************************************************************************************/
+
+/**
+ *
+ * Analyzes vocabulary assessment responses and updates the user's progress.
+ *
+ */
+const analyzeVocabularyAssessment = asyncHandelr(async (req, res) => {
+  const { answers, assessmentID } = req.body;
+
+  if (!answers || !assessmentID)
+    throw new ApiError(400, "Incomplete request data");
+
+  const { score, assessment } = await calculateScore(
+    VocabularyAssessment,
+    answers,
+    assessmentID
+  );
+
+  // Update vocabulary assessment completion record
+  await updateAssessmentCompletion(
+    VocabularyAssessment,
+    assessmentID,
+    req.user._id,
+    score
+  );
+
+  // Update user's vocabulary in grammar assessments
+  await updateUserProgress(
+    User,
+    req.user._id,
+    assessmentID,
+    score,
+    "vocabulary"
+  );
 
   const response = { score, assessment };
 
@@ -320,6 +371,8 @@ async function updateAssessmentCompletion(model, assessmentID, userID, score) {
     );
   }
 }
+//*************************************************************************************/
+
 /**
  * Calculate score
  */
@@ -341,6 +394,8 @@ const calculateScore = async (assessmentModel, answers, assessmentID) => {
 
   return { score, totalQuestions, assessment };
 };
+//*************************************************************************************/
+
 /**
  * Update user progress for completed assessments.
  */
@@ -405,4 +460,5 @@ export {
   analyzeReadingAssessment,
   analyzeListeningAssessment,
   analyzeGrammarAssessment,
+  analyzeVocabularyAssessment
 };
