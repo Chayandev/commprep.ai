@@ -173,6 +173,35 @@ export const getAllVocabularyAssessments = createAsyncThunk(
   }
 );
 
+//action/getVocabularyAssessments
+export const getAllSpeakingAssessments = createAsyncThunk(
+  "operation/getAllSpeakingAssessments",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/getSpeakingAssessments`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during fetching Speaking assesments."
+        );
+      }
+      console.log("getAllSpeakingAssessments", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
+
 //action//addUserFeedback
 export const addUserFeedback = createAsyncThunk(
   "operation/addUserFeedback",
@@ -191,6 +220,9 @@ export const addUserFeedback = createAsyncThunk(
     }
   }
 );
+
+//***************************************************************************************************************** */
+
 //action/readingAssesmentAnalysis
 export const getReadingAssessmentAnslysis = createAsyncThunk(
   "analysis/readingAssessmentAnalysis",
@@ -308,29 +340,30 @@ export const getVocabularyAssessmentAnalysis = createAsyncThunk(
   }
 );
 
-export const getEachTotalAssessmentCount=createAsyncThunk(
+export const getEachTotalAssessmentCount = createAsyncThunk(
   "operation/getEachTotlaAssessmentCount",
-  async (_,{ rejectWithValue }) => {
-  try {
-    const response = await fetch(`${BASE_URL}/getEachAssessmentCount`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/getEachAssessmentCount`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-    const result = await response.json();
+      const result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(
-        result.message ||
-          "An error occurred during fetching count of each  assesments."
-      );
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during fetching count of each  assesments."
+        );
+      }
+      console.log("getEachAssessmentCount", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
     }
-    console.log("getEachAssessmentCount", result);
-    return result;
-  } catch (error) {
-    return rejectWithValue(error.message || "Something went wrong");
   }
-});
+);

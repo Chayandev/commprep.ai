@@ -8,8 +8,6 @@ const AssessmentCard = ({
   handleSelectAssessment,
   logo,
 }) => {
-  
-
   const difficultyColor = {
     easy: "bg-[#aada27]",
     medium: "bg-[#fdc324]",
@@ -100,7 +98,11 @@ const AssessmentCard = ({
         <div className="flex items-center justify-center text-sm text-[#046f45] mb-2">
           <Clock className="w-4 h-4 mr-1" />
           <span>
-            Approx. {formatTime(assessment.evaluationCriteria.timeToComplete)}
+            Approx.{" "}
+            {formatTime(
+              assessment.evaluationCriteria?.timeToComplete ||
+                assessment.timeToComplete
+            )}
           </span>
         </div>
         <button

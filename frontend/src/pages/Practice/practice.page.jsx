@@ -1,14 +1,19 @@
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useDispatch, useSelector } from "react-redux";
-import { Mic, Headphones, MessageSquare, Book } from "lucide-react";
+import {
+  Mic,
+  Headphones,
+  MessageSquare,
+  Book,
+  Speech,
+} from "lucide-react";
 import Progress from "../../components/Progress";
 import "../../App.css";
 import LazyLoadingCard from "../../components/LazyLoadingCard";
 import { getEachTotalAssessmentCount } from "../../../actions/user.actions";
 import { calculateProgress } from "../../utils/formalCalculation";
 const CategoryCard = React.lazy(() => import("../../components/CategoryCard"));
-
 
 export default function Practice() {
   const user = useSelector((state) => state.auth.user);
@@ -88,6 +93,18 @@ export default function Practice() {
       ),
       color: "from-blue-500 to-cyan-500",
       path: "vocabulary",
+    },
+    {
+      name: "Speaking",
+      icon: Speech,
+      description:
+        "Develop clear articulation and express thoughts confidently.",
+      progress: calculateProgress(
+        user?.progress?.speaking?.assessments?.length,
+        totalAssessmentCount?.totalSpeakingAssessments
+      ),
+      color: "from-orange-500 to-yellow-500",
+      path: "speaking",
     },
   ];
 

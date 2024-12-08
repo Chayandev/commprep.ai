@@ -1,7 +1,10 @@
 import React, { Suspense, useEffect, useState } from "react";
-import logo from "/ic_grammar.png";
+import logo from "/ic_speaking.png";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllGrammarAssessments } from "../../../actions/user.actions.js";
+import {
+  getAllGrammarAssessments,
+  getAllSpeakingAssessments,
+} from "../../../actions/user.actions.js";
 import { selectAssessment } from "../../features/userOperationSlice.js";
 import { useNavigate } from "react-router-dom";
 import AssessmentHeader from "../../components/AssessmentHeader.jsx";
@@ -13,7 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 import LazyLoadingCard from "../../components/LazyLoadingCard.jsx";
 import LoadingUI from "../../components/LoadingUI.jsx";
 
-export default function GrammarAssessments() {
+export default function SpeakingAssessments() {
   const navigate = useNavigate();
   const [showCompleted, setShowCompleted] = useState(true);
   const [difficulty, setDifficulty] = useState("All");
@@ -26,11 +29,11 @@ export default function GrammarAssessments() {
 
   const handleSelectAssessment = (index) => {
     dispatch(selectAssessment(index));
-    navigate(`/practice/grammar/assessment/${index + 1}`);
+    navigate(`/practice/speaking/assessment/${index + 1}`);
   };
 
   useEffect(() => {
-    dispatch(getAllGrammarAssessments());
+    dispatch(getAllSpeakingAssessments());
   }, [dispatch]);
 
   const filteredAssessments = assessments?.filter(
@@ -49,7 +52,7 @@ export default function GrammarAssessments() {
       ) : (
         <main className="w-[90%] lg:w-[80%] mx-auto py-6">
           <AssessmentHeader
-            title="Grammar Assessments"
+            title="Speaking Assessments"
             difficulty={difficulty}
             showCompleted={showCompleted}
             onDifficultyChange={handleChange}
