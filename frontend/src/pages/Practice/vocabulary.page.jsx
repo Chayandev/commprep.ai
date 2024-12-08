@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useState } from "react";
-import logo from "/ic_reading.png";
+import logo from "/ic_vocabulary.png";
 import { useDispatch, useSelector } from "react-redux";
 import { selectAssessment } from "../../features/userOperationSlice.js";
 import { useNavigate } from "react-router-dom";

@@ -4,6 +4,7 @@ import {
   getAllGrammarAssessments,
   getAllListeningAssessments,
   getAllReadingAssessments,
+  getAllSpeakingAssessments,
   getAllVocabularyAssessments,
   getEachTotalAssessmentCount,
 } from "../../actions/user.actions.js";
@@ -31,75 +32,81 @@ const userOperationSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    //fetching all reading assessments
-    builder.addCase(getAllReadingAssessments.pending, (state, _) => {
+    // Handle pending, fulfilled, and rejected states for any assessment
+    const handlePending = (state) => {
       state.isProcessing = true;
       state.assessments = null;
       state.selectedAssessmentIndex = -1;
-    });
-    builder.addCase(getAllReadingAssessments.fulfilled, (state, action) => {
+    };
+
+    const handleFulfilled = (state, action) => {
       state.isProcessing = false;
       state.assessments = action.payload?.data;
       state.selectedAssessmentIndex = -1;
-    });
-    builder.addCase(getAllReadingAssessments.rejected, (state, _) => {
-      state.isProcessing = false;
-      state.assessments = null;
-      state.selectedAssessmentIndex = -1;
-    });
+    };
 
-    //fetching all listening assessments
-    builder.addCase(getAllListeningAssessments.pending, (state, _) => {
-      state.isProcessing = true;
-      state.assessments = null;
-      state.selectedAssessmentIndex = -1;
-    });
-    builder.addCase(getAllListeningAssessments.fulfilled, (state, action) => {
-      state.isProcessing = false;
-      state.assessments = action.payload?.data;
-      state.selectedAssessmentIndex = -1;
-    });
-    builder.addCase(getAllListeningAssessments.rejected, (state, _) => {
+    const handleRejected = (state) => {
       state.isProcessing = false;
       state.assessments = null;
       state.selectedAssessmentIndex = -1;
-    });
+    };
 
-    //fetching all grammar assessments
-    builder.addCase(getAllGrammarAssessments.pending, (state, _) => {
-      state.isProcessing = true;
-      state.assessments = null;
-      state.selectedAssessmentIndex = -1;
-    });
-    builder.addCase(getAllGrammarAssessments.fulfilled, (state, action) => {
-      state.isProcessing = false;
-      state.assessments = action.payload?.data;
-      state.selectedAssessmentIndex = -1;
-    });
-    builder.addCase(getAllGrammarAssessments.rejected, (state, _) => {
-      state.isProcessing = false;
-      state.assessments = null;
-      state.selectedAssessmentIndex = -1;
-    });
+    // Handle reading assessments
+    builder.addCase(getAllReadingAssessments.pending, (state) =>
+      handlePending(state)
+    );
+    builder.addCase(getAllReadingAssessments.fulfilled, (state, action) =>
+      handleFulfilled(state, action)
+    );
+    builder.addCase(getAllReadingAssessments.rejected, (state) =>
+      handleRejected(state)
+    );
 
-    //fetching all Vocalbulary assessments
-    builder.addCase(getAllVocabularyAssessments.pending, (state, _) => {
-      state.isProcessing = true;
-      state.assessments = null;
-      state.selectedAssessmentIndex = -1;
-    });
-    builder.addCase(getAllVocabularyAssessments.fulfilled, (state, action) => {
-      state.isProcessing = false;
-      state.assessments = action.payload?.data;
-      state.selectedAssessmentIndex = -1;
-    });
-    builder.addCase(getAllVocabularyAssessments.rejected, (state, _) => {
-      state.isProcessing = false;
-      state.assessments = null;
-      state.selectedAssessmentIndex = -1;
-    });
+    // Handle listening assessments
+    builder.addCase(getAllListeningAssessments.pending, (state) =>
+      handlePending(state)
+    );
+    builder.addCase(getAllListeningAssessments.fulfilled, (state, action) =>
+      handleFulfilled(state, action)
+    );
+    builder.addCase(getAllListeningAssessments.rejected, (state) =>
+      handleRejected(state)
+    );
 
-    //add user feedbacks
+    // Handle grammar assessments
+    builder.addCase(getAllGrammarAssessments.pending, (state) =>
+      handlePending(state)
+    );
+    builder.addCase(getAllGrammarAssessments.fulfilled, (state, action) =>
+      handleFulfilled(state, action)
+    );
+    builder.addCase(getAllGrammarAssessments.rejected, (state) =>
+      handleRejected(state)
+    );
+
+    // Handle vocabulary assessments
+    builder.addCase(getAllVocabularyAssessments.pending, (state) =>
+      handlePending(state)
+    );
+    builder.addCase(getAllVocabularyAssessments.fulfilled, (state, action) =>
+      handleFulfilled(state, action)
+    );
+    builder.addCase(getAllVocabularyAssessments.rejected, (state) =>
+      handleRejected(state)
+    );
+
+    // Handle speaking assessments
+    builder.addCase(getAllSpeakingAssessments.pending, (state) =>
+      handlePending(state)
+    );
+    builder.addCase(getAllSpeakingAssessments.fulfilled, (state, action) =>
+      handleFulfilled(state, action)
+    );
+    builder.addCase(getAllSpeakingAssessments.rejected, (state) =>
+      handleRejected(state)
+    );
+
+    // Add user feedback reducers
     builder.addCase(addUserFeedback.pending, (state, _) => {
       state.isProcessing = true;
       state.message = null;
@@ -108,13 +115,13 @@ const userOperationSlice = createSlice({
       state.isProcessing = false;
       state.message = action.payload?.data;
     });
-    builder.addCase(addUserFeedback.rejected, (state, action) => {
+    builder.addCase(addUserFeedback.rejected, (state) => {
       state.isProcessing = false;
       state.message = null;
     });
 
-    //getEachTotalAssessments
-    builder.addCase(getEachTotalAssessmentCount.pending, (state, _) => {
+    // Get each total assessments count
+    builder.addCase(getEachTotalAssessmentCount.pending, (state) => {
       state.isProcessing = true;
       state.totalAssessmentCount = null;
     });
@@ -122,8 +129,7 @@ const userOperationSlice = createSlice({
       state.isProcessing = false;
       state.totalAssessmentCount = action.payload?.data;
     });
-    //getEachTotalAssessments
-    builder.addCase(getEachTotalAssessmentCount.rejected, (state, _) => {
+    builder.addCase(getEachTotalAssessmentCount.rejected, (state) => {
       state.isProcessing = false;
       state.totalAssessmentCount = null;
     });
