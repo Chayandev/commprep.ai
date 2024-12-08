@@ -15,18 +15,21 @@ import {
   addGrammarAssessment,
   addListeningAssessment,
   addReadingAssessment,
+  addSpeakingAssessment,
   addUserFeedback,
   addVocabularyAssessment,
   getEachTotalAssessmentCount,
   getGrammarAssessments,
   getListeningAssessments,
   getReadingAssessments,
+  getSpeakingAssessments,
   getVocabularyAssessments,
 } from "../controllers/user.operations.controller.js";
 import {
   analyzeGrammarAssessment,
   analyzeListeningAssessment,
   analyzeReadingAssessment,
+  analyzeSpeakingAssessment,
   analyzeVocabularyAssessment,
 } from "../controllers/assessment.analysis.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -53,6 +56,8 @@ router
   );
 router.route("/addGrammarAssessment").post(addGrammarAssessment);
 router.route("/addVocabularyAssessment").post(addVocabularyAssessment);
+router.route("/addSpeakingAssessment").post(addSpeakingAssessment);
+
 //secure routes
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/getReadingAssessments").get(verifyJWT, getReadingAssessments);
@@ -77,12 +82,23 @@ router
 router
   .route("/getVocabularyAssessments")
   .get(verifyJWT, getVocabularyAssessments);
+
 router
   .route("/analyzeVocabularyAssessments")
   .post(verifyJWT, analyzeVocabularyAssessment);
+
+router.route("/getSpeakingAssessments").get(verifyJWT, getSpeakingAssessments);
 
 router.route("/addUserFeedback").post(verifyJWT, addUserFeedback);
 router
   .route("/getEachAssessmentCount")
   .get(verifyJWT, getEachTotalAssessmentCount);
+
+//testing
+router
+  .route("/analyzeSpekaingAssessment")
+  .post(
+    upload.fields([{ name: "audio", maxCount: 1 }]),
+    analyzeSpeakingAssessment
+  );
 export default router;

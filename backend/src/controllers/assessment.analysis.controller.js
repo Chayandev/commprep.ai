@@ -3,12 +3,13 @@ import { ApiResponse } from "../utils/ApiResonse.js";
 import { ApiError } from "../utils/ApiErros.js";
 import fs from "fs"; // Import the fs module to handle file operations
 import { AssemblyAI } from "assemblyai";
+import Groq from "groq-sdk";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 import { User } from "../models/user.model.js";
 import { GrammarAssessment } from "../models/grammarAssessment.model.js";
 import { VocabularyAssessment } from "../models/vocabularyAssessment.model.js";
-
+import { parseFile } from "music-metadata";
 // Initialize the AssemblyAI client with the API key
 const assemblyClient = new AssemblyAI({
   apiKey: process.env.ASSEMBLYAI_API_KEY,
@@ -45,6 +46,7 @@ const analyzeReadingAssessment = asyncHandelr(async (req, res) => {
     audio: audioLocalPath,
   });
 
+  console.log(transcript);
   // Validate transcription response
   if (!transcript) {
     throw new ApiError(500, "Transcription failed or returned invalid data");
@@ -456,9 +458,127 @@ async function updateUserProgress(
   await user.save();
 }
 
+const analyzeSpeakingAssessment = asyncHandelr(async (req, res) => {
+  const { topic } = req.body;
+
+  if (!topic) {
+    throw new ApiError(400, "Topic is required to analyze");
+  }
+  // Validate and retrieve audio file path
+  let audioLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.audio) &&
+    req.files.audio.length > 0
+  ) {
+    audioLocalPath = req.files.audio[0].path;
+  }
+  if (!audioLocalPath) {
+    throw new ApiError(400, "Audio file is required");
+  }
+
+  // Get the duration of the audio file
+  let audioDuration;
+  try {
+    audioDuration = await getAudioDuration(audioLocalPath);
+    console.log(`Audio Duration: ${audioDuration} seconds`);
+  } catch (error) {
+    console.error("Error fetching audio duration:", error);
+    throw new ApiError(500, "Failed to retrieve audio duration");
+  }
+
+  // Attempt transcription of the audio file
+  const transcript = await assemblyClient.transcripts.transcribe({
+    audio: audioLocalPath,
+  });
+
+  console.log(transcript);
+  // Validate transcription response
+  if (!transcript) {
+    throw new ApiError(500, "Transcription failed or returned invalid data");
+  }
+
+  // Analyze transcription with audio duration
+  const response = await getTranscriptionAnalysis(
+    transcript,
+    topic,
+    audioDuration
+  );
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, response, "Successfully Analyzed!"));
+});
+
+const getAudioDuration = async (audioPath) => {
+  try {
+    // Parse the audio file
+    const metadata = await parseFile(audioPath);
+    const durationInSeconds = metadata.format.duration; // Duration in seconds
+    console.log(`Audio Duration: ${durationInSeconds} seconds`);
+    return durationInSeconds;
+  } catch (error) {
+    console.error("Error reading audio file:", error);
+    throw new Error("Failed to retrieve audio duration");
+  }
+};
+const getTranscriptionAnalysis = async (
+  transcription,
+  topic,
+  audioDuration
+) => {
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+  // Construct the prompt for the AI
+  const prompt = `
+      Analyze the following transcription for grammar, relevance to the given topic, and adequacy of content length based on the audio duration. The analysis should consider that a well-developed response for a given topic should have an appropriate number of words or sentences relative to the audio length.The analysis should be short and to the point 
+      Return the analysis in the following JSON format wihtout any extra text:
+      {
+        "grammarScore": <score out of 100>,
+        "relevanceScore": <score out of 100>,
+        "adequacyScore": <score out of 100>, // Based on whether the transcription has enough content relative to the audio duration
+        "feedback": "<Detailed feedback on grammar, topic relevance, and content adequacy>",
+        "suggestions": "<Specific suggestions for improving grammar, topic relevance, content adequacy, or clarity>"
+      }
+  
+      Transcription: "${transcription.text}"
+      Topic: "${topic}"
+      Audio Duration (seconds): ${audioDuration}
+      Word Count: ${transcription.words.length}
+      
+      Evaluate adequacyScore as follows:
+      - If the transcription contains fewer than 3 words per second of audio, deduct points for insufficient content.
+      - If the transcription is verbose or irrelevant to the topic, adjust the relevance score accordingly.
+      Provide constructive feedback on how the user can improve their response to better match the topic and audio duration.
+    `;
+
+  // Perform the request to Groq API
+  try {
+    const response = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      model: "llama3-8b-8192",
+    });
+
+    // Ensure the result is returned as JSON
+    const result = JSON.parse(response.choices[0]?.message?.content || "{}");
+    console.log(result);
+    return result;
+    //  return JSON.parse(result); // Parse the JSON response for further use
+  } catch (error) {
+    console.error("Error during transcription analysis:", error);
+    throw new Error("Failed to analyze transcription");
+  }
+};
+
 export {
   analyzeReadingAssessment,
   analyzeListeningAssessment,
   analyzeGrammarAssessment,
-  analyzeVocabularyAssessment
+  analyzeVocabularyAssessment,
+  analyzeSpeakingAssessment,
 };

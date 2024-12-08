@@ -2,6 +2,7 @@ import { UserFeedback } from "../models/feedback.model.js";
 import { GrammarAssessment } from "../models/grammarAssessment.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
+import { SpeakingAssessment } from "../models/speakingAssessments.model.js";
 import { VocabularyAssessment } from "../models/vocabularyAssessment.model.js";
 import { ApiError } from "../utils/ApiErros.js";
 import { ApiResponse } from "../utils/ApiResonse.js";
@@ -344,9 +345,7 @@ const addVocabularyAssessment = asyncHandelr(async (req, res) => {
 
   // Check if the required fields are present
   if (!difficulty || !evaluationCriteria || !mcqQuestions) {
-    return res.status(400).json({
-      message: "Invalid input data",
-    });
+    return res.status(400).json(new ApiError(400, "Invalid Input format"));
   }
 
   const newAssessment = await VocabularyAssessment.create({
@@ -423,6 +422,99 @@ const getVocabularyAssessments = asyncHandelr(async (req, res) => {
         200,
         assessments,
         "Vocabulary assessments fetched successfully"
+      )
+    );
+});
+
+//**************************************************** */
+/*
+ *
+ * add speaking assessments
+ *
+ *
+ */
+const addSpeakingAssessment = asyncHandelr(async (req, res) => {
+  const { topic, difficulty, evaluationCriteria } = req.body;
+
+  if (!topic || !difficulty || !evaluationCriteria) {
+    return res.status(400).json(new ApiError(400, "Invalid Input format"));
+  }
+  const newAssessment = await SpeakingAssessment.create({
+    topic: topic,
+    difficulty: difficulty,
+    evaluationCriteria: evaluationCriteria,
+  });
+
+  console.log("New Assessment Created:", newAssessment);
+
+  return res
+    .status(201)
+    .json(
+      new ApiResponse(200, null, "Speaking assessment created successfully")
+    );
+});
+
+//**************************************************** */
+/*
+ *
+ * get speaking assessments
+ *
+ *
+ */
+
+const getSpeakingAssessments = asyncHandelr(async (req, res) => {
+  const userId = req.user._id;
+  const assessments = await SpeakingAssessment.aggregate([
+    {
+      $addFields: {
+        userCompletion: {
+          $arrayElemAt: [
+            {
+              $filter: {
+                input: "$assessmentCompleters",
+                as: "completer",
+                cond: { $eq: ["$$completer.userId", userId] },
+              },
+            },
+            0,
+          ],
+        },
+        // Add the new field timeToComplete which is the sum of timeToSpeak and timeToThink
+        timeToComplete: {
+          $add: [
+            "$evaluationCriteria.timeToSpeak",
+            "$evaluationCriteria.timeToThink",
+          ],
+        },
+      },
+    },
+    {
+      $project: {
+        topic: 1,
+        difficulty: 1,
+        evaluationCriteria: 1,
+        timeToComplete: 1,  // Include the new field in the final output
+        isCompleted: {
+          $cond: {
+            if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
+            then: true,
+            else: false,
+          },
+        },
+        score: { $ifNull: ["$userCompletion.score", null] },
+        completedAt: { $ifNull: ["$userCompletion.completedAt", null] },
+      },
+    },
+  ]);
+  
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        assessments,
+        "Speaking assessments fetched successfully"
       )
     );
 });
@@ -508,6 +600,8 @@ export {
   getGrammarAssessments,
   addVocabularyAssessment,
   getVocabularyAssessments,
+  addSpeakingAssessment,
+  getSpeakingAssessments,
   addUserFeedback,
   getEachTotalAssessmentCount,
 };
