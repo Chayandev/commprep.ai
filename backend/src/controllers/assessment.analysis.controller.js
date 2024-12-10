@@ -3,13 +3,18 @@ import { ApiResponse } from "../utils/ApiResonse.js";
 import { ApiError } from "../utils/ApiErros.js";
 import fs from "fs"; // Import the fs module to handle file operations
 import { AssemblyAI } from "assemblyai";
-import Groq from "groq-sdk";
 import { ReadingAssessment } from "../models/readingAssessments.model.js";
 import { ListeningAssessment } from "../models/listeningAssessment.model.js";
 import { User } from "../models/user.model.js";
 import { GrammarAssessment } from "../models/grammarAssessment.model.js";
 import { VocabularyAssessment } from "../models/vocabularyAssessment.model.js";
-import { parseFile } from "music-metadata";
+import { SpeakingAssessment } from "../models/speakingAssessments.model.js";
+import { getAudioDuration } from "../utils/assessmenAnalysisHelper/generateAudioDuration.js";
+import { analyzeAgainstPassageAndGenerateFeedback } from "../utils/assessmenAnalysisHelper/analyzeAndGenerateFeedback.js";
+import { generateFeedbackAndSuggestions } from "../utils/assessmenAnalysisHelper/generateFeedbackAndSuggestion.js";
+import { calculateScore } from "../utils/assessmenAnalysisHelper/calculateScore.js";
+import { getTranscriptionAnalysis } from "../utils/assessmenAnalysisHelper/groqTranscriptionAnalysis.js";
+
 // Initialize the AssemblyAI client with the API key
 const assemblyClient = new AssemblyAI({
   apiKey: process.env.ASSEMBLYAI_API_KEY,
@@ -86,112 +91,6 @@ const analyzeReadingAssessment = asyncHandelr(async (req, res) => {
 //*************************************************************************************/
 
 /**
- * Analyze transcription data against an actual passage and generate feedback.
- * This function checks accuracy, pronunciation confidence, and provides feedback.
- */
-async function analyzeAgainstPassageAndGenerateFeedback(
-  transcriptionData,
-  actualPassage
-) {
-  // Validate inputs
-  if (!transcriptionData || !actualPassage) {
-    return {
-      accuracy: "0.0%",
-      pronunciationConfidence: "0.0%",
-      overallScore: "0.0",
-      feedback: "No transcription data or passage provided.",
-      suggestion: "Please provide valid data for analysis.",
-    };
-  }
-
-  // Prepare words and passage for comparison
-  const words = transcriptionData.words || [];
-  const transcriptionText = transcriptionData.text
-    ? transcriptionData.text.toLowerCase()
-    : "";
-  const actualText = actualPassage.toLowerCase();
-  const passageWords = actualText
-    .split(" ")
-    .filter((word) => word.trim() !== "");
-
-  let correctMatches = 0;
-  let substitutions = 0;
-  let insertions = 0;
-  let deletions = 0;
-  let pronunciationIssues = [];
-  let punctuationIssues = [];
-
-  // Compare transcription to the passage
-  for (let i = 0; i < passageWords.length; i++) {
-    const originalWord = passageWords[i];
-    const transcribedWord = words[i] ? words[i].text || null : null;
-    const confidenceScore = words[i] ? words[i].confidence : null;
-
-    if (transcribedWord === originalWord) {
-      correctMatches++;
-      if (confidenceScore < 0.6) {
-        punctuationIssues.push(transcribedWord);
-      }
-    } else if (transcribedWord) {
-      substitutions++;
-      pronunciationIssues.push(transcribedWord);
-    } else {
-      deletions++;
-    }
-  }
-
-  // Calculate insertions
-  if (words.length > passageWords.length) {
-    insertions = words.length - passageWords.length;
-  }
-
-  // Compute feedback and scores
-  const averageConfidence = transcriptionData.confidence || 0;
-  const accuracyRate = (correctMatches / passageWords.length) * 100 || 0;
-  const overallScore = ((accuracyRate + averageConfidence * 100) / 2) * 0.1;
-
-  // Generate feedback based on analysis results
-  let feedback = "";
-  let suggestion = "";
-  if (accuracyRate >= 90) feedback += "Excellent accuracy!#";
-  else if (accuracyRate >= 70)
-    feedback += "Good accuracy, but there’s room for improvement.#";
-  else feedback += "Accuracy could be improved. Pay attention to each word.#";
-
-  if (averageConfidence > 0.9)
-    feedback += "Pronunciation is very clear and confident.#";
-  else if (averageConfidence > 0.7)
-    feedback += "Good pronunciation, though some words could be clearer.#";
-  else
-    feedback +=
-      "Consider practicing pronunciation, especially on complex words.#";
-
-  if (substitutions > 0)
-    suggestion +=
-      "Review words with pronunciation issues: " +
-      pronunciationIssues.join(", ") +
-      ".#";
-  if (insertions > 0) suggestion += "Try to avoid adding extra words.#";
-  if (deletions > 0) suggestion += "Pay attention to omitted words.#";
-
-  if (punctuationIssues.length > 0) {
-    suggestion +=
-      "Words with low confidence include: " +
-      punctuationIssues.join(", ") +
-      ".#";
-  }
-
-  return {
-    accuracy: `${accuracyRate.toFixed(1)}%`,
-    pronunciationConfidence: `${(averageConfidence * 100).toFixed(1)}%`,
-    overallScore: overallScore.toFixed(1),
-    feedback,
-    suggestion,
-  };
-}
-//*************************************************************************************/
-
-/**
  *
  * Analyzes listening assessment responses and updates the user's progress.
  *
@@ -237,23 +136,6 @@ const analyzeListeningAssessment = asyncHandelr(async (req, res) => {
     .json(new ApiResponse(200, response, "Successfully Analyzed"));
 });
 
-const generateFeedbackAndSuggestions = async (score, totalQuestions) => {
-  let feedback = "";
-  let suggestions = "";
-  const scorePercentage = (score / totalQuestions) * 100;
-  if (scorePercentage >= 80) {
-    feedback = "Excellent job! Your listening skills are impressive.";
-    suggestions = "Try challenging yourself with more complex audio.";
-  } else if (scorePercentage >= 50) {
-    feedback = "Good work! Keep practicing.";
-    suggestions = "Try listening to various accents for improvement.";
-  } else {
-    feedback = "Don't be discouraged. Keep practicing!";
-    suggestions = "Start with slower-paced audio for better understanding.";
-  }
-
-  return { feedback, suggestions };
-};
 //*************************************************************************************/
 
 /**
@@ -335,6 +217,91 @@ const analyzeVocabularyAssessment = asyncHandelr(async (req, res) => {
     .json(new ApiResponse(200, response, "Successfully Analyzed"));
 });
 
+/************************************************************************************************* */
+/**
+ *
+ * Analyzes speaking assessment responses and updates the user's progress.
+ *
+ */
+const analyzeSpeakingAssessment = asyncHandelr(async (req, res) => {
+  const { topic, assessmentID } = req.body;
+
+  if (!topic) {
+    throw new ApiError(400, "Topic is required to analyze");
+  }
+  // Validate and retrieve audio file path
+  let audioLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.audio) &&
+    req.files.audio.length > 0
+  ) {
+    audioLocalPath = req.files.audio[0].path;
+  }
+  if (!audioLocalPath) {
+    throw new ApiError(400, "Audio file is required");
+  }
+
+  // Get the duration of the audio file
+  let audioDuration;
+  try {
+    audioDuration = await getAudioDuration(audioLocalPath);
+    console.log(`Audio Duration: ${audioDuration} seconds`);
+  } catch (error) {
+    console.error("Error fetching audio duration:", error);
+    throw new ApiError(500, "Failed to retrieve audio duration");
+  }
+
+  // Attempt transcription of the audio file
+  const transcript = await assemblyClient.transcripts.transcribe({
+    audio: audioLocalPath,
+  });
+
+  console.log(transcript);
+  // Validate transcription response
+  if (!transcript) {
+    throw new ApiError(500, "Transcription failed or returned invalid data");
+  }
+
+  // Analyze transcription with audio duration
+  const { grammarScore, relevanceScore, adequacyScore, feedback, suggestions } =
+    await getTranscriptionAnalysis(transcript, topic, audioDuration);
+
+  //calculate overallscore by calcualting avarage
+  const score = (grammarScore + relevanceScore + adequacyScore) / 3;
+
+  // Update speaking assessment completion record
+  await updateAssessmentCompletion(
+    SpeakingAssessment,
+    assessmentID,
+    req.user._id,
+    score
+  );
+
+  // Update user's Porogress in speaking assessments
+  await updateUserProgress(User, req.user._id, assessmentID, score, "speaking");
+  
+  // Remove the audio file after processing
+  fs.unlinkSync(audioLocalPath);
+  
+  return res.status(201).json(
+    new ApiResponse(
+      200,
+      {
+        score,
+        grammarScore,
+        relevanceScore,
+        adequacyScore,
+        feedback,
+        suggestions,
+      },
+      "Successfully Analyzed!"
+    )
+  );
+});
+
+/******************************************************************************************* */
+
 /**
  * Update the assessment completion status for a user.
  */
@@ -373,29 +340,6 @@ async function updateAssessmentCompletion(model, assessmentID, userID, score) {
     );
   }
 }
-//*************************************************************************************/
-
-/**
- * Calculate score
- */
-const calculateScore = async (assessmentModel, answers, assessmentID) => {
-  const assessment = await assessmentModel.findById(assessmentID).exec();
-
-  if (!assessment) throw new ApiError(400, "Assessment not found");
-
-  let score = 0;
-  const totalQuestions = assessment.mcqQuestions.length;
-
-  // Calculate score based on correct answers
-  assessment.mcqQuestions.forEach((question, index) => {
-    const userAnswer = answers[index.toString()];
-    if (userAnswer && userAnswer === question.options[question.correctOption]) {
-      score += 1;
-    }
-  });
-
-  return { score, totalQuestions, assessment };
-};
 //*************************************************************************************/
 
 /**
@@ -457,123 +401,6 @@ async function updateUserProgress(
 
   await user.save();
 }
-
-const analyzeSpeakingAssessment = asyncHandelr(async (req, res) => {
-  const { topic } = req.body;
-
-  if (!topic) {
-    throw new ApiError(400, "Topic is required to analyze");
-  }
-  // Validate and retrieve audio file path
-  let audioLocalPath;
-  if (
-    req.files &&
-    Array.isArray(req.files.audio) &&
-    req.files.audio.length > 0
-  ) {
-    audioLocalPath = req.files.audio[0].path;
-  }
-  if (!audioLocalPath) {
-    throw new ApiError(400, "Audio file is required");
-  }
-
-  // Get the duration of the audio file
-  let audioDuration;
-  try {
-    audioDuration = await getAudioDuration(audioLocalPath);
-    console.log(`Audio Duration: ${audioDuration} seconds`);
-  } catch (error) {
-    console.error("Error fetching audio duration:", error);
-    throw new ApiError(500, "Failed to retrieve audio duration");
-  }
-
-  // Attempt transcription of the audio file
-  const transcript = await assemblyClient.transcripts.transcribe({
-    audio: audioLocalPath,
-  });
-
-  console.log(transcript);
-  // Validate transcription response
-  if (!transcript) {
-    throw new ApiError(500, "Transcription failed or returned invalid data");
-  }
-
-  // Analyze transcription with audio duration
-  const response = await getTranscriptionAnalysis(
-    transcript,
-    topic,
-    audioDuration
-  );
-
-  return res
-    .status(201)
-    .json(new ApiResponse(200, response, "Successfully Analyzed!"));
-});
-
-const getAudioDuration = async (audioPath) => {
-  try {
-    // Parse the audio file
-    const metadata = await parseFile(audioPath);
-    const durationInSeconds = metadata.format.duration; // Duration in seconds
-    console.log(`Audio Duration: ${durationInSeconds} seconds`);
-    return durationInSeconds;
-  } catch (error) {
-    console.error("Error reading audio file:", error);
-    throw new Error("Failed to retrieve audio duration");
-  }
-};
-const getTranscriptionAnalysis = async (
-  transcription,
-  topic,
-  audioDuration
-) => {
-  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-  // Construct the prompt for the AI
-  const prompt = `
-      Analyze the following transcription for grammar, relevance to the given topic, and adequacy of content length based on the audio duration. The analysis should consider that a well-developed response for a given topic should have an appropriate number of words or sentences relative to the audio length.The analysis should be short and to the point 
-      Return the analysis in the following JSON format wihtout any extra text:
-      {
-        "grammarScore": <score out of 100>,
-        "relevanceScore": <score out of 100>,
-        "adequacyScore": <score out of 100>, // Based on whether the transcription has enough content relative to the audio duration
-        "feedback": "<Detailed feedback on grammar, topic relevance, and content adequacy>",
-        "suggestions": "<Specific suggestions for improving grammar, topic relevance, content adequacy, or clarity>"
-      }
-  
-      Transcription: "${transcription.text}"
-      Topic: "${topic}"
-      Audio Duration (seconds): ${audioDuration}
-      Word Count: ${transcription.words.length}
-      
-      Evaluate adequacyScore as follows:
-      - If the transcription contains fewer than 3 words per second of audio, deduct points for insufficient content.
-      - If the transcription is verbose or irrelevant to the topic, adjust the relevance score accordingly.
-      Provide constructive feedback on how the user can improve their response to better match the topic and audio duration.
-    `;
-
-  // Perform the request to Groq API
-  try {
-    const response = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      model: "llama3-8b-8192",
-    });
-
-    // Ensure the result is returned as JSON
-    const result = JSON.parse(response.choices[0]?.message?.content || "{}");
-    console.log(result);
-    return result;
-    //  return JSON.parse(result); // Parse the JSON response for further use
-  } catch (error) {
-    console.error("Error during transcription analysis:", error);
-    throw new Error("Failed to analyze transcription");
-  }
-};
 
 export {
   analyzeReadingAssessment,
