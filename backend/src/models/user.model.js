@@ -92,6 +92,29 @@ const progressSchema = new Schema(
         },
       ],
     },
+
+    speaking: {
+      // completionPercentage: {
+      //   type: Number,
+      //   default: 0,
+      // },
+      assessments: [
+        {
+          assessmentId: {
+            type: Schema.Types.ObjectId,
+            ref: "SpeakingAssessment",
+          },
+          takenAt: {
+            type: Date,
+          },
+          evaluationResult: {
+            overallScore: {
+              type: Number,
+            },
+          },
+        },
+      ],
+    },
   },
   { timestamps: true }
 );
@@ -132,6 +155,7 @@ const userSchema = new Schema(
         listening: { assessments: [] },
         grammar: { assessments: [] },
         vocabulary: { assessments: [] },
+        speaking: { assessments: [] },
       }),
     },
     achivements: [
