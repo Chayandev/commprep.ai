@@ -31,6 +31,7 @@ import VocabularyAssessments from "./pages/Practice/vocabulary.page.jsx";
 import Profile from "./pages/Profile/profile.jsx";
 import VocabularyAssessmentPractice from "./pages/Assessments/vocabulary.assessment.page.jsx";
 import SpeakingAssessments from "./pages/Practice/speaking.page.jsx";
+import SpeakingAssessmentPractice from "./pages/Assessments/speaking.assessment.page.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -82,7 +83,11 @@ const router = createBrowserRouter(
           path="practice/vocabulary/assessment/:assessmentId"
           element={<VocabularyAssessmentPractice />}
         />
-        
+
+        <Route
+          path="practice/speaking/assessment/:assessmentId"
+          element={<SpeakingAssessmentPractice />}
+        />
       </Route>
     </>
   )

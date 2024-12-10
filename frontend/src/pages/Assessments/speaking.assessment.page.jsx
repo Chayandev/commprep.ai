@@ -7,10 +7,16 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { selectAssessment } from "../../features/userOperationSlice";
-import { Card, CardContent, Typography } from "@mui/material";
-import Progress from "../../components/Progress";
-import { getReadingAssessmentAnslysis } from "../../../actions/user.actions";
+import { selectAssessment } from "../../features/userOperationSlice.js";
+import {
+  Alert,
+  AlertTitle,
+  Card,
+  CardContent,
+  Typography,
+} from "@mui/material";
+import Progress from "../../components/Progress.jsx";
+import { getReadingAssessmentAnslysis } from "../../../actions/user.actions.js";
 import { toast } from "react-toastify";
 import LoadingBar from "react-top-loading-bar";
 import useFullScreen from "../../components/Hooks/FullScreenHook.js";
@@ -22,7 +28,7 @@ import useUnloadConfirmation from "../../components/Hooks/useReloadConfirmation.
 import { requestMicrophonePermission } from "../../utils/microphonePermission.js";
 import useScrollPosition from "../../components/Hooks/useScrollPosition.js";
 
-export default function ReadingAssessmentPractice() {
+export default function SpeakingAssessmentPractice() {
   //useFullScreen();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -34,7 +40,7 @@ export default function ReadingAssessmentPractice() {
   const { isAnalyzing, result } = useSelector(
     (state) => state.assessmentAnalysis
   );
-
+  const [phase, setPhase] = useState("thinking");
   const isErrorState = selectedAssessmentIndex === -1;
   const isLastAssessment = selectedAssessmentIndex === assessments?.length - 1;
   const [assessment, setAssessment] = useState(null);
@@ -57,22 +63,20 @@ export default function ReadingAssessmentPractice() {
   useEffect(() => {
     if (!isErrorState) {
       setAssessment(assessments[selectedAssessmentIndex]);
-      setTimeLeft(
-        assessments[selectedAssessmentIndex].evaluationCriteria.timeToComplete
-      );
+      setTimeLeft(assessments[selectedAssessmentIndex].timeToComplete);
     }
   }, [selectedAssessmentIndex, assessments, isErrorState]);
 
   const handleNext = () => {
     const newIndex = selectedAssessmentIndex + 1;
     dispatch(selectAssessment(newIndex));
-    navigate(`/practice/reading/assessment/${newIndex + 1}`);
+    navigate(`/practice/speaking/assessment/${newIndex + 1}`);
     setFeedbackReceived(false);
   };
 
   const handleBack = () => {
     //dispatch(changeLayout());
-    navigate("/practice/reading");
+    navigate("/practice/speaking");
   };
 
   const toggleRecording = async () => {
@@ -139,7 +143,7 @@ export default function ReadingAssessmentPractice() {
     formData.append("audio", audioBlob, "recording.wav");
     formData.append("passage", assessment.passage);
 
-    dispatch(getReadingAssessmentAnslysis(formData))
+    dispatch(/*getReadingAssessmentAnslysis(formData)*/)
       .unwrap()
       .then((result) => {
         console.log(result);
@@ -149,7 +153,7 @@ export default function ReadingAssessmentPractice() {
       .catch((error) => {
         // Show the error message as a toast error
         toast.error(
-          error || "An error occurred during ReadingAssesment Analysis.",
+          error || "An error occurred during SpeakingAssesment Analysis.",
           {
             position: "top-center",
             autoClose: 1000,
@@ -161,7 +165,7 @@ export default function ReadingAssessmentPractice() {
             theme: "light",
           }
         );
-        console.error("Error during ReadingAssesment Analysis:", error);
+        console.error("Error during SpeakingAssesment Analysis:", error);
       })
       .finally(() => {
         setProgress(100);
@@ -222,7 +226,7 @@ export default function ReadingAssessmentPractice() {
                 <TakeAssessmentHeader
                   title={
                     assessment?.title ||
-                    `Reading Assessment ${selectedAssessmentIndex + 1}`
+                    `Speaking Assessment ${selectedAssessmentIndex + 1}`
                   }
                   assessment={assessment}
                 />
@@ -238,28 +242,53 @@ export default function ReadingAssessmentPractice() {
             </div>
             <div className="flex flex-col-reverse md:flex-row  gap-8">
               {/* Left Column - Passage */}
-              <div className="flex-[3] bg-white rounded-lg shadow-md p-8">
-                <Typography
-                  variant="h4"
-                  style={{ fontWeight: 600 }}
-                  className="text-black"
-                >
-                  Reading Passage
-                </Typography>
-                <Typography
-                  variant="h7"
-                  style={{ fontWeight: 400 }}
-                  className="text-gray-400 my-1"
-                >
-                  Read the following text carefully
-                </Typography>
-                <div className="max-w-none border border-gray-200 mt-6 p-4 rounded-md">
-                  <p className="text-lg leading-relaxed text-gray-900">
-                    {assessment?.passage}
-                  </p>
+              <div className="flex-[3] bg-white rounded-lg shadow-md">
+                <div className="bg-teal-600 px-8 py-6 rounded-t-md">
+                  <Typography
+                    variant="h5"
+                    style={{ fontWeight: 600 }}
+                    className="text-gray-100"
+                  >
+                    Topic:
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    style={{ fontWeight: 500 }}
+                    className="text-white my-1"
+                  >
+                    {`"${assessment?.topic}"`}
+                  </Typography>
+                </div>
+                <div className="p-8">
+                  <div className="space-y-4">
+                    <Alert
+                      variant="outlined"
+                      severity={
+                        phase === "thinking"
+                          ? "info"
+                          : "speaking"
+                          ? "warning"
+                          : "success"
+                      }
+                    >
+                      <AlertTitle style={{ fontWeight: 600 }}>
+                        {phase === "thinking"
+                          ? "Thinking Time"
+                          : phase === "speaking"
+                          ? "Speaking Time"
+                          : "Time's Up!"}
+                      </AlertTitle>
+
+                      {phase === "thinking"
+                        ? "Prepare your answer"
+                        : phase === "speaking"
+                        ? "Start speaking now"
+                        : "Your response has been recorded"}
+                    </Alert>
+                  </div>
                 </div>
 
-                <div className="flex align-middle justify-center">
+                <div className="flex align-middle justify-center p-8">
                   {/* Analysis Loading */}
                   {isAnalyzing && (
                     <div className="mt-8 text-center">
