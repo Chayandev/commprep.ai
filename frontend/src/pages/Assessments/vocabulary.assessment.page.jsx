@@ -9,6 +9,8 @@ import { toast } from "react-toastify";
 import AssessmentError from "../../components/AssessmentError";
 import McqBasedAssessmentUi from "../../components/McqBassesAssessmentUI";
 import { getVocabularyAssessmentAnalysis } from "../../../actions/user.actions";
+import useScrollPosition from "../../components/Hooks/useScrollPosition";
+import useUnloadConfirmation from "../../components/Hooks/useReloadConfirmation";
 
 export default function VocabularyAssessmentPractice() {
   const navigate = useNavigate();
@@ -19,7 +21,8 @@ export default function VocabularyAssessmentPractice() {
   const [assessment, setAssessment] = useState(null);
   const isErrorState = selectedAssessmentIndex === -1;
   const [progress, setProgress] = useState(0);
-  const [isScrolled, setIsScrolled] = useState(false);
+  //Use the custom hook to set the scrolling
+  const isScrolled = useScrollPosition(80);
   const timeDisplayRef = useRef(null);
   const timerRef = useRef(null);
   const timeRef = useRef(null); // Ref to store the latest assessment time
@@ -33,6 +36,11 @@ export default function VocabularyAssessmentPractice() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [questions, setQuestions] = useState(null);
   const answeredQuestionsCount = Object.keys(answers).length;
+
+  // Use the custom hook to display the unload confirmation message
+  useUnloadConfirmation(
+    "Are you sure you want to reload? You might lose your progress."
+  );
 
   // Extract data from the selected assessment
   useEffect(() => {
@@ -75,19 +83,6 @@ export default function VocabularyAssessmentPractice() {
       }
     };
   }, [isErrorState, assessmentTime]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 100); // Adjust this value as needed
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   const handleAnswerChange = (questionIndex, answer) => {
     setAnswers((prevAnswers) => ({

@@ -12,6 +12,8 @@ import LoadingBar from "react-top-loading-bar";
 import TakeAssessmentHeader from "../../components/TakeAssessmentHeader";
 import TimeDisplay from "../../components/TimeDisplay";
 import AssessmentError from "../../components/AssessmentError";
+import useScrollPosition from "../../components/Hooks/useScrollPosition";
+import useUnloadConfirmation from "../../components/Hooks/useReloadConfirmation";
 
 export default function ListeningAssessmentPractice() {
   const navigate = useNavigate();
@@ -38,7 +40,8 @@ export default function ListeningAssessmentPractice() {
   const [assessment, setAssessment] = useState(null);
   const isErrorState = selectedAssessmentIndex === -1;
   const [progress, setProgress] = useState(0);
-  const [isScrolled, setIsScrolled] = useState(false);
+  //Use the custom hook to set the scrolling
+  const isScrolled = useScrollPosition(100);
   const timeDisplayRef = useRef(null);
 
   const dispatch = useDispatch();
@@ -52,6 +55,11 @@ export default function ListeningAssessmentPractice() {
   const mcqQuestions = assessment?.mcqQuestions || [];
   const saqQuestions = assessment?.saqQuestions || [];
   const questions = [...mcqQuestions, ...saqQuestions];
+
+  // Use the custom hook to display the unload confirmation message
+  useUnloadConfirmation(
+    "Are you sure you want to reload? You might lose your progress."
+  );
 
   useEffect(() => {
     const loadAudio = async () => {
@@ -206,22 +214,6 @@ export default function ListeningAssessmentPractice() {
   const handleBack = () => {
     navigate("/practice/listening");
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 100); // Adjust this value as needed
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {

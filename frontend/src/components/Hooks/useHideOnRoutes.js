@@ -4,6 +4,9 @@ const useHideOnRoutes = () => {
   const routesToHide = [
     "/practice/reading/assessment/",
     "/practice/listening/assessment/",
+    "/practice/grammar/assessment/",
+    "/practice/vocabulary/assessment/",
+    "/practice/speaking/assessment/",
   ];
   const location = useLocation();
 
