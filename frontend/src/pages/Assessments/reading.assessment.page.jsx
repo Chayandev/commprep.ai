@@ -227,7 +227,7 @@ export default function ReadingAssessmentPractice() {
                   assessment={assessment}
                 />
                 {/* Timer Display */}
-                {timeLeft && (
+                {timeLeft!==null && (
                   <TimeDisplay
                     ref={timeDisplayRef}
                     timeLeft={timeLeft}

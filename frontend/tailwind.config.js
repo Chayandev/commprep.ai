@@ -19,11 +19,21 @@ export default {
 
       animation: {
         rotate: "rotate 10s linear infinite",
+        'fade-in': 'fade-in 0.5s ease-in-out forwards',
+        'fade-out': 'fade-out 0.5s ease-in-out forwards',
       },
       keyframes: {
         rotate: {
           "0%": { transform: "rotate(0deg) scale(10)" },
           "100%": { transform: "rotate(-360deg) scale(10)" },
+        },
+        'fade-in': {
+          '0%': { opacity: 0, transform: 'scale(0.8)' },
+          '100%': { opacity: 1, transform: 'scale(1)' },
+        },
+        'fade-out': {
+          '0%': { opacity: 1, transform: 'scale(1)' },
+          '100%': { opacity: 0, transform: 'scale(0.8)' },
         },
       },
       // Add custom easing function for the spring effect
