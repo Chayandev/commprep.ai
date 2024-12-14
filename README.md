@@ -104,4 +104,6 @@ Technologies used in the project:
 *   MongoDB
 *   NodeMailer
 *   AssemblyAI SDK
+*   GroqAi SDK
 *   Cloudinery
+  
