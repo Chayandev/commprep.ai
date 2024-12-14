@@ -28,6 +28,8 @@ import { requestMicrophonePermission } from "../../utils/microphonePermission.js
 import useScrollPosition from "../../components/Hooks/useScrollPosition.js";
 import CircularProgress from "../../components/CircularProgress.jsx";
 import InstructionDialog from "../../components/InstrctionDialog.jsx";
+import { getSpeakingAssessmentAnslysis } from "../../../actions/user.actions.js";
+import Score from "../../components/Score.jsx";
 
 export default function SpeakingAssessmentPractice() {
   //useFullScreen();
@@ -58,7 +60,7 @@ export default function SpeakingAssessmentPractice() {
   const [timeLeft2, setTimeLeft] = useState(null);
   const [open, setOpen] = useState(true);
   //Use the custom hook to set the scrolling
-  const isScrolled = useScrollPosition(100);
+  const isScrolled = useScrollPosition(60);
   // Use the custom hook to display the unload confirmation message
   useUnloadConfirmation(
     "Are you sure you want to reload? You might lose your progress."
@@ -178,6 +180,7 @@ export default function SpeakingAssessmentPractice() {
       mediaRecorder.stop();
     }
     clearInterval(timerRef.current);
+    clearInterval(timer.current);
   };
 
   const startAssessmentTimer = () => {
@@ -194,14 +197,16 @@ export default function SpeakingAssessmentPractice() {
   };
 
   const analyzeRecording = () => {
+    console.log("clciekd");
     if (!audioBlob) return;
+    console.log("audio blob is not null");
     setProgress(10);
     const formData = new FormData();
     formData.append("assessmentID", assessment._id);
     formData.append("audio", audioBlob, "recording.wav");
-    formData.append("passage", assessment.passage);
+    formData.append("topic", assessment.topic);
 
-    dispatch(/*getReadingAssessmentAnslysis(formData)*/)
+    dispatch(getSpeakingAssessmentAnslysis(formData))
       .unwrap()
       .then((result) => {
         console.log(result);
@@ -227,6 +232,7 @@ export default function SpeakingAssessmentPractice() {
       })
       .finally(() => {
         setProgress(100);
+        setPhase("finished");
       });
   };
 
@@ -250,8 +256,8 @@ export default function SpeakingAssessmentPractice() {
         })
     : []; // Default to an empty array if feedback is missing
 
-  const suggestionLines = result?.suggestion
-    ? result.suggestion
+  const suggestionLines = result?.suggestions
+    ? result.suggestions
         .split("#") // Split suggestions by "#"
         .map((line) => line.trim()) // Trim extra spaces
         .filter((line) => line !== "") // Remove empty lines
@@ -290,7 +296,7 @@ export default function SpeakingAssessmentPractice() {
                   assessment={assessment}
                 />
                 {/* Timer Display */}
-                {timeLeft!==null && (
+                {timeLeft !== null && (
                   <TimeDisplay
                     ref={timeDisplayRef}
                     timeLeft={timeLeft}
@@ -318,165 +324,149 @@ export default function SpeakingAssessmentPractice() {
                     {`"${assessment?.topic}"`}
                   </Typography>
                 </div>
-                <div className="flex flex-col gap-4 items-center p-8">
-                  <div className="w-full space-y-4">
-                    <Alert
-                      variant="outlined"
-                      severity={
-                        phase === "thinking" || phase === null
-                          ? "info"
-                          : phase === "speaking"
-                          ? "warning"
-                          : "success"
-                      }
-                    >
-                      <AlertTitle style={{ fontWeight: 600 }}>
-                        {phase === "thinking"
-                          ? "Thinking Time"
-                          : phase === "speaking"
-                          ? "Speaking Time"
-                          : phase === "finished"
-                          ? "Time's Up!"
-                          : "Improve Speaking"}
-                      </AlertTitle>
+                <div className="p-8">
+                  <div className="flex flex-col gap-4 items-center">
+                    <div className="w-full space-y-4">
+                      <Alert
+                        variant="outlined"
+                        severity={
+                          phase === "thinking" || phase === null
+                            ? "info"
+                            : phase === "speaking"
+                            ? "warning"
+                            : "success"
+                        }
+                      >
+                        <AlertTitle style={{ fontWeight: 600 }}>
+                          {phase === "thinking"
+                            ? "Thinking Time"
+                            : phase === "speaking"
+                            ? "Speaking Time"
+                            : phase === "finished"
+                            ? "Time's Up!"
+                            : "Improve Speaking"}
+                        </AlertTitle>
 
-                      {phase === "thinking"
-                        ? "Prepare your response"
-                        : phase === "speaking"
-                        ? "Start speaking now"
-                        : phase === "finished"
-                        ? "Your response has been recorded"
-                        : "Analysis will be given shortly"}
-                    </Alert>
+                        {phase === "thinking"
+                          ? "Prepare your response"
+                          : phase === "speaking"
+                          ? "Start speaking now"
+                          : phase === "finished"
+                          ? "Your response has been recorded"
+                          : "Analysis will be given shortly"}
+                      </Alert>
+                    </div>
+                    {!isAnalyzing && !feedbackReceived && (
+                      <CircularProgress
+                        value={timeLeft2}
+                        max={
+                          phase === "thinking" ? THINKING_TIME : SPEAKING_TIME
+                        }
+                        phase={phase}
+                      />
+                    )}
                   </div>
 
-                  <CircularProgress
-                    value={timeLeft2}
-                    max={phase === "thinking" ? THINKING_TIME : SPEAKING_TIME}
-                    phase={phase}
-                  />
-                </div>
-
-                <div className="flex align-middle justify-center p-8">
-                  {/* Analysis Loading */}
-                  {isAnalyzing && (
-                    <div className="mt-8 text-center">
-                      <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-600 mx-auto mb-4"></div>
-                      <div className="text-lg font-medium text-gray-700">
-                        Analyzing your recording...
-                      </div>
-                    </div>
-                  )}
-                  {/* Feedback Display */}
-
-                  {feedbackReceived && (
-                    <Card className="mt-8 w-full bg-white shadow-lg">
-                      <CardContent className="pt-6">
-                        <h3 className="text-2xl font-bold mb-6 text-gray-800">
-                          Analysis Result
-                        </h3>
-                        <div className="space-y-6">
-                          <div>
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-lg font-medium text-gray-700">
-                                Overall Score
-                              </span>
-                              <span className="text-2xl font-bold text-teal-600">
-                                {`${result.overallScore * 10}/100`}
-                              </span>
-                            </div>
-                            <Progress
-                              value={result.overallScore * 10}
-                              className="h-3 rounded-full bg-gray-200"
-                              indicatorClassName="bg-black"
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <div className="text-sm font-medium text-gray-500 mb-1">
-                                Accuracy
-                              </div>
-                              <div
-                                className={`text-lg font-semibold rounded-full px-3 py-1 inline-block ${
-                                  parseFloat(result.accuracy) < 60
-                                    ? "bg-red-100 text-red-800"
-                                    : parseFloat(result.accuracy) < 80
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-green-100 text-green-800"
-                                }`}
-                              >
-                                {result.accuracy}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-500 mb-1">
-                                Confidence
-                              </div>
-                              <div
-                                className={`text-lg font-semibold rounded-full px-3 py-1 inline-block ${
-                                  parseFloat(result.pronunciationConfidence) <
-                                  60
-                                    ? "bg-red-100 text-red-800"
-                                    : parseFloat(
-                                        result.pronunciationConfidence
-                                      ) < 80
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-green-100 text-green-800"
-                                }`}
-                              >
-                                {result.pronunciationConfidence}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-4">
-                            <div className="flex items-start">
-                              <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 mt-1" />
-                              <div>
-                                <h4 className="font-semibold text-gray-800 mb-1">
-                                  Feedback
-                                </h4>
-                                <ul className="list-disc list-inside text-gray-600 text-sm font-semibold">
-                                  {feedbackLines.map((line, index) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start"
-                                    >
-                                      <span className="mr-2">•</span>
-                                      {line}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="bg-yellow-50 rounded-lg p-4">
-                            <div className="flex items-start">
-                              <AlertTriangle className="w-5 h-5 text-yellow-500 mr-2 mt-1" />
-                              <div>
-                                <h4 className="font-semibold text-gray-800 mb-1">
-                                  Suggestion
-                                </h4>
-                                <ul className="list-disc list-inside text-gray-600 text-sm font-semibold">
-                                  {suggestionLines.map((line, index) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start"
-                                    >
-                                      <span className="mr-2">•</span>
-                                      {line}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
+                  <div className="flex align-middle justify-center">
+                    {/* Analysis Loading */}
+                    {isAnalyzing && (
+                      <div className="mt-8 text-center">
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-600 mx-auto mb-4"></div>
+                        <div className="text-lg font-medium text-gray-700">
+                          Analyzing your recording...
                         </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                      </div>
+                    )}
+                    {/* Feedback Display */}
+
+                    {feedbackReceived && (
+                      <Card className="mt-8 w-full bg-white shadow-lg">
+                        <CardContent className="pt-6">
+                          <h3 className="text-2xl font-bold mb-6 text-gray-800">
+                            Analysis Result
+                          </h3>
+                          <div className="space-y-6">
+                            <div>
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-lg font-medium text-gray-700">
+                                  Overall Score
+                                </span>
+                                <span className="text-2xl font-bold text-teal-600">
+                                  {`${result.overallScore * 10}/100`}
+                                </span>
+                              </div>
+                              <Progress
+                                value={result.overallScore * 10}
+                                className="h-3 rounded-full bg-gray-200"
+                                indicatorClassName="bg-black"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                              <Score
+                                title="Grammar Score"
+                                score={result.grammarScore}
+                                thresholds={{ low: 60, high: 80 }}
+                              />
+                              <Score
+                                title="Relevance Score"
+                                score={result.relevanceScore}
+                                thresholds={{ low: 60, high: 80 }}
+                              />
+                              <Score
+                                title={"Adequacy Score"}
+                                score={result.adequacyScore}
+                                thresholds={{ low: 60, high: 80 }}
+                              />
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-4">
+                              <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 mt-1" />
+                                <div>
+                                  <h4 className="font-semibold text-gray-800 mb-1">
+                                    Feedback
+                                  </h4>
+                                  <ul className="list-disc list-inside text-gray-600 text-sm font-semibold">
+                                    {feedbackLines.map((line, index) => (
+                                      <li
+                                        key={index}
+                                        className="flex items-start"
+                                      >
+                                        <span className="mr-2">•</span>
+                                        {line}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="bg-yellow-50 rounded-lg p-4">
+                              <div className="flex items-start">
+                                <AlertTriangle className="w-5 h-5 text-yellow-500 mr-2 mt-1" />
+                                <div>
+                                  <h4 className="font-semibold text-gray-800 mb-1">
+                                    Suggestion
+                                  </h4>
+                                  <ul className="list-disc list-inside text-gray-600 text-sm font-semibold">
+                                    {suggestionLines.map((line, index) => (
+                                      <li
+                                        key={index}
+                                        className="flex items-start"
+                                      >
+                                        <span className="mr-2">•</span>
+                                        {line}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
                 </div>
               </div>
-
               {/* Right Column - Recording Interface */}
               <RecordingInterface
                 toggleRecording={toggleRecording}
@@ -485,7 +475,7 @@ export default function SpeakingAssessmentPractice() {
                 feedbackReceived={feedbackReceived}
                 recordingComplete={recordingComplete}
                 analyzeRecording={analyzeRecording}
-                isDisabled={phase === "thinking" || phase === "finished"}
+                isDisabled={phase === "thinking"}
               />
             </div>
           </>

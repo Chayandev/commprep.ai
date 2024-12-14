@@ -255,7 +255,7 @@ export const getListeningAssessmentAnalysis = createAsyncThunk(
   "analysis/listeningAssessmentAnalysis",
   async (answers, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${BASE_URL}/analyzeListeningAssessments`, {
+      const response = await fetch(`${BASE_URL}/analyzeListeningAssessment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -285,7 +285,7 @@ export const getGrammarAssessmentAnalysis = createAsyncThunk(
   "analysis/grammarAssessmentAnalysis",
   async (answers, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${BASE_URL}/analyzeGrammarAssessments`, {
+      const response = await fetch(`${BASE_URL}/analyzeGrammarAssessment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -315,7 +315,7 @@ export const getVocabularyAssessmentAnalysis = createAsyncThunk(
   "analysis/vocabularyAssessmentAnalysis",
   async (answers, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${BASE_URL}/analyzeVocabularyAssessments`, {
+      const response = await fetch(`${BASE_URL}/analyzeVocabularyAssessment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -333,6 +333,33 @@ export const getVocabularyAssessmentAnalysis = createAsyncThunk(
         );
       }
       console.log("analyze vocabulary assessment", result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
+
+//action/speakingAssesmentAnalysis
+export const getSpeakingAssessmentAnslysis = createAsyncThunk(
+  "analysis/speakingAssessmentAnalysis",
+  async (reqData, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${BASE_URL}/analyzeSpeakingAssessment`, {
+        method: "POST",
+        credentials: "include",
+        body: reqData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message ||
+            "An error occurred during analysis of speaking assesments."
+        );
+      }
+      console.log("analyze speaking assessment", result);
       return result;
     } catch (error) {
       return rejectWithValue(error.message || "Something went wrong");

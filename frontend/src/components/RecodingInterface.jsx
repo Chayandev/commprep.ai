@@ -11,7 +11,7 @@ const RecordingInterface = ({
   isDisabled=false
 }) => {
   return (
-    <div className=" md:sticky top-24 flex-1 flex flex-col items-center bg-white rounded-lg shadow-md p-8">
+    <div className=" md:sticky top-24 flex-1 max-h-fit flex flex-col items-center bg-white rounded-lg shadow-md p-8">
       <div className="mb-8 text-center">
         <h3 className="text-2xl font-bold mb-2 text-gray-800">Recording</h3>
         <p className="text-gray-600">
