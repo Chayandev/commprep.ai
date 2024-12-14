@@ -3,6 +3,7 @@ import {
   getGrammarAssessmentAnalysis,
   getListeningAssessmentAnalysis,
   getReadingAssessmentAnslysis,
+  getSpeakingAssessmentAnslysis,
   getVocabularyAssessmentAnalysis,
 } from "../../actions/user.actions";
 
@@ -74,6 +75,23 @@ const assessmentAnalysisSlice = createSlice({
       }
     );
     builder.addCase(getVocabularyAssessmentAnalysis.rejected, (state) => {
+      state.isAnalyzing = false;
+      state.result = null;
+    });
+
+    //Speaking Assessment Analysis
+    builder.addCase(getSpeakingAssessmentAnslysis.pending, (state, _) => {
+      state.isAnalyzing = true;
+      state.result = null;
+    });
+    builder.addCase(
+      getSpeakingAssessmentAnslysis.fulfilled,
+      (state, action) => {
+        state.isAnalyzing = false;
+        state.result = action.payload?.data;
+      }
+    );
+    builder.addCase(getSpeakingAssessmentAnslysis.rejected, (state) => {
       state.isAnalyzing = false;
       state.result = null;
     });

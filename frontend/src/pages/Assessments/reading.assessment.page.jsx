@@ -21,6 +21,7 @@ import RecordingInterface from "../../components/RecodingInterface.jsx";
 import useUnloadConfirmation from "../../components/Hooks/useReloadConfirmation.js";
 import { requestMicrophonePermission } from "../../utils/microphonePermission.js";
 import useScrollPosition from "../../components/Hooks/useScrollPosition.js";
+import Score from "../../components/Score.jsx";
 
 export default function ReadingAssessmentPractice() {
   //useFullScreen();
@@ -227,7 +228,7 @@ export default function ReadingAssessmentPractice() {
                   assessment={assessment}
                 />
                 {/* Timer Display */}
-                {timeLeft!==null && (
+                {timeLeft !== null && (
                   <TimeDisplay
                     ref={timeDisplayRef}
                     timeLeft={timeLeft}
@@ -294,41 +295,16 @@ export default function ReadingAssessmentPractice() {
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <div className="text-sm font-medium text-gray-500 mb-1">
-                                Accuracy
-                              </div>
-                              <div
-                                className={`text-lg font-semibold rounded-full px-3 py-1 inline-block ${
-                                  parseFloat(result.accuracy) < 60
-                                    ? "bg-red-100 text-red-800"
-                                    : parseFloat(result.accuracy) < 80
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-green-100 text-green-800"
-                                }`}
-                              >
-                                {result.accuracy}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-500 mb-1">
-                                Confidence
-                              </div>
-                              <div
-                                className={`text-lg font-semibold rounded-full px-3 py-1 inline-block ${
-                                  parseFloat(result.pronunciationConfidence) <
-                                  60
-                                    ? "bg-red-100 text-red-800"
-                                    : parseFloat(
-                                        result.pronunciationConfidence
-                                      ) < 80
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-green-100 text-green-800"
-                                }`}
-                              >
-                                {result.pronunciationConfidence}
-                              </div>
-                            </div>
+                            <Score
+                              title="Grammar Score"
+                              score={result.grammarScore}
+                              thresholds={{ low: 60, high: 80 }}
+                            />
+                            <Score
+                              title="Accuracy"
+                              score={result.accuracy}
+                              thresholds={{ low: 60, high: 80 }}
+                            />
                           </div>
                           <div className="bg-gray-50 rounded-lg p-4">
                             <div className="flex items-start">
