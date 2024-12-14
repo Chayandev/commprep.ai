@@ -493,7 +493,7 @@ const getSpeakingAssessments = asyncHandelr(async (req, res) => {
         topic: 1,
         difficulty: 1,
         evaluationCriteria: 1,
-        timeToComplete: 1,  // Include the new field in the final output
+        timeToComplete: 1, // Include the new field in the final output
         isCompleted: {
           $cond: {
             if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
@@ -506,7 +506,6 @@ const getSpeakingAssessments = asyncHandelr(async (req, res) => {
       },
     },
   ]);
-  
 
   return res
     .status(200)
@@ -573,7 +572,7 @@ const getEachTotalAssessmentCount = asyncHandelr(async (req, res) => {
   const totalGrammarAssessments = await GrammarAssessment.countDocuments();
   const totalVocabularyAssessments =
     await VocabularyAssessment.countDocuments();
-
+  const totalSpeakingAssessments = await SpeakingAssessment.countDocuments();
   return res.status(201).json(
     new ApiResponse(
       200,
@@ -582,6 +581,7 @@ const getEachTotalAssessmentCount = asyncHandelr(async (req, res) => {
         totalListeningAssessments,
         totalGrammarAssessments,
         totalVocabularyAssessments,
+        totalSpeakingAssessments,
       },
       "Sucessfully get the total assessments count"
     )
