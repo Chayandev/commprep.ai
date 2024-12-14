@@ -1,3 +1,4 @@
+import { parseFile } from "music-metadata";
 const getAudioDuration = async (audioPath) => {
   try {
     // Parse the audio file
@@ -11,4 +12,4 @@ const getAudioDuration = async (audioPath) => {
   }
 };
 
-export { getAudioDuration as getAudioDuration};
+export { getAudioDuration as getAudioDuration };

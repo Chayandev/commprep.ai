@@ -280,20 +280,20 @@ const analyzeSpeakingAssessment = asyncHandelr(async (req, res) => {
 
   // Update user's Porogress in speaking assessments
   await updateUserProgress(User, req.user._id, assessmentID, score, "speaking");
-  
+
   // Remove the audio file after processing
   fs.unlinkSync(audioLocalPath);
-  
+
   return res.status(201).json(
     new ApiResponse(
       200,
       {
-        score,
-        grammarScore,
-        relevanceScore,
-        adequacyScore,
-        feedback,
-        suggestions,
+        overallScore: score,
+        grammarScore: grammarScore,
+        relevanceScore: relevanceScore,
+        adequacyScore: adequacyScore,
+        feedback: feedback,
+        suggestions: suggestions,
       },
       "Successfully Analyzed!"
     )

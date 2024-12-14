@@ -72,20 +72,28 @@ router
   .route("/getListeningAssessments")
   .get(verifyJWT, getListeningAssessments);
 router
-  .route("/analyzeListeningAssessments")
+  .route("/analyzeListeningAssessment")
   .post(verifyJWT, analyzeListeningAssessment);
 
 router.route("/getGrammarAssessments").get(verifyJWT, getGrammarAssessments);
 router
-  .route("/analyzeGrammarAssessments")
+  .route("/analyzeGrammarAssessment")
   .post(verifyJWT, analyzeGrammarAssessment);
 router
   .route("/getVocabularyAssessments")
   .get(verifyJWT, getVocabularyAssessments);
 
 router
-  .route("/analyzeVocabularyAssessments")
+  .route("/analyzeVocabularyAssessment")
   .post(verifyJWT, analyzeVocabularyAssessment);
+
+router
+  .route("/analyzeSpeakingAssessment")
+  .post(
+    verifyJWT,
+    upload.fields([{ name: "audio", maxCount: 1 }]),
+    analyzeSpeakingAssessment
+  );
 
 router.route("/getSpeakingAssessments").get(verifyJWT, getSpeakingAssessments);
 
@@ -94,11 +102,5 @@ router
   .route("/getEachAssessmentCount")
   .get(verifyJWT, getEachTotalAssessmentCount);
 
-//testing
-router
-  .route("/analyzeSpekaingAssessment")
-  .post(
-    upload.fields([{ name: "audio", maxCount: 1 }]),
-    analyzeSpeakingAssessment
-  );
+
 export default router;
