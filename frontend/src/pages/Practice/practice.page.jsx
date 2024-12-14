@@ -1,13 +1,7 @@
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  Mic,
-  Headphones,
-  MessageSquare,
-  Book,
-  Speech,
-} from "lucide-react";
+import { Mic, Headphones, MessageSquare, Book, Speech } from "lucide-react";
 import Progress from "../../components/Progress";
 import "../../App.css";
 import LazyLoadingCard from "../../components/LazyLoadingCard";
@@ -39,8 +33,8 @@ export default function Practice() {
         (user.progress.reading?.assessments?.length || 0) +
         (user.progress.listening?.assessments?.length || 0) +
         (user.progress.grammar?.assessments?.length || 0) +
-        (user.progress.vocabulary?.assessments?.length || 0);
-
+        (user.progress.vocabulary?.assessments?.length || 0) +
+        (user.progress.speaking?.assessments?.length || 0);
       setProgressPercentage(
         totalAssessments
           ? Math.round((totalCompletedAssessments / totalAssessments) * 100)

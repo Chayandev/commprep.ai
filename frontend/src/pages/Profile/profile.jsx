@@ -1,13 +1,14 @@
 import React, { Suspense, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Book, Edit, Headphones, MessageSquare, Mic } from "lucide-react";
+import { Book, Edit, Headphones, MessageSquare, Mic, Speech } from "lucide-react";
 import { calculateProgress, formatDate } from "../../utils/formalCalculation";
 import { getEachTotalAssessmentCount } from "../../../actions/user.actions";
 import { v4 as uuidv4 } from "uuid";
 import ShimmerCard from "../../components/ShimmerCard";
 import { Typography } from "@mui/material";
 
-const cloudinaryBaseImaegUrl = import.meta.env.VITE_CLOUDINARY_IMAGE_FOLDER_BASE_URL;
+const cloudinaryBaseImaegUrl = import.meta.env
+  .VITE_CLOUDINARY_IMAGE_FOLDER_BASE_URL;
 const CategoryCard = React.lazy(() =>
   import("../../components/ProfileCategoryCard")
 );
@@ -62,6 +63,17 @@ export default function Profile() {
       ),
 
       path: "vocabulary",
+    },
+    {
+      name: "Speaking",
+      icon: Speech,
+
+      progress: calculateProgress(
+        user?.progress?.speaking?.assessments?.length,
+        totalAssessmentCount?.totalSpeakingAssessments
+      ),
+
+      path: "speaking",
     },
   ];
 
