@@ -8,6 +8,7 @@ const RecordingInterface = ({
   feedbackReceived,
   recordingComplete,
   analyzeRecording,
+  isDisabled=false
 }) => {
   return (
     <div className=" md:sticky top-24 flex-1 flex flex-col items-center bg-white rounded-lg shadow-md p-8">
@@ -26,7 +27,7 @@ const RecordingInterface = ({
             ? "bg-gradient-to-r from-orange-400 to-red-500 shadow-lg scale-110"
             : "bg-gradient-to-r from-teal-400 to-teal-500"
         }`}
-        disabled={isAnalyzing || feedbackReceived || recordingComplete}
+        disabled={isAnalyzing || feedbackReceived || recordingComplete || isDisabled}
       >
         {isRecording ? (
           <Square
@@ -67,7 +68,7 @@ const RecordingInterface = ({
                    }
                   
                   `}
-        disabled={!recordingComplete || isAnalyzing || feedbackReceived}
+        disabled={!recordingComplete || isAnalyzing || feedbackReceived || isDisabled}
       >
         {isAnalyzing ? "Analyzing..." : "Analyze Recording"}
       </button>

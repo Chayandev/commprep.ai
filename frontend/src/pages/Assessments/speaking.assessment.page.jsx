@@ -16,7 +16,6 @@ import {
   Typography,
 } from "@mui/material";
 import Progress from "../../components/Progress.jsx";
-import { getReadingAssessmentAnslysis } from "../../../actions/user.actions.js";
 import { toast } from "react-toastify";
 import LoadingBar from "react-top-loading-bar";
 import useFullScreen from "../../components/Hooks/FullScreenHook.js";
@@ -27,6 +26,8 @@ import RecordingInterface from "../../components/RecodingInterface.jsx";
 import useUnloadConfirmation from "../../components/Hooks/useReloadConfirmation.js";
 import { requestMicrophonePermission } from "../../utils/microphonePermission.js";
 import useScrollPosition from "../../components/Hooks/useScrollPosition.js";
+import CircularProgress from "../../components/CircularProgress.jsx";
+import InstructionDialog from "../../components/InstrctionDialog.jsx";
 
 export default function SpeakingAssessmentPractice() {
   //useFullScreen();
@@ -40,19 +41,24 @@ export default function SpeakingAssessmentPractice() {
   const { isAnalyzing, result } = useSelector(
     (state) => state.assessmentAnalysis
   );
-  const [phase, setPhase] = useState("thinking");
+  const [phase, setPhase] = useState(null);
   const isErrorState = selectedAssessmentIndex === -1;
   const isLastAssessment = selectedAssessmentIndex === assessments?.length - 1;
   const [assessment, setAssessment] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingComplete, setRecordingComplete] = useState(false);
   const timerRef = useRef(null);
-  const [timeLeft, setTimeLeft] = useState(null);
+  const timer = useRef(null);
+  const [timeLeft, setAssessmentTime] = useState(null);
   const timeDisplayRef = useRef(null);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
+  const [THINKING_TIME, setThinkingTime] = useState(null);
+  const [SPEAKING_TIME, setSpeakingTime] = useState(null);
+  const [timeLeft2, setTimeLeft] = useState(null);
+  const [open, setOpen] = useState(true);
   //Use the custom hook to set the scrolling
-  const isScrolled = useScrollPosition(80);
+  const isScrolled = useScrollPosition(100);
   // Use the custom hook to display the unload confirmation message
   useUnloadConfirmation(
     "Are you sure you want to reload? You might lose your progress."
@@ -61,9 +67,42 @@ export default function SpeakingAssessmentPractice() {
   //useFullScreen();
 
   useEffect(() => {
+    if (phase === "thinking" || phase === "speaking") {
+      timer.current = setInterval(() => {
+        setTimeLeft((prevTime) => {
+          if (prevTime <= 1) {
+            if (phase === "thinking") {
+              setPhase("speaking");
+              startRecording();
+              return SPEAKING_TIME;
+            } else {
+              setPhase("finished");
+              stopRecording();
+              return 0;
+            }
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer.current);
+  }, [phase]);
+
+  const startThinking = () => {
+    setPhase("thinking");
+    setTimeLeft(THINKING_TIME);
+  };
+
+  useEffect(() => {
     if (!isErrorState) {
       setAssessment(assessments[selectedAssessmentIndex]);
-      setTimeLeft(assessments[selectedAssessmentIndex].timeToComplete);
+      setAssessmentTime(assessments[selectedAssessmentIndex].timeToComplete);
+      setThinkingTime(
+        assessments[selectedAssessmentIndex].evaluationCriteria?.timeToThink
+      );
+      setSpeakingTime(
+        assessments[selectedAssessmentIndex].evaluationCriteria.timeToSpeak
+      );
     }
   }, [selectedAssessmentIndex, assessments, isErrorState]);
 
@@ -77,6 +116,12 @@ export default function SpeakingAssessmentPractice() {
   const handleBack = () => {
     //dispatch(changeLayout());
     navigate("/practice/speaking");
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    startThinking();
+    startAssessmentTimer();
   };
 
   const toggleRecording = async () => {
@@ -93,10 +138,10 @@ export default function SpeakingAssessmentPractice() {
   const startRecording = () => {
     setIsRecording(true);
     setRecordingComplete(false);
-    setTimeLeft(
-      assessment.evaluationCriteria.timeToComplete
-      //assessments[selectedAssessmentIndex].evaluationCriteria.timeToComplete
-    );
+    // setTimeLeft(
+    //   assessment.evaluationCriteria.timeToComplete
+    //   //assessments[selectedAssessmentIndex].evaluationCriteria.timeToComplete
+    // );
 
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
       const recorder = new MediaRecorder(stream);
@@ -114,16 +159,16 @@ export default function SpeakingAssessmentPractice() {
         setRecordingComplete(true);
       };
 
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            setRecordingComplete(true);
-            stopRecording();
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
+      // timerRef.current = setInterval(() => {
+      //   setTimeLeft((prevTime) => {
+      //     if (prevTime <= 1) {
+      //       setRecordingComplete(true);
+      //       stopRecording();
+      //       return 0;
+      //     }
+      //     return prevTime - 1;
+      //   });
+      // }, 1000);
     });
   };
 
@@ -133,6 +178,19 @@ export default function SpeakingAssessmentPractice() {
       mediaRecorder.stop();
     }
     clearInterval(timerRef.current);
+  };
+
+  const startAssessmentTimer = () => {
+    timerRef.current = setInterval(() => {
+      setAssessmentTime((prevTime) => {
+        if (prevTime <= 1) {
+          setRecordingComplete(true);
+          stopRecording();
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
   };
 
   const analyzeRecording = () => {
@@ -221,6 +279,7 @@ export default function SpeakingAssessmentPractice() {
           <AssessmentError />
         ) : (
           <>
+            {<InstructionDialog open={open} handleClose={handleClose} />}
             <div className="mb-8 bg-white border border-gray-300 rounded-lg shadow-sm">
               <div className=" flex  justify-between items-center p-6">
                 <TakeAssessmentHeader
@@ -231,7 +290,7 @@ export default function SpeakingAssessmentPractice() {
                   assessment={assessment}
                 />
                 {/* Timer Display */}
-                {timeLeft && (
+                {timeLeft!==null && (
                   <TimeDisplay
                     ref={timeDisplayRef}
                     timeLeft={timeLeft}
@@ -259,14 +318,14 @@ export default function SpeakingAssessmentPractice() {
                     {`"${assessment?.topic}"`}
                   </Typography>
                 </div>
-                <div className="p-8">
-                  <div className="space-y-4">
+                <div className="flex flex-col gap-4 items-center p-8">
+                  <div className="w-full space-y-4">
                     <Alert
                       variant="outlined"
                       severity={
-                        phase === "thinking"
+                        phase === "thinking" || phase === null
                           ? "info"
-                          : "speaking"
+                          : phase === "speaking"
                           ? "warning"
                           : "success"
                       }
@@ -276,16 +335,26 @@ export default function SpeakingAssessmentPractice() {
                           ? "Thinking Time"
                           : phase === "speaking"
                           ? "Speaking Time"
-                          : "Time's Up!"}
+                          : phase === "finished"
+                          ? "Time's Up!"
+                          : "Improve Speaking"}
                       </AlertTitle>
 
                       {phase === "thinking"
-                        ? "Prepare your answer"
+                        ? "Prepare your response"
                         : phase === "speaking"
                         ? "Start speaking now"
-                        : "Your response has been recorded"}
+                        : phase === "finished"
+                        ? "Your response has been recorded"
+                        : "Analysis will be given shortly"}
                     </Alert>
                   </div>
+
+                  <CircularProgress
+                    value={timeLeft2}
+                    max={phase === "thinking" ? THINKING_TIME : SPEAKING_TIME}
+                    phase={phase}
+                  />
                 </div>
 
                 <div className="flex align-middle justify-center p-8">
@@ -416,6 +485,7 @@ export default function SpeakingAssessmentPractice() {
                 feedbackReceived={feedbackReceived}
                 recordingComplete={recordingComplete}
                 analyzeRecording={analyzeRecording}
+                isDisabled={phase === "thinking" || phase === "finished"}
               />
             </div>
           </>
