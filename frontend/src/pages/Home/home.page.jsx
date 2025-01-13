@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import logo from "/home.png";
+//C:\Users\chaya\CommprepAi\commprep.ai\frontend\public\home.webp
 import {
   ArrowRight,
   Book,
@@ -68,28 +70,13 @@ export default function Home() {
               <div className="relative mx-auto w-full rounded-lg shadow-lg lg:max-w-md">
                 <div className="relative block w-full bg-white rounded-lg overflow-hidden">
                   <img
-                    src="/placeholder.svg?height=400&width=600"
+                    src={logo}
                     alt="CommPrep.ai in action"
-                    width={600}
-                    height={400}
-                    className="w-full"
+                    className="w-[500px] h-[380px] object-cover"
                   />
-                  <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-                    <svg
-                      className="h-20 w-20 text-teal-500"
-                      fill="currentColor"
-                      viewBox="0 0 84 84"
-                    >
-                      <circle
-                        opacity="0.9"
-                        cx="42"
-                        cy="42"
-                        r="42"
-                        fill="white"
-                      />
-                      <path d="M55.5039 40.3359L37.1094 28.0729C35.7803 27.1869 34 28.1396 34 29.737V54.263C34 55.8604 35.7803 56.8131 37.1094 55.9271L55.5038 43.6641C56.6913 42.8725 56.6913 41.1275 55.5039 40.3359Z" />
-                    </svg>
-                  </div>
+
+                 
+              
                 </div>
               </div>
             </div>
@@ -130,7 +117,7 @@ export default function Home() {
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             <span className="block">Ready to make a difference?</span>
             <span className="block text-teal-900">
-            Join us and elevate your experience with us.
+              Join us and elevate your experience with us.
             </span>
           </h2>
           <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
