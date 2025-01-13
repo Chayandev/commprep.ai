@@ -211,7 +211,7 @@ const autoLoginUser = asyncHandler(async (req, res) => {
       const user = await User.findById(decodedToken._id);
 
       if (!user || user.refreshToken !== refreshToken) {
-        throw new ApiError(401, "Refresh token is invalid or expired.");
+        throw new ApiError(403, "Refresh token is invalid or expired.");
       }
 
       // Generate new tokens
@@ -230,7 +230,7 @@ const autoLoginUser = asyncHandler(async (req, res) => {
           new ApiResponse(200, user, "Access token refreshed successfully!")
         );
     } catch (error) {
-      throw new ApiError(401, "Invalid refresh token or expired.");
+      throw new ApiError(403, "Invalid refresh token or expired.");
     }
   } else {
     // Handle access token verification
@@ -262,7 +262,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     req.cookies.refreshToken || req.body.refreshToken;
 
   if (!incomingRefreshToken) {
-    throw new ApiError(401, "Unauthorized Access!");
+    throw new ApiError(403, "Unauthorized Access!");
   }
 
   try {
@@ -274,11 +274,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const user = await User.findById(decodedToke?._id);
 
     if (!user) {
-      throw new ApiError(401, "Invalid refresh token");
+      throw new ApiError(403, "Invalid refresh token");
     }
 
     if (incomingRefreshToken !== user?.refreshToken) {
-      throw new ApiError(401, "Refresh Token is expired");
+      throw new ApiError(403, "Refresh Token is expired");
     }
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
@@ -297,7 +297,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
-    throw new ApiError(401, error?.message || "invalid refrech Token");
+    throw new ApiError(403, error?.message || "invalid refrech Token");
   }
 });
 

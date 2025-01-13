@@ -25,6 +25,10 @@ const userFeedbackSchema = new Schema(
           type: Number,
           default: 0,
         },
+        acceptToBeContacted: {
+          type: Boolean,
+          default: false,
+        },
       },
     ],
   },
