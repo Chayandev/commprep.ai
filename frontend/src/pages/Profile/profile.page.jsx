@@ -1,6 +1,13 @@
 import React, { Suspense, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Book, Edit, Headphones, MessageSquare, Mic, Speech } from "lucide-react";
+import {
+  Book,
+  Edit,
+  Headphones,
+  MessageSquare,
+  Mic,
+  Speech,
+} from "lucide-react";
 import { calculateProgress, formatDate } from "../../utils/formalCalculation";
 import { getEachTotalAssessmentCount } from "../../../actions/user.actions";
 import { v4 as uuidv4 } from "uuid";
@@ -84,11 +91,13 @@ export default function Profile() {
           <div className="h-32 bg-gradient-to-r from-[#02ccc2] to-[#0f6284]" />
           <div className="relative pt-16 pb-8 px-6">
             <div className="absolute -top-16 left-6 h-32 w-32 rounded-full border-4 border-white">
-              <img
-                src={`${cloudinaryBaseImaegUrl}${user?.avatar}.webp`}
-                alt="User"
-                className="w-full h-full rounded-full object-fill"
-              />
+              <div className="bg-gray-300 w-full h-full rounded-full object-fill">
+                <img
+                  src={`${cloudinaryBaseImaegUrl}${user?.avatar}.webp`}
+                  alt="User"
+                  className="w-full h-full rounded-full object-fill"
+                />
+              </div>
             </div>
             <div className="flex justify-between items-start">
               <div>

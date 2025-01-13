@@ -28,10 +28,10 @@ import ListeningAssessmentPractice from "./pages/Assessments/listening.assessmen
 import GrammarAssessments from "./pages/Practice/grammar.page.jsx";
 import GrammarAssessmentPractice from "./pages/Assessments/grammar.assessment.page.jsx";
 import VocabularyAssessments from "./pages/Practice/vocabulary.page.jsx";
-import Profile from "./pages/Profile/profile.jsx";
 import VocabularyAssessmentPractice from "./pages/Assessments/vocabulary.assessment.page.jsx";
 import SpeakingAssessments from "./pages/Practice/speaking.page.jsx";
 import SpeakingAssessmentPractice from "./pages/Assessments/speaking.assessment.page.jsx";
+import Profile from "./pages/Profile/profile.page.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
