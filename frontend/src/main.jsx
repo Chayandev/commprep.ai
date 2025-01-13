@@ -31,7 +31,7 @@ import VocabularyAssessments from "./pages/Practice/vocabulary.page.jsx";
 import VocabularyAssessmentPractice from "./pages/Assessments/vocabulary.assessment.page.jsx";
 import SpeakingAssessments from "./pages/Practice/speaking.page.jsx";
 import SpeakingAssessmentPractice from "./pages/Assessments/speaking.assessment.page.jsx";
-import Profile from "./pages/profile/profile.jsx";
+import Profile from "./pages/Profile/profile.page.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
