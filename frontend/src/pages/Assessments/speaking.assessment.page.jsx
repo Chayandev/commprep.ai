@@ -28,7 +28,7 @@ import { requestMicrophonePermission } from "../../utils/microphonePermission.js
 import useScrollPosition from "../../components/Hooks/useScrollPosition.js";
 import CircularProgress from "../../components/CircularProgress.jsx";
 import InstructionDialog from "../../components/InstrctionDialog.jsx";
-import { getSpeakingAssessmentAnslysis } from "../../../actions/user.actions.js";
+import { getSpeakingAssessmentAnalysis } from "../../../actions/user.actions.js";
 import Score from "../../components/Score.jsx";
 
 export default function SpeakingAssessmentPractice() {
@@ -206,7 +206,7 @@ export default function SpeakingAssessmentPractice() {
     formData.append("audio", audioBlob, "recording.wav");
     formData.append("topic", assessment.topic);
 
-    dispatch(getSpeakingAssessmentAnslysis(formData))
+    dispatch(getSpeakingAssessmentAnalysis(formData))
       .unwrap()
       .then((result) => {
         console.log(result);

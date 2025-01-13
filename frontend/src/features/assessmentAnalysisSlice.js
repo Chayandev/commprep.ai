@@ -2,10 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   getGrammarAssessmentAnalysis,
   getListeningAssessmentAnalysis,
-  getReadingAssessmentAnslysis,
-  getSpeakingAssessmentAnslysis,
+  getReadingAssessmentAnalysis,
+  getSpeakingAssessmentAnalysis,
   getVocabularyAssessmentAnalysis,
-} from "../../actions/user.actions";
+} from "../../actions/user.actions.js";
 
 const initialState = {
   isAnalyzing: false,
@@ -18,15 +18,15 @@ const assessmentAnalysisSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     // Reading Assessment Analysis
-    builder.addCase(getReadingAssessmentAnslysis.pending, (state) => {
+    builder.addCase(getReadingAssessmentAnalysis.pending, (state) => {
       state.isAnalyzing = true;
       state.result = null;
     });
-    builder.addCase(getReadingAssessmentAnslysis.fulfilled, (state, action) => {
+    builder.addCase(getReadingAssessmentAnalysis.fulfilled, (state, action) => {
       state.isAnalyzing = false;
       state.result = action.payload?.data;
     });
-    builder.addCase(getReadingAssessmentAnslysis.rejected, (state) => {
+    builder.addCase(getReadingAssessmentAnalysis.rejected, (state) => {
       state.isAnalyzing = false;
       state.result = null;
     });
@@ -80,18 +80,18 @@ const assessmentAnalysisSlice = createSlice({
     });
 
     //Speaking Assessment Analysis
-    builder.addCase(getSpeakingAssessmentAnslysis.pending, (state, _) => {
+    builder.addCase(getSpeakingAssessmentAnalysis.pending, (state, _) => {
       state.isAnalyzing = true;
       state.result = null;
     });
     builder.addCase(
-      getSpeakingAssessmentAnslysis.fulfilled,
+      getSpeakingAssessmentAnalysis.fulfilled,
       (state, action) => {
         state.isAnalyzing = false;
         state.result = action.payload?.data;
       }
     );
-    builder.addCase(getSpeakingAssessmentAnslysis.rejected, (state) => {
+    builder.addCase(getSpeakingAssessmentAnalysis.rejected, (state) => {
       state.isAnalyzing = false;
       state.result = null;
     });

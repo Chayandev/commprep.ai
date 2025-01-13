@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { selectAssessment } from "../../features/userOperationSlice";
 import { Card, CardContent, Typography } from "@mui/material";
 import Progress from "../../components/Progress";
-import { getReadingAssessmentAnslysis } from "../../../actions/user.actions";
+import { getReadingAssessmentAnalysis } from "../../../actions/user.actions";
 import { toast } from "react-toastify";
 import LoadingBar from "react-top-loading-bar";
 import useFullScreen from "../../components/Hooks/FullScreenHook.js";
@@ -140,7 +140,7 @@ export default function ReadingAssessmentPractice() {
     formData.append("audio", audioBlob, "recording.wav");
     formData.append("passage", assessment.passage);
 
-    dispatch(getReadingAssessmentAnslysis(formData))
+    dispatch(getReadingAssessmentAnalysis(formData))
       .unwrap()
       .then((result) => {
         console.log(result);
