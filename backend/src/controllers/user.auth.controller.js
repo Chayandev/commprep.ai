@@ -350,6 +350,8 @@ const sendVerificationCode = asyncHandler(async (req, res) => {
 const verifyEmail = asyncHandler(async (req, res) => {
   const { verificationCode } = req.body;
 
+  console.log(verificationCode);
+
   const user = await User.findOne({
     verificationCode: verificationCode,
     verificationCodeExpireAt: { $gt: Date.now() },
