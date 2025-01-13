@@ -418,7 +418,7 @@ export const verifyUserEmail = createAsyncThunk(
   "verify/emailVerification",
   async (verificationCode, { rejectWithValue }) => {
     try {
-      const response = await api.post("/verify-email", { verificationCode });
+      const response = await api.post("/verify-email",  verificationCode );
       return response.data;
     } catch (error) {
       return rejectWithValue(
