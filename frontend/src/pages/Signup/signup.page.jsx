@@ -376,7 +376,7 @@ export default function Signup() {
       </Card>
       <div className="mt-8 text-center">
         <Link
-          to="/home"
+          to="/"
           className="text-sm text-gray-600 hover:text-primary inline-flex items-center"
         >
           <ArrowRight className="mr-2 h-4 w-4" />

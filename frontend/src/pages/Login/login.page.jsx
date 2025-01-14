@@ -237,7 +237,7 @@ export default function LoginPage() {
       </Card>
       <div className="mt-8 text-center">
         <Link
-          to="/home"
+          to="/"
           className="text-gray-600 hover:text-teal-600 inline-flex items-center"
         >
           <ArrowRight className="mr-2 h-4 w-4" />
