@@ -1,4 +1,4 @@
-import { ApiError } from "../ApiErros.js";
+import { ApiError } from "../apiHandler/ApiErros.js";
 
 /**
  * Calculate score

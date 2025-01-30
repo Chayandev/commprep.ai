@@ -1,19 +1,25 @@
-import { asyncHandelr } from "../utils/asyncHandler.js";
-import { ApiResponse } from "../utils/ApiResonse.js";
-import { ApiError } from "../utils/ApiErros.js";
+import {
+  asyncHandler,
+  ApiError,
+  ApiResponse,
+} from "../utils/apiHandler/exports.js";
 import fs from "fs"; // Import the fs module to handle file operations
 import { AssemblyAI } from "assemblyai";
-import { ReadingAssessment } from "../models/readingAssessments.model.js";
-import { ListeningAssessment } from "../models/listeningAssessment.model.js";
-import { User } from "../models/user.model.js";
-import { GrammarAssessment } from "../models/grammarAssessment.model.js";
-import { VocabularyAssessment } from "../models/vocabularyAssessment.model.js";
-import { SpeakingAssessment } from "../models/speakingAssessments.model.js";
-import { getAudioDuration } from "../utils/assessmenAnalysisHelper/generateAudioDuration.js";
-import { analyzeAgainstPassageAndGenerateFeedback } from "../utils/assessmenAnalysisHelper/analyzeAndGenerateFeedback.js";
-import { generateFeedbackAndSuggestions } from "../utils/assessmenAnalysisHelper/generateFeedbackAndSuggestion.js";
-import { calculateScore } from "../utils/assessmenAnalysisHelper/calculateScore.js";
-import { getTranscriptionAnalysis } from "../utils/assessmenAnalysisHelper/groqTranscriptionAnalysis.js";
+import {
+  ReadingAssessment,
+  ListeningAssessment,
+  User,
+  GrammarAssessment,
+  VocabularyAssessment,
+  SpeakingAssessment,
+} from "../models/exports.js";
+import {
+  getAudioDuration,
+  analyzeAgainstPassageAndGenerateFeedback,
+  calculateScore,
+  getTranscriptionAnalysis,
+  generateFeedbackAndSuggestions,
+} from "../utils/assessmentAnalysisHelper/exports.js";
 
 // Initialize the AssemblyAI client with the API key
 const assemblyClient = new AssemblyAI({
@@ -25,7 +31,7 @@ const assemblyClient = new AssemblyAI({
  * comparing it to a given passage, updating the user's progress and
  * assessment data based on the transcription results.
  */
-const analyzeReadingAssessment = asyncHandelr(async (req, res) => {
+const analyzeReadingAssessment = asyncHandler(async (req, res) => {
   const { passage, assessmentID } = req.body;
 
   // Validate required data
@@ -95,7 +101,7 @@ const analyzeReadingAssessment = asyncHandelr(async (req, res) => {
  * Analyzes listening assessment responses and updates the user's progress.
  *
  */
-const analyzeListeningAssessment = asyncHandelr(async (req, res) => {
+const analyzeListeningAssessment = asyncHandler(async (req, res) => {
   const { answers, assessmentID } = req.body;
 
   if (!answers || !assessmentID)
@@ -143,7 +149,7 @@ const analyzeListeningAssessment = asyncHandelr(async (req, res) => {
  * Analyzes grammar assessment responses and updates the user's progress.
  *
  */
-const analyzeGrammarAssessment = asyncHandelr(async (req, res) => {
+const analyzeGrammarAssessment = asyncHandler(async (req, res) => {
   const { answers, assessmentID } = req.body;
 
   if (!answers || !assessmentID)
@@ -180,7 +186,7 @@ const analyzeGrammarAssessment = asyncHandelr(async (req, res) => {
  * Analyzes vocabulary assessment responses and updates the user's progress.
  *
  */
-const analyzeVocabularyAssessment = asyncHandelr(async (req, res) => {
+const analyzeVocabularyAssessment = asyncHandler(async (req, res) => {
   const { answers, assessmentID } = req.body;
 
   if (!answers || !assessmentID)
@@ -223,7 +229,7 @@ const analyzeVocabularyAssessment = asyncHandelr(async (req, res) => {
  * Analyzes speaking assessment responses and updates the user's progress.
  *
  */
-const analyzeSpeakingAssessment = asyncHandelr(async (req, res) => {
+const analyzeSpeakingAssessment = asyncHandler(async (req, res) => {
   const { topic, assessmentID } = req.body;
 
   if (!topic) {

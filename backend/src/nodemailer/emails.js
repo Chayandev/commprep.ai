@@ -1,4 +1,4 @@
-import { ApiError } from "../utils/ApiErros.js";
+import { ApiError } from "../utils/apiHandler/exports.js";
 import { VERIFICATION_EMAIL_TEMPLATE } from "./email.templates.js";
 import nodemailer from "nodemailer";
 
