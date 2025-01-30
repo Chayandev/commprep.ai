@@ -1,12 +1,17 @@
-import { UserFeedback } from "../models/feedback.model.js";
-import { GrammarAssessment } from "../models/grammarAssessment.model.js";
-import { ListeningAssessment } from "../models/listeningAssessment.model.js";
-import { ReadingAssessment } from "../models/readingAssessments.model.js";
-import { SpeakingAssessment } from "../models/speakingAssessments.model.js";
-import { VocabularyAssessment } from "../models/vocabularyAssessment.model.js";
-import { ApiError } from "../utils/ApiErros.js";
-import { ApiResponse } from "../utils/ApiResonse.js";
-import { asyncHandelr } from "../utils/asyncHandler.js";
+import {
+  ReadingAssessment,
+  ListeningAssessment,
+  UserFeedback,
+  GrammarAssessment,
+  VocabularyAssessment,
+  SpeakingAssessment,
+} from "../models/exports.js";
+
+import {
+  asyncHandler,
+  ApiError,
+  ApiResponse,
+} from "../utils/apiHandler/exports.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 /*
  *
@@ -15,7 +20,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
  *
  */
 
-const addReadingAssessment = asyncHandelr(async (req, res) => {
+const addReadingAssessment = asyncHandler(async (req, res) => {
   const { passage, difficulty, timeToComplete } = req.body;
 
   // Directly create and save the new assessment document
@@ -43,7 +48,7 @@ const addReadingAssessment = asyncHandelr(async (req, res) => {
  *
  */
 
-const getReadingAssessments = asyncHandelr(async (req, res) => {
+const getReadingAssessments = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const assessments = await ReadingAssessment.aggregate([
@@ -101,7 +106,7 @@ const getReadingAssessments = asyncHandelr(async (req, res) => {
  *
  */
 
-const addListeningAssessment = asyncHandelr(async (req, res) => {
+const addListeningAssessment = asyncHandler(async (req, res) => {
   const { title, difficulty, mcqQuestions, saqQuestions, evaluationCriteria } =
     req.body;
   // console.log(difficulty);
@@ -175,7 +180,7 @@ const addListeningAssessment = asyncHandelr(async (req, res) => {
  *
  */
 
-const getListeningAssessments = asyncHandelr(async (req, res) => {
+const getListeningAssessments = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const assessments = await ListeningAssessment.aggregate([
@@ -236,7 +241,7 @@ const getListeningAssessments = asyncHandelr(async (req, res) => {
  *
  */
 
-const addGrammarAssessment = asyncHandelr(async (req, res) => {
+const addGrammarAssessment = asyncHandler(async (req, res) => {
   const { difficulty, evaluationCriteria, mcqQuestions } = req.body;
 
   console.log("Received Difficulty:", difficulty);
@@ -276,7 +281,7 @@ const addGrammarAssessment = asyncHandelr(async (req, res) => {
  *
  *
  */
-const getGrammarAssessments = asyncHandelr(async (req, res) => {
+const getGrammarAssessments = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const assessments = await GrammarAssessment.aggregate([
@@ -336,7 +341,7 @@ const getGrammarAssessments = asyncHandelr(async (req, res) => {
  *
  *
  */
-const addVocabularyAssessment = asyncHandelr(async (req, res) => {
+const addVocabularyAssessment = asyncHandler(async (req, res) => {
   const { difficulty, evaluationCriteria, mcqQuestions } = req.body;
 
   console.log("Received Difficulty:", difficulty);
@@ -374,7 +379,7 @@ const addVocabularyAssessment = asyncHandelr(async (req, res) => {
  *
  *
  */
-const getVocabularyAssessments = asyncHandelr(async (req, res) => {
+const getVocabularyAssessments = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const assessments = await VocabularyAssessment.aggregate([
@@ -433,7 +438,7 @@ const getVocabularyAssessments = asyncHandelr(async (req, res) => {
  *
  *
  */
-const addSpeakingAssessment = asyncHandelr(async (req, res) => {
+const addSpeakingAssessment = asyncHandler(async (req, res) => {
   const { topic, difficulty, evaluationCriteria } = req.body;
 
   if (!topic || !difficulty || !evaluationCriteria) {
@@ -462,7 +467,7 @@ const addSpeakingAssessment = asyncHandelr(async (req, res) => {
  *
  */
 
-const getSpeakingAssessments = asyncHandelr(async (req, res) => {
+const getSpeakingAssessments = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const assessments = await SpeakingAssessment.aggregate([
     {
@@ -525,7 +530,7 @@ const getSpeakingAssessments = asyncHandelr(async (req, res) => {
  *
  */
 
-const addUserFeedback = asyncHandelr(async (req, res) => {
+const addUserFeedback = asyncHandler(async (req, res) => {
   const { title, feedbackDescription, feedbackType, rating } = req.body;
   // Validate the required fields
   if (!title || !feedbackDescription || !feedbackType) {
@@ -566,7 +571,7 @@ const addUserFeedback = asyncHandelr(async (req, res) => {
     .json(new ApiResponse(200, null, "Successfully added feedback"));
 });
 
-const getEachTotalAssessmentCount = asyncHandelr(async (req, res) => {
+const getEachTotalAssessmentCount = asyncHandler(async (req, res) => {
   const totalReadingAssessments = await ReadingAssessment.countDocuments();
   const totalListeningAssessments = await ListeningAssessment.countDocuments();
   const totalGrammarAssessments = await GrammarAssessment.countDocuments();

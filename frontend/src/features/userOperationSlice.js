@@ -15,6 +15,18 @@ const initialState = {
   selectedAssessmentIndex: -1,
   message: null,
   totalAssessmentCount: null,
+  showCompleted: true,
+  difficulty: "All",
+  filteredAssessments: null,
+};
+
+const filterAssessments = (state) => {
+  state.filteredAssessments = state.assessments.filter(
+    (assessment) =>
+      (state.difficulty === "All" ||
+        assessment.difficulty === state.difficulty.toLowerCase()) &&
+      (state.showCompleted || !assessment.isCompleted)
+  );
 };
 
 const userOperationSlice = createSlice({
@@ -30,6 +42,16 @@ const userOperationSlice = createSlice({
       console.log(state.selectedAssessmentIndex);
       state.selectedAssessmentIndex += 1; // Increment index if not at the last assessment
     },
+    setDifficulty: (state, action) => {
+      state.difficulty = action.payload;
+
+      //filter the assessment based on difffculty
+      filterAssessments(state);
+    },
+    setShowCompleted: (state, _) => {
+      state.showCompleted = !state.showCompleted;
+      filterAssessments(state);
+    },
   },
   extraReducers: (builder) => {
     // Handle pending, fulfilled, and rejected states for any assessment
@@ -37,18 +59,23 @@ const userOperationSlice = createSlice({
       state.isProcessing = true;
       state.assessments = null;
       state.selectedAssessmentIndex = -1;
+      state.filteredAssessments = null;
     };
 
     const handleFulfilled = (state, action) => {
       state.isProcessing = false;
       state.assessments = action.payload?.data;
       state.selectedAssessmentIndex = -1;
+      state.showCompleted = true;
+      state.difficult = "All";
+      state.filteredAssessments = action.payload?.data;
     };
 
     const handleRejected = (state) => {
       state.isProcessing = false;
       state.assessments = null;
       state.selectedAssessmentIndex = -1;
+      state.filteredAssessments = null;
     };
 
     // Handle reading assessments
@@ -137,6 +164,10 @@ const userOperationSlice = createSlice({
 });
 
 // Export actions
-export const { selectAssessment, moveNextAssessment } =
-  userOperationSlice.actions;
+export const {
+  selectAssessment,
+  moveNextAssessment,
+  setShowCompleted,
+  setDifficulty,
+} = userOperationSlice.actions;
 export default userOperationSlice.reducer;

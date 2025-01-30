@@ -13,7 +13,9 @@ function App() {
       <ToastContainer />
       <Header />
       <ScrollToTop />
-      <Outlet />
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
+        <Outlet />
+      </div>
       <Footer />
 
       <div>

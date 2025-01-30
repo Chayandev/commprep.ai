@@ -1,11 +1,8 @@
 import React, { Suspense, useEffect, useState } from "react";
 import logo from "/ic_speaking.png";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getAllGrammarAssessments,
-  getAllSpeakingAssessments,
-} from "../../../actions/user.actions.js";
-import { selectAssessment } from "../../features/userOperationSlice.js";
+import { getAllSpeakingAssessments } from "../../../actions/user.actions.js";
+import { selectAssessment, setDifficulty, setShowCompleted } from "../../features/userOperationSlice.js";
 import { useNavigate } from "react-router-dom";
 import AssessmentHeader from "../../components/AssessmentHeader.jsx";
 import NoAssessmentsFound from "../../components/NoAssessmentFound.jsx";
@@ -18,14 +15,12 @@ import LoadingUI from "../../components/LoadingUI.jsx";
 
 export default function SpeakingAssessments() {
   const navigate = useNavigate();
-  const [showCompleted, setShowCompleted] = useState(true);
-  const [difficulty, setDifficulty] = useState("All");
-
-  const handleChange = (event) => setDifficulty(event.target.value);
-  const handleToggleCompleted = () => setShowCompleted(!showCompleted);
-
   const dispatch = useDispatch();
-  const { isProcessing, assessments } = useSelector((state) => state.operation);
+  const handleChange = (event) => dispatch(setDifficulty(event.target.value));
+  const handleToggleCompleted = () => dispatch(setShowCompleted());
+
+  const { isProcessing, filteredAssessments, showCompleted, difficulty } =
+    useSelector((state) => state.operation);
 
   const handleSelectAssessment = (index) => {
     dispatch(selectAssessment(index));
@@ -34,17 +29,10 @@ export default function SpeakingAssessments() {
 
   useEffect(() => {
     dispatch(getAllSpeakingAssessments());
-  }, [dispatch]);
-
-  const filteredAssessments = assessments?.filter(
-    (assessment) =>
-      (difficulty === "All" ||
-        assessment.difficulty === difficulty.toLowerCase()) &&
-      (showCompleted || !assessment.isCompleted)
-  );
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100 flex flex-col items-center">
+    <div className="flex flex-col items-center">
       {isProcessing ? (
         <div className="min-h-screen flex justify-center items-center">
           <LoadingUI />

@@ -136,7 +136,7 @@ export default function VocabularyAssessmentPractice() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
+    <>
       <LoadingBar
         color="#02cbc3"
         progress={progress}
@@ -195,6 +195,6 @@ export default function VocabularyAssessmentPractice() {
           </button>
         </div>
       </main>
-    </div>
+    </>
   );
 }

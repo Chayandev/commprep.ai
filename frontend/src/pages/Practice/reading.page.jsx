@@ -2,7 +2,11 @@ import React, { Suspense, useEffect, useState } from "react";
 import logo from "/ic_reading.png";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllReadingAssessments } from "../../../actions/user.actions";
-import { selectAssessment } from "../../features/userOperationSlice";
+import {
+  selectAssessment,
+  setDifficulty,
+  setShowCompleted,
+} from "../../features/userOperationSlice";
 import { useNavigate } from "react-router-dom";
 import AssessmentHeader from "../../components/AssessmentHeader.jsx";
 import NoAssessmentsFound from "../../components/NoAssessmentFound.jsx";
@@ -15,14 +19,13 @@ const AssessmentCard = React.lazy(() =>
 );
 export default function ReadingAssessments() {
   const navigate = useNavigate();
-  const [showCompleted, setShowCompleted] = useState(true);
-  const [difficulty, setDifficulty] = useState("All");
-
-  const handleChange = (event) => setDifficulty(event.target.value);
-  const handleToggleCompleted = () => setShowCompleted(!showCompleted);
-
   const dispatch = useDispatch();
-  const { isProcessing, assessments } = useSelector((state) => state.operation);
+  const handleChange = (event) => dispatch(setDifficulty(event.target.value));
+  const handleToggleCompleted = () => dispatch(setShowCompleted());
+  
+  const { isProcessing, filteredAssessments, showCompleted, difficulty } = useSelector(
+    (state) => state.operation
+  );
 
   const handleSelectAssessment = (index) => {
     dispatch(selectAssessment(index));
@@ -31,17 +34,10 @@ export default function ReadingAssessments() {
 
   useEffect(() => {
     dispatch(getAllReadingAssessments());
-  }, [dispatch]);
-
-  const filteredAssessments = assessments?.filter(
-    (assessment) =>
-      (difficulty === "All" ||
-        assessment.difficulty === difficulty.toLowerCase()) &&
-      (showCompleted || !assessment.isCompleted)
-  );
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100 flex flex-col items-center">
+    <div className="flex flex-col items-center">
       {isProcessing ? (
         <div className="min-h-screen flex justify-center items-center">
           <LoadingUI />
