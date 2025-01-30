@@ -73,7 +73,7 @@ const ContactCard = ({ icon, title, content, action, link }) => {
 
 export default function Contact() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
+   <>
       <main className="w-[90%] lg:w-[80%] mx-auto py-6">
         {/* Header Section */}
         <Box textAlign="center" py={6}>
@@ -153,6 +153,6 @@ export default function Contact() {
             </Typography>
           </Box> */}
       </main>
-    </div>
+      </>
   );
 }

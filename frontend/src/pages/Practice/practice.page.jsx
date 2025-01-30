@@ -102,7 +102,7 @@ export default function Practice() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
+    <>
       {isProcessing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg">
@@ -151,6 +151,6 @@ export default function Practice() {
           </div>
         </div>
       </main>
-    </div>
+      </>
   );
 }

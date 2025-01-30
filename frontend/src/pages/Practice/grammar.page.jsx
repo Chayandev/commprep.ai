@@ -41,7 +41,8 @@ export default function GrammarAssessments() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100 flex flex-col items-center">
+
+    <div className="flex flex-col items-center">
       {isProcessing ? (
         <div className="min-h-screen flex justify-center items-center">
           <LoadingUI />

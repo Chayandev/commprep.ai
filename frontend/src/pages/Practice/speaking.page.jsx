@@ -2,7 +2,6 @@ import React, { Suspense, useEffect, useState } from "react";
 import logo from "/ic_speaking.png";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getAllGrammarAssessments,
   getAllSpeakingAssessments,
 } from "../../../actions/user.actions.js";
 import { selectAssessment } from "../../features/userOperationSlice.js";
@@ -44,7 +43,7 @@ export default function SpeakingAssessments() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100 flex flex-col items-center">
+    <div className="flex flex-col items-center">
       {isProcessing ? (
         <div className="min-h-screen flex justify-center items-center">
           <LoadingUI />

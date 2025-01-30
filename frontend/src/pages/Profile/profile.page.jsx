@@ -85,7 +85,7 @@ export default function Profile() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100">
+   <>
       <main className="w-[90%] lg:w-[80%] mx-auto py-6">
         <div className="w-full overflow-hidden border border-gray-300 rounded-md">
           <div className="h-32 bg-gradient-to-r from-[#02ccc2] to-[#0f6284]" />
@@ -137,6 +137,6 @@ export default function Profile() {
           ))}
         </div>
       </main>
-    </div>
+      </>
   );
 }
