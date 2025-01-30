@@ -1,5 +1,4 @@
-import React, { Suspense, useEffect, useMemo, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import React, { Suspense, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Mic, Headphones, MessageSquare, Book, Speech } from "lucide-react";
 import Progress from "../../components/Progress";
@@ -21,7 +20,7 @@ export default function Practice() {
     dispatch(getEachTotalAssessmentCount());
   }, [dispatch]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (totalAssessmentCount && user?.progress) {
       const totalAssessments =
         (totalAssessmentCount.totalReadingAssessments || 0) +
@@ -144,7 +143,7 @@ export default function Practice() {
             </div>
             <div className="mt-12 grid gap-8 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
               {categories.map((category) => (
-                <Suspense key={uuidv4()} fallback={<LazyLoadingCard />}>
+                <Suspense key={category.name} fallback={<LazyLoadingCard />}>
                   <CategoryCard category={category} />
                 </Suspense>
               ))}

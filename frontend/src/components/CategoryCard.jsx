@@ -40,10 +40,7 @@ const CategoryCard = ({ category }) => {
         <p className="mt-2 text-sm text-gray-600">
           {category.progress}% complete
         </p>
-        <Link
-          to={`/practice/${category.path}`}
-          style={{ textDecoration: "none" }}
-        >
+        <Link to={category.path} style={{ textDecoration: "none" }}>
           <button
             className={`mt-4 w-full bg-gradient-to-r ${category.color} text-white font-semibold py-2 px-4 rounded-full transition-all duration-200 hover:shadow-lg hover:scale-105`}
           >
