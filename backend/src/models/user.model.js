@@ -115,6 +115,24 @@ const progressSchema = new Schema(
         },
       ],
     },
+    test: {
+      tests: [
+        {
+          testId: {
+            type: Schema.Types.ObjectId,
+            ref: "Tests",
+          },
+          takenAt: {
+            type: Date,
+          },
+          evaluationResult: {
+            overallScore: {
+              type: Number,
+            },
+          },
+        },
+      ],
+    },
   },
   { timestamps: true }
 );
@@ -156,6 +174,7 @@ const userSchema = new Schema(
         grammar: { assessments: [] },
         vocabulary: { assessments: [] },
         speaking: { assessments: [] },
+        test: { tests: [] },
       }),
     },
     achivements: [
