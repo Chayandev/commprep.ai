@@ -91,7 +91,7 @@ export default function GrammarAssessmentPractice() {
     }));
   };
   const handleBack = () => {
-    navigate("/practice/listening");
+    navigate("/practice/grammer");
   };
 
   const handleSubmit = () => {
