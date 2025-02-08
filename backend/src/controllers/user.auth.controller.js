@@ -204,7 +204,7 @@ const autoLoginUser = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
 
   if (!accessToken && refreshToken) {
-    console.log("generating new accesstoken using accesstoken");
+    console.log("generating new accesstoken using refreshToken");
     try {
       const decodedToken = jwt.verify(
         refreshToken,
@@ -217,7 +217,7 @@ const autoLoginUser = asyncHandler(async (req, res) => {
       }
 
       // Generate new tokens
-      const { accessToken, refreshToken: newRefreshToken } =
+      const { accessToken:newAccessToken, refreshToken: newRefreshToken } =
         await generateAccessAndRefreshTokens(user._id);
 
       // Update refresh token in database
@@ -226,7 +226,7 @@ const autoLoginUser = asyncHandler(async (req, res) => {
 
       return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
+        .cookie("accessToken", newAccessToken, options)
         .cookie("refreshToken", newRefreshToken, options)
         .json(
           new ApiResponse(200, user, "Access token refreshed successfully!")
@@ -388,7 +388,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 const getAvatars = asyncHandler(async (req, res) => {
   // Fetch all images from the 'commprep.ai_avatars' folder
   const { resources } = await cloudinary.search
-    .expression("folder:commprep.ai_avatars") // Specify the folder
+    .expression(process.env.AVATAR_FOLDER) // Specify the folder
     .max_results(20) // You can adjust the number of results if needed
     .execute();
 
