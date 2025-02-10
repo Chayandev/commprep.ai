@@ -392,11 +392,11 @@ export default function SpeakingAssessmentPractice() {
                                   Overall Score
                                 </span>
                                 <span className="text-2xl font-bold text-teal-600">
-                                  {`${result.overallScore * 10}/100`}
+                                  {`${Math.round(result.overallScore)}/100`}
                                 </span>
                               </div>
                               <Progress
-                                value={result.overallScore * 10}
+                                value={Math.round(result.overallScore)}
                                 className="h-3 rounded-full bg-gray-200"
                                 indicatorClassName="bg-black"
                               />
@@ -404,17 +404,17 @@ export default function SpeakingAssessmentPractice() {
                             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                               <Score
                                 title="Grammar Score"
-                                score={result.grammarScore}
+                                score={Math.round(result.grammarScore)}
                                 thresholds={{ low: 60, high: 80 }}
                               />
                               <Score
                                 title="Relevance Score"
-                                score={result.relevanceScore}
+                                score={Math.round(result.relevanceScore)}
                                 thresholds={{ low: 60, high: 80 }}
                               />
                               <Score
                                 title={"Adequacy Score"}
-                                score={result.adequacyScore}
+                                score={Math.round(result.adequacyScore)}
                                 thresholds={{ low: 60, high: 80 }}
                               />
                             </div>
