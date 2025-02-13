@@ -253,9 +253,9 @@ export default function Signup() {
                   <MenuItem disabled value="">
                     <em className="text-gray-500">Role describe you best</em>
                   </MenuItem>
-                  <MenuItem value="admin">Student</MenuItem>
-                  <MenuItem value="moderator">Profesional</MenuItem>
-                  <MenuItem value="user">Corporate-person</MenuItem>
+                  <MenuItem value="student">Student</MenuItem>
+                  <MenuItem value="profesional">Profesional</MenuItem>
+                  <MenuItem value="corporate-person">Corporate-person</MenuItem>
                 </Select>
               </FormControl>
               <CustomTextField
