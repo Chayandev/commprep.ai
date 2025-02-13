@@ -2,7 +2,7 @@ import {
   asyncHandler,
   ApiError,
   ApiResponse,
-} from "../utils/apiHandler/exports.js";
+} from "../../utils/apiHandler/exports.js";
 import fs from "fs"; // Import the fs module to handle file operations
 import { AssemblyAI } from "assemblyai";
 import {
@@ -12,14 +12,14 @@ import {
   GrammarAssessment,
   VocabularyAssessment,
   SpeakingAssessment,
-} from "../models/exports.js";
+} from "../../models/exports.js";
 import {
   getAudioDuration,
   analyzeAgainstPassageAndGenerateFeedback,
   calculateScore,
   getTranscriptionAnalysis,
   generateFeedbackAndSuggestions,
-} from "../utils/assessmentAnalysisHelper/exports.js";
+} from "../../utils/assessmentAnalysisHelper/exports.js";
 
 // Initialize the AssemblyAI client with the API key
 const assemblyClient = new AssemblyAI({

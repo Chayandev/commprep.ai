@@ -1,17 +1,17 @@
-import { cloudinary } from "../utils/cloudinary.js";
+import { cloudinary } from "../../utils/cloudinary.js";
 import {
   asyncHandler,
   ApiError,
   ApiResponse,
-} from "../utils/apiHandler/exports.js";
-import { User } from "../models/user.model.js";
-import { sendVerificationEmail } from "../nodemailer/emails.js";
+} from "../../utils/apiHandler/exports.js";
+import { User } from "../../models/user.model.js";
+import { sendVerificationEmail } from "../../nodemailer/emails.js";
 import {
   oneDayExpiryTime,
   randomCryptoVerificationCode,
-} from "../utils/codeGenarator.js";
+} from "../../utils/codeGenarator.js";
 import jwt from "jsonwebtoken";
-import { convertToMilliseconds } from "../utils/convertToMiliseconds.js";
+import { convertToMilliseconds } from "../../utils/convertToMiliseconds.js";
 
 // Set maxAge using the converted values
 const accessTokenMaxAge = convertToMilliseconds(
@@ -51,6 +51,8 @@ const generateAccessAndRefreshTokens = async (userId) => {
 //registering user
 const registerUser = asyncHandler(async (req, res) => {
   const { fullname, username, email, password, avatar, role } = req.body;
+
+  //console.log(`role:${role}`)
 
   if (
     [fullname, email, username, password].some((field) => field?.trim() === "")

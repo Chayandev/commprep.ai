@@ -1,4 +1,4 @@
-import { Router } from "express";
+
 import {
   registerUser,
   getAvatars,
@@ -9,32 +9,31 @@ import {
   autoLoginUser,
   sendVerificationCode,
   resetPassword,
-} from "../controllers/user.auth.controller.js";
+} from "../controllers/auth/user.auth.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
-  addGrammarAssessment,
-  addListeningAssessment,
-  addReadingAssessment,
-  addSpeakingAssessment,
   addUserFeedback,
-  addVocabularyAssessment,
   getEachTotalAssessmentCount,
   getGrammarAssessments,
   getListeningAssessments,
   getReadingAssessments,
   getSpeakingAssessments,
   getVocabularyAssessments,
-} from "../controllers/user.operations.controller.js";
+} from "../controllers/operation/user.operations.controller.js";
 import {
   analyzeGrammarAssessment,
   analyzeListeningAssessment,
   analyzeReadingAssessment,
   analyzeSpeakingAssessment,
   analyzeVocabularyAssessment,
-} from "../controllers/assessment.analysis.controller.js";
+} from "../controllers/analysis/assessment.analysis.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
+import { Router } from "express";
+
 const router = Router();
+
+
 
 //normal-routes-for-auth
 router.route("/avatars").get(getAvatars);
@@ -46,17 +45,6 @@ router.route("/autoLogin").post(autoLoginUser);
 router.route("/sendVerificationCode").post(sendVerificationCode);
 router.route("/resetPassword").post(resetPassword);
 
-//routes for setup the assesments
-router.route("/addReadingAssessment").post(addReadingAssessment);
-router
-  .route("/addListeningAssessment")
-  .post(
-    upload.fields([{ name: "audio", maxCount: 1 }]),
-    addListeningAssessment
-  );
-router.route("/addGrammarAssessment").post(addGrammarAssessment);
-router.route("/addVocabularyAssessment").post(addVocabularyAssessment);
-router.route("/addSpeakingAssessment").post(addSpeakingAssessment);
 
 //secure routes
 router.route("/logout").post(verifyJWT, logoutUser);
@@ -102,5 +90,4 @@ router
   .route("/getEachAssessmentCount")
   .get(verifyJWT, getEachTotalAssessmentCount);
 
-
-export default router;
+  export default router;

@@ -27,9 +27,10 @@ app.use(cookieParser());
 // });
 
 import userRouter from "./routes/user.routes.js";
-
+import adminRouter from "./routes/admin.routes.js"
 //routes decalration
 app.use("/api/v1/users", userRouter);
+app.use("api/v1/admin",adminRouter);
 
 app.use("*", (req, res, next) => {
   console.log("hit alive endpoint");
