@@ -7,6 +7,7 @@ import {
   Book,
   Headphones,
   MessageSquare,
+  Speech,
   Star,
 } from "lucide-react";
 import Card from "../../components/Card"; // Make sure the path is correct
@@ -14,28 +15,34 @@ import Card from "../../components/Card"; // Make sure the path is correct
 export default function Home() {
   const features = [
     {
-      name: "Reading",
+      name: "Speed Reading",
       icon: Book,
       description:
-        "Supercharge your reading skills! Dive into texts with ease and speed, so you can grasp key ideas in no time.",
+        "Sharpen your reading skills! Quickly grasp key ideas, improve comprehension, and boost retention for efficient learning.",
     },
     {
-      name: "Listening Practice",
+      name: "Active Listening",
       icon: Headphones,
       description:
-        "Tune into a world of sounds! Experience different accents and styles to sharpen your listening skills like a pro.",
+        "Enhance your listening accuracy! Train your ears to understand different accents, speech patterns, and key details in conversations.",
     },
     {
-      name: "Grammar",
+      name: "Grammar Mastery",
       icon: MessageSquare,
       description:
-        "Get grammar savvy! Nail down the rules and use them like a native speaker, so you can write and speak with confidence.",
+        "Strengthen your grammar! Learn to structure sentences correctly, eliminate errors, and communicate with clarity and precision.",
     },
     {
-      name: "Vocabulary Building",
+      name: "Power Vocabulary",
       icon: Star,
       description:
-        "Level up your word game! Expand your vocabulary to express yourself better and connect with others in meaningful ways.",
+        "Expand your word power! Learn new words in context, improve recall, and use expressive vocabulary for impactful communication.",
+    },
+    {
+      name: "Expressive Speaking",
+      icon: Speech,
+      description:
+        "Think, organize, and speak! Respond to given topics spontaneously, refine articulation, and assess overall communication skills with confidence.",
     },
   ];
 
@@ -59,7 +66,7 @@ export default function Home() {
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
                 <button className="text-lg bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-200 hover:shadow-lg hover:scale-105">
-                  <Link to="/" className="inline-flex items-center">
+                  <Link to="/practice" className="inline-flex items-center">
                     Get Started
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
@@ -74,9 +81,6 @@ export default function Home() {
                     alt="CommPrep.ai in action"
                     className="w-[500px] h-[380px] object-cover"
                   />
-
-                 
-              
                 </div>
               </div>
             </div>
@@ -95,7 +99,7 @@ export default function Home() {
               your communication skills using cutting-edge AI technology.
             </p>
           </div>
-          <dl className="mt-12 space-y-10 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-12 lg:grid-cols-4 lg:gap-x-8">
+          <dl className="mt-12 space-y-10 sm:space-y-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature) => (
               <Card
                 key={feature.name}
@@ -134,6 +138,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-      </>
+    </>
   );
 }
