@@ -6,7 +6,7 @@ import { SpeakingAssessment } from "./speakingAssessments.model.js";
 import { User } from "./user.model.js";
 import { VocabularyAssessment } from "./vocabularyAssessment.model.js";
 import { Tests } from "./testSchema.modle.js";
-
+import { TestResults } from "./testResult.model.js";
 export {
   UserFeedback,
   GrammarAssessment,
@@ -16,4 +16,5 @@ export {
   User,
   VocabularyAssessment,
   Tests,
+  TestResults
 };

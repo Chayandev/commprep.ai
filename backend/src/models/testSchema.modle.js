@@ -68,27 +68,27 @@ const testSchema = new Schema(
       required: true,
       default: 0,
     },
-    participants: [
-      {
-        userId: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        scores: {
-          reading: { type: Number, default: 0 },
-          speaking: { type: Number, default: 0 },
-          listening: { type: Number, default: 0 },
-          grammar: { type: Number, default: 0 },
-          vocabulary: { type: Number, default: 0 },
-          totalScore: { type: Number, default: 0 },
-        },
-        completedAt: {
-          type: Date,
-          default: null,
-        },
-      },
-    ],
+    // participants: [
+    //   {
+    //     userId: {
+    //       type: Schema.Types.ObjectId,
+    //       ref: "User",
+    //       required: true,
+    //     },
+    //     scores: {
+    //       reading: { type: Number, default: 0 },
+    //       speaking: { type: Number, default: 0 },
+    //       listening: { type: Number, default: 0 },
+    //       grammar: { type: Number, default: 0 },
+    //       vocabulary: { type: Number, default: 0 },
+    //       totalScore: { type: Number, default: 0 },
+    //     },
+    //     completedAt: {
+    //       type: Date,
+    //       default: null,
+    //     },
+    //   },
+    // ],
   },
   { timestamps: true }
 );
