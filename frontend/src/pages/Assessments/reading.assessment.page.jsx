@@ -296,8 +296,8 @@ export default function ReadingAssessmentPractice() {
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <Score
-                              title="Grammar Score"
-                              score={result.grammarScore}
+                              title="Pronunciation Score"
+                              score={result.pronunciationConfidence}
                               thresholds={{ low: 60, high: 80 }}
                             />
                             <Score

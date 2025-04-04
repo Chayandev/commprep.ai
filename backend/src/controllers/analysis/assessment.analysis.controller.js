@@ -39,6 +39,8 @@ const analyzeReadingAssessment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Passage is required to analyze the audio");
   }
 
+  console.log("passage", passage);
+
   // Validate and retrieve audio file path
   let audioLocalPath;
   if (
