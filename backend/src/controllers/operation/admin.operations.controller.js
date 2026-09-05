@@ -1,16 +1,17 @@
 import {
-    ReadingAssessment,
-    ListeningAssessment,
-    GrammarAssessment,
-    VocabularyAssessment,
-    SpeakingAssessment,
-  } from "../../models/exports.js";
-  import {
-    asyncHandler,
-    ApiError,
-    ApiResponse,
-  } from "../../utils/apiHandler/exports.js";
-  import { uploadOnCloudinary } from "../../utils/cloudinary.js";
+  ReadingAssessment,
+  ListeningAssessment,
+  GrammarAssessment,
+  VocabularyAssessment,
+  SpeakingAssessment,
+} from "../../models/exports.js";
+import {
+  asyncHandler,
+  ApiError,
+  ApiResponse,
+} from "../../utils/apiHandler/exports.js";
+import { logger } from "../../utils/logger/logger.js";
+import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 /*
  *
  *adding readingassements
@@ -18,10 +19,12 @@ import {
  *
  */
 
-
 const addReadingAssessment = asyncHandler(async (req, res) => {
   const { passage, difficulty, timeToComplete } = req.body;
 
+  if (!passage || !difficulty || !timeToComplete) {
+    throw new ApiError(400, "Invalid Input format");
+  }
   // Directly create and save the new assessment document
   const newAssessment = await ReadingAssessment.create({
     passage,
@@ -30,12 +33,12 @@ const addReadingAssessment = asyncHandler(async (req, res) => {
       timeToComplete,
     },
   });
-  console.log(newAssessment);
+  logger.info("New Reading Assessment Created:", newAssessment);
 
   return res
     .status(201)
     .json(
-      new ApiResponse(200, null, "Reading assessment created successfully")
+      new ApiResponse(200, null, "Reading assessment created successfully"),
     );
 });
 //************************************************************ */
@@ -48,12 +51,8 @@ const addReadingAssessment = asyncHandler(async (req, res) => {
  */
 
 const addListeningAssessment = asyncHandler(async (req, res) => {
-  const { title, difficulty, mcqQuestions, saqQuestions, evaluationCriteria } =
+  const { title, difficulty, mcqQuestions, evaluationCriteria } =
     req.body;
-  // console.log(difficulty);
-  // console.log(mcqQuestions);
-  // console.log(saqQuestions);
-  // console.log(evaluationCriteria);
 
   // Input validation (basic checks)
   if (!title || !difficulty || !evaluationCriteria || !mcqQuestions) {
@@ -96,19 +95,16 @@ const addListeningAssessment = asyncHandler(async (req, res) => {
       options: mcq.options,
       correctOption: mcq.correctOption,
     })),
-    // saqQuestions: parsedSaqQuestions.map((saq) => ({
-    //   question: saq.question,
-    //   expectedAnswer: saq.expectedAnswer,
-    // })),
+
     evaluationCriteria: parsedEvaluationCriteria,
   });
 
-  console.log(newAssessment);
+  logger.info("New Listening Assessment Created:", newAssessment);
 
   return res
     .status(201)
     .json(
-      new ApiResponse(200, null, "Listening assessment created successfully")
+      new ApiResponse(200, null, "Listening assessment created successfully"),
     );
 });
 
@@ -123,10 +119,6 @@ const addListeningAssessment = asyncHandler(async (req, res) => {
 
 const addGrammarAssessment = asyncHandler(async (req, res) => {
   const { difficulty, evaluationCriteria, mcqQuestions } = req.body;
-
-  console.log("Received Difficulty:", difficulty);
-  console.log("Received MCQ Questions:", mcqQuestions);
-  console.log("Received Evaluation Criteria:", evaluationCriteria);
 
   // Check if the required fields are present
   if (!difficulty || !evaluationCriteria || !mcqQuestions) {
@@ -150,7 +142,7 @@ const addGrammarAssessment = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(
-      new ApiResponse(200, null, "Grammar assessment created successfully")
+      new ApiResponse(200, null, "Grammar assessment created successfully"),
     );
 });
 
@@ -163,10 +155,6 @@ const addGrammarAssessment = asyncHandler(async (req, res) => {
  */
 const addVocabularyAssessment = asyncHandler(async (req, res) => {
   const { difficulty, evaluationCriteria, mcqQuestions } = req.body;
-
-  console.log("Received Difficulty:", difficulty);
-  console.log("Received MCQ Questions:", mcqQuestions);
-  console.log("Received Evaluation Criteria:", evaluationCriteria);
 
   // Check if the required fields are present
   if (!difficulty || !evaluationCriteria || !mcqQuestions) {
@@ -183,12 +171,12 @@ const addVocabularyAssessment = asyncHandler(async (req, res) => {
     evaluationCriteria,
   });
 
-  console.log("New Assessment Created:", newAssessment);
+  logger.info("New Vocabulary Assessment Created:", newAssessment);
 
   return res
     .status(201)
     .json(
-      new ApiResponse(200, null, "Vocabulary assessment created successfully")
+      new ApiResponse(200, null, "Vocabulary assessment created successfully"),
     );
 });
 //**************************************************** */
@@ -211,12 +199,12 @@ const addSpeakingAssessment = asyncHandler(async (req, res) => {
     evaluationCriteria: evaluationCriteria,
   });
 
-  console.log("New Assessment Created:", newAssessment);
+  logger.info("New Speaking Assessment Created:", newAssessment);
 
   return res
     .status(201)
     .json(
-      new ApiResponse(200, null, "Speaking assessment created successfully")
+      new ApiResponse(200, null, "Speaking assessment created successfully"),
     );
 });
 
