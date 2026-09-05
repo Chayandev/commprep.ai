@@ -606,3 +606,19 @@ export const getEachTotalAssessmentCount = createAsyncThunk(
     }
   }
 );
+
+// Action: Get User Progress
+export const getUserProgress = createAsyncThunk(
+  "operation/getUserProgress",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/getUserProgress");
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Something went wrong"
+      );
+    }
+  }
+);
+

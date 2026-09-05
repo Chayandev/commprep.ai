@@ -9,7 +9,10 @@ import {
   Speech,
 } from "lucide-react";
 import { calculateProgress, formatDate } from "../../utils/formalCalculation";
-import { getEachTotalAssessmentCount } from "../../../actions/user.actions";
+import {
+  getEachTotalAssessmentCount,
+  getUserProgress,
+} from "../../../actions/user.actions";
 import { v4 as uuidv4 } from "uuid";
 import ShimmerCard from "../../components/ShimmerCard";
 import { Typography } from "@mui/material";
@@ -23,19 +26,23 @@ const CategoryCard = React.lazy(() =>
 export default function Profile() {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
-  console.log(user);
-  const { isProcessing, totalAssessmentCount } = useSelector(
+  const { isProcessing, totalAssessmentCount, userProgress } = useSelector(
     (state) => state.operation
   );
+
+  const currentProgress = userProgress || user?.progress;
+
   useEffect(() => {
     dispatch(getEachTotalAssessmentCount());
+    dispatch(getUserProgress());
   }, [dispatch]);
+
   const categories = [
     {
       name: "Reading",
       icon: Mic,
       progress: calculateProgress(
-        user?.progress?.reading?.assessments?.length,
+        currentProgress?.reading?.assessments?.length,
         totalAssessmentCount?.totalReadingAssessments
       ),
       path: "reading",
@@ -45,7 +52,7 @@ export default function Profile() {
       icon: Headphones,
 
       progress: calculateProgress(
-        user?.progress?.listening?.assessments?.length,
+        currentProgress?.listening?.assessments?.length,
         totalAssessmentCount?.totalListeningAssessments
       ),
       path: "listening",
@@ -55,7 +62,7 @@ export default function Profile() {
       icon: MessageSquare,
 
       progress: calculateProgress(
-        user?.progress?.grammar?.assessments?.length,
+        currentProgress?.grammar?.assessments?.length,
         totalAssessmentCount?.totalGrammarAssessments
       ),
       path: "grammar",
@@ -65,7 +72,7 @@ export default function Profile() {
       icon: Book,
 
       progress: calculateProgress(
-        user?.progress?.vocabulary?.assessments?.length,
+        currentProgress?.vocabulary?.assessments?.length,
         totalAssessmentCount?.totalVocabularyAssessments
       ),
 
@@ -76,7 +83,7 @@ export default function Profile() {
       icon: Speech,
 
       progress: calculateProgress(
-        user?.progress?.speaking?.assessments?.length,
+        currentProgress?.speaking?.assessments?.length,
         totalAssessmentCount?.totalSpeakingAssessments
       ),
 

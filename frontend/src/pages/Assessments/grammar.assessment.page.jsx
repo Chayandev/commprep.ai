@@ -63,8 +63,6 @@ export default function GrammarAssessmentPractice() {
       setAssessmentTime((prevTime) => {
         if (timeRef.current === 0) {
           clearInterval(timerRef.current);
-          // Handle when time is up
-          console.log("Time's up!");
           return 0;
         }
         return timeRef.current - 1;
@@ -91,14 +89,13 @@ export default function GrammarAssessmentPractice() {
     }));
   };
   const handleBack = () => {
-    navigate("/practice/grammer");
+    navigate("/practice/grammar");
   };
 
   const handleSubmit = () => {
     // handle submit
     setIsSubmitted(true);
     if (timerRef.current) clearInterval(timerRef.current);
-    console.log("Submitting answers:", answers);
 
     if (!answers && answers.length < 0) {
       toast.error("Answers are missing or invalid");
@@ -112,7 +109,6 @@ export default function GrammarAssessmentPractice() {
     )
       .unwrap()
       .then((result) => {
-        console.log(result);
         setProgress(70);
         //setAssessment(result?.assessment);
       })
@@ -154,7 +150,7 @@ export default function GrammarAssessmentPractice() {
                 <TakeAssessmentHeader
                   title={
                     assessment?.title ||
-                    `Grammer Assessment ${selectedAssessmentIndex + 1}`
+                    `Grammar Assessment ${selectedAssessmentIndex + 1}`
                   }
                   assessment={assessment}
                 />

@@ -7,6 +7,7 @@ import {
   getAllSpeakingAssessments,
   getAllVocabularyAssessments,
   getEachTotalAssessmentCount,
+  getUserProgress,
 } from "../../actions/user.actions.js";
 
 const initialState = {
@@ -15,6 +16,7 @@ const initialState = {
   selectedAssessmentIndex: -1,
   message: null,
   totalAssessmentCount: null,
+  userProgress: null,
   showCompleted: true,
   difficulty: "All",
   filteredAssessments: null,
@@ -37,9 +39,6 @@ const userOperationSlice = createSlice({
       state.selectedAssessmentIndex = action.payload; // Set the current assessment index to the selected index
     },
     moveNextAssessment: (state, _) => {
-      console.log(state.selectedAssessmentIndex);
-
-      console.log(state.selectedAssessmentIndex);
       state.selectedAssessmentIndex += 1; // Increment index if not at the last assessment
     },
     setDifficulty: (state, action) => {
@@ -159,6 +158,18 @@ const userOperationSlice = createSlice({
     builder.addCase(getEachTotalAssessmentCount.rejected, (state) => {
       state.isProcessing = false;
       state.totalAssessmentCount = null;
+    });
+
+    // Get user progress
+    builder.addCase(getUserProgress.pending, (state) => {
+      state.isProcessing = true;
+    });
+    builder.addCase(getUserProgress.fulfilled, (state, action) => {
+      state.isProcessing = false;
+      state.userProgress = action.payload?.data;
+    });
+    builder.addCase(getUserProgress.rejected, (state) => {
+      state.isProcessing = false;
     });
   },
 });

@@ -51,7 +51,7 @@ const AssessmentCard = ({
           style={{ transformOrigin: "left top" }}
         >
           <p className="text-center text-white text-xs font-semibold">
-            {assessment.score * 10}/100
+            {assessment.score}/100
           </p>
         </div>
       )}

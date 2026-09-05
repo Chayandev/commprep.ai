@@ -197,9 +197,7 @@ export default function SpeakingAssessmentPractice() {
   };
 
   const analyzeRecording = () => {
-    console.log("clciekd");
     if (!audioBlob) return;
-    console.log("audio blob is not null");
     setProgress(10);
     const formData = new FormData();
     formData.append("assessmentID", assessment._id);
@@ -209,7 +207,6 @@ export default function SpeakingAssessmentPractice() {
     dispatch(getSpeakingAssessmentAnalysis(formData))
       .unwrap()
       .then((result) => {
-        console.log(result);
         setProgress(70);
         setFeedbackReceived(true);
       })

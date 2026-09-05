@@ -173,7 +173,6 @@ export default function ListeningAssessmentPractice() {
     setIsSubmitted(true);
     if (audioRef.current) audioRef.current.pause();
     if (timerRef.current) clearInterval(timerRef.current);
-    console.log("Submitting answers:", answers);
 
     if (!answers && answers.length < 0) {
       toast.error("Answers are missing or invalid");
@@ -188,7 +187,6 @@ export default function ListeningAssessmentPractice() {
     )
       .unwrap()
       .then((result) => {
-        console.log(result);
         setProgress(70);
         // setFeedback(result);
       })
@@ -316,7 +314,6 @@ export default function ListeningAssessmentPractice() {
                           const current = audioRef.current.currentTime;
                           const newProgress = (current / AUDIO_DURATION) * 100;
                           setAudioProgress(newProgress);
-                          console.log(newProgress); // Check the value of newProgress
                           setAudioCurrentTime(Math.floor(current));
                         }}
                         onEnded={() => {
