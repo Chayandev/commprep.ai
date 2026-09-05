@@ -61,7 +61,9 @@ async function analyzeAgainstPassageAndGenerateFeedback(
   // Compute feedback and scores
   const averageConfidence = transcriptionData.confidence || 0;
   const accuracyRate = (correctMatches / passageWords.length) * 100 || 0;
-  const overallScore = ((accuracyRate + averageConfidence * 100) / 2) * 0.1;
+  const overallScore = Number(
+    ((accuracyRate + averageConfidence * 100) / 2).toFixed(1)
+  );
 
   // Generate feedback based on analysis results
   let feedback = "";

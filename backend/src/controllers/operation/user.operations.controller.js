@@ -6,6 +6,7 @@ import {
   VocabularyAssessment,
   SpeakingAssessment,
 } from "../../models/exports.js";
+import { UserProgress } from "../../models/progress.model.js";
 
 import {
   asyncHandler,
@@ -13,7 +14,39 @@ import {
   ApiResponse,
 } from "../../utils/apiHandler/exports.js";
 import { uploadOnCloudinary } from "../../utils/cloudinary.js";
+import { logger } from "../../utils/logger/logger.js";
 
+const getAssessmentsWithProgress = async (
+  AssessmentModel,
+  userId,
+  progressType,
+  pipeline
+) => {
+  const [assessments, userProgress] = await Promise.all([
+    AssessmentModel.aggregate(pipeline),
+    UserProgress.findOne({ userId })
+      .select(`${progressType}.assessments`)
+      .lean(),
+  ]);
+
+  const completedAssessments = new Map(
+    (userProgress?.[progressType]?.assessments || []).map((assessment) => [
+      assessment.assessmentId.toString(),
+      assessment,
+    ])
+  );
+
+  return assessments.map((assessment) => {
+    const completion = completedAssessments.get(assessment._id.toString());
+
+    return {
+      ...assessment,
+      isCompleted: Boolean(completion),
+      score: completion?.evaluationResult?.overallScore ?? null,
+      completedAt: completion?.takenAt ?? null,
+    };
+  });
+};
 
 /*
  *
@@ -25,40 +58,20 @@ import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 const getReadingAssessments = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const assessments = await ReadingAssessment.aggregate([
-    {
-      $addFields: {
-        userCompletion: {
-          $arrayElemAt: [
-            {
-              $filter: {
-                input: "$assessmentCompleters",
-                as: "completer",
-                cond: { $eq: ["$$completer.userId", userId] },
-              },
-            },
-            0,
-          ],
+  const assessments = await getAssessmentsWithProgress(
+    ReadingAssessment,
+    userId,
+    "reading",
+    [
+      {
+        $project: {
+          passage: 1,
+          difficulty: 1,
+          evaluationCriteria: 1,
         },
       },
-    },
-    {
-      $project: {
-        passage: 1,
-        difficulty: 1,
-        evaluationCriteria: 1,
-        isCompleted: {
-          $cond: {
-            if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
-            then: true,
-            else: false,
-          },
-        },
-        score: { $ifNull: ["$userCompletion.score", null] },
-        completedAt: { $ifNull: ["$userCompletion.completedAt", null] },
-      },
-    },
-  ]);
+    ]
+  );
 
   return res
     .status(200)
@@ -83,44 +96,24 @@ const getReadingAssessments = asyncHandler(async (req, res) => {
 const getListeningAssessments = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const assessments = await ListeningAssessment.aggregate([
-    {
-      $addFields: {
-        userCompletion: {
-          $arrayElemAt: [
-            {
-              $filter: {
-                input: "$assessmentCompleters",
-                as: "completer",
-                cond: { $eq: ["$$completer.userId", userId] },
-              },
-            },
-            0,
-          ],
+  const assessments = await getAssessmentsWithProgress(
+    ListeningAssessment,
+    userId,
+    "listening",
+    [
+      {
+        $project: {
+          audioFileUrl: 1,
+          passage: 1,
+          difficulty: 1,
+          evaluationCriteria: 1,
+          title: 1,
+          mcqQuestions: 1,
+          saqQuestions: 1,
         },
       },
-    },
-    {
-      $project: {
-        audioFileUrl: 1,
-        passage: 1,
-        difficulty: 1,
-        evaluationCriteria: 1,
-        title: 1,
-        mcqQuestions: 1,
-        saqQuestions: 1,
-        isCompleted: {
-          $cond: {
-            if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
-            then: true,
-            else: false,
-          },
-        },
-        score: { $ifNull: ["$userCompletion.score", null] },
-        completedAt: { $ifNull: ["$userCompletion.completedAt", null] },
-      },
-    },
-  ]);
+    ]
+  );
 
   return res
     .status(200)
@@ -143,43 +136,29 @@ const getListeningAssessments = asyncHandler(async (req, res) => {
 const getGrammarAssessments = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const assessments = await GrammarAssessment.aggregate([
-    {
-      $addFields: {
-        userCompletion: {
-          $arrayElemAt: [
-            {
-              $filter: {
-                input: "$assessmentCompleters",
-                as: "completer",
-                cond: { $eq: ["$$completer.userId", userId] },
-              },
-            },
-            0,
-          ],
-        },
-      },
-    },
-    {
-      $project: {
-        difficulty: 1,
-        evaluationCriteria: 1,
-        mcqQuestions: {
-          question: 1,
-          options: 1,
-        },
-        isCompleted: {
-          $cond: {
-            if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
-            then: true,
-            else: false,
+  const assessments = await getAssessmentsWithProgress(
+    GrammarAssessment,
+    userId,
+    "grammar",
+    [
+      {
+        $project: {
+          difficulty: 1,
+          evaluationCriteria: 1,
+          mcqQuestions: {
+            question: 1,
+            options: 1,
           },
         },
-        score: { $ifNull: ["$userCompletion.score", null] },
-        completedAt: { $ifNull: ["$userCompletion.completedAt", null] },
       },
-    },
-  ]);
+    ]
+  );
+
+  logger.info("Grammar assessments fetched successfully", {
+    userId: userId.toString(),
+    assessmentCount: assessments.length,
+    assessment: assessments,
+  });
 
   return res
     .status(200)
@@ -241,43 +220,23 @@ const addVocabularyAssessment = asyncHandler(async (req, res) => {
 const getVocabularyAssessments = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  const assessments = await VocabularyAssessment.aggregate([
-    {
-      $addFields: {
-        userCompletion: {
-          $arrayElemAt: [
-            {
-              $filter: {
-                input: "$assessmentCompleters",
-                as: "completer",
-                cond: { $eq: ["$$completer.userId", userId] },
-              },
-            },
-            0,
-          ],
-        },
-      },
-    },
-    {
-      $project: {
-        difficulty: 1,
-        evaluationCriteria: 1,
-        mcqQuestions: {
-          question: 1,
-          options: 1,
-        },
-        isCompleted: {
-          $cond: {
-            if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
-            then: true,
-            else: false,
+  const assessments = await getAssessmentsWithProgress(
+    VocabularyAssessment,
+    userId,
+    "vocabulary",
+    [
+      {
+        $project: {
+          difficulty: 1,
+          evaluationCriteria: 1,
+          mcqQuestions: {
+            question: 1,
+            options: 1,
           },
         },
-        score: { $ifNull: ["$userCompletion.score", null] },
-        completedAt: { $ifNull: ["$userCompletion.completedAt", null] },
       },
-    },
-  ]);
+    ]
+  );
 
   return res
     .status(200)
@@ -301,48 +260,31 @@ const getVocabularyAssessments = asyncHandler(async (req, res) => {
 
 const getSpeakingAssessments = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const assessments = await SpeakingAssessment.aggregate([
-    {
-      $addFields: {
-        userCompletion: {
-          $arrayElemAt: [
-            {
-              $filter: {
-                input: "$assessmentCompleters",
-                as: "completer",
-                cond: { $eq: ["$$completer.userId", userId] },
-              },
-            },
-            0,
-          ],
-        },
-        // Add the new field timeToComplete which is the sum of timeToSpeak and timeToThink
-        timeToComplete: {
-          $add: [
-            "$evaluationCriteria.timeToSpeak",
-            "$evaluationCriteria.timeToThink",
-          ],
-        },
-      },
-    },
-    {
-      $project: {
-        topic: 1,
-        difficulty: 1,
-        evaluationCriteria: 1,
-        timeToComplete: 1, // Include the new field in the final output
-        isCompleted: {
-          $cond: {
-            if: { $gt: [{ $type: "$userCompletion" }, "missing"] },
-            then: true,
-            else: false,
+  const assessments = await getAssessmentsWithProgress(
+    SpeakingAssessment,
+    userId,
+    "speaking",
+    [
+      {
+        $addFields: {
+          timeToComplete: {
+            $add: [
+              "$evaluationCriteria.timeToSpeak",
+              "$evaluationCriteria.timeToThink",
+            ],
           },
         },
-        score: { $ifNull: ["$userCompletion.score", null] },
-        completedAt: { $ifNull: ["$userCompletion.completedAt", null] },
       },
-    },
-  ]);
+      {
+        $project: {
+          topic: 1,
+          difficulty: 1,
+          evaluationCriteria: 1,
+          timeToComplete: 1,
+        },
+      },
+    ]
+  );
 
   return res
     .status(200)
@@ -428,6 +370,27 @@ const getEachTotalAssessmentCount = asyncHandler(async (req, res) => {
   // progressType.completionPercentage =
   //   Math.floor((completedAssessments / totalAvailableAssessments) * 100) || 0;
 });
+
+const getUserProgress = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  let progress = await UserProgress.findOne({ userId });
+
+  if (!progress) {
+    progress = {
+      userId,
+      reading: { assessments: [] },
+      listening: { assessments: [] },
+      grammar: { assessments: [] },
+      vocabulary: { assessments: [] },
+      speaking: { assessments: [] },
+    };
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, progress, "User progress fetched successfully"));
+});
+
 export {
   getReadingAssessments,
   getListeningAssessments,
@@ -437,4 +400,5 @@ export {
   getSpeakingAssessments,
   addUserFeedback,
   getEachTotalAssessmentCount,
+  getUserProgress,
 };

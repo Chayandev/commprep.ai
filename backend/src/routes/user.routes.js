@@ -14,6 +14,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   addUserFeedback,
   getEachTotalAssessmentCount,
+  getUserProgress,
   getGrammarAssessments,
   getListeningAssessments,
   getReadingAssessments,
@@ -89,5 +90,6 @@ router.route("/addUserFeedback").post(verifyJWT, addUserFeedback);
 router
   .route("/getEachAssessmentCount")
   .get(verifyJWT, getEachTotalAssessmentCount);
+router.route("/getUserProgress").get(verifyJWT, getUserProgress);
 
-  export default router;
+export default router;

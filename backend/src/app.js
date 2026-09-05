@@ -26,7 +26,7 @@ app.use(cookieParser());
 
 //routes decalration
 app.use("/api/v1/users", userRouter);
-app.use("api/v1/admin",adminRouter);
+app.use("/api/v1/admin", adminRouter);
 
 app.use("*", (req, res, next) => {
   logger.info("Fallback endpoint reached", {

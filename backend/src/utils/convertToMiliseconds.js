@@ -1,5 +1,6 @@
 // Utility function to convert time strings to milliseconds
 export const convertToMilliseconds = (timeString) => {
+  // if(!timeString) return null;
     const timeUnit = timeString.slice(-1);
     const timeValue = parseInt(timeString.slice(0, -1), 10);
   

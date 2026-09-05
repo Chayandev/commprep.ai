@@ -20,6 +20,12 @@ const userProgressSchema = new Schema(
           takenAt: {
             type: Date,
           },
+          audioUrl: {
+            type: String,
+          },
+          audioPublicId: {
+            type: String,
+          },
           evaluationResult: {
             overallScore: {
               type: Number,
@@ -108,6 +114,12 @@ const userProgressSchema = new Schema(
           },
           takenAt: {
             type: Date,
+          },
+          audioUrl: {
+            type: String,
+          },
+          audioPublicId: {
+            type: String,
           },
           evaluationResult: {
             overallScore: {

@@ -8,27 +8,45 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (
+  localFilePath,
+  folder = "commprep.ai_audios",
+  tags = []
+) => {
   try {
     if (!localFilePath) return null;
 
     // Upload the file to the specified folder in Cloudinary
-    const response = await cloudinary.uploader.upload(localFilePath, {
+    const uploadOptions = {
       resource_type: "auto",
-      folder: "commprep.ai_audios", // specify the folder here
-    });
+      folder: folder,
+    };
 
-    // File has been uploaded successfully
-    // Unlink (delete) the local file
-    fs.unlinkSync(localFilePath);
+    if (Array.isArray(tags) && tags.length > 0) {
+      uploadOptions.tags = tags;
+    }
+
+    const response = await cloudinary.uploader.upload(
+      localFilePath,
+      uploadOptions
+    );
+
     return response;
   } catch (error) {
-    fs.unlinkSync(localFilePath); // remove the locally saved temporary file as the upload operation failed
     console.error("Error uploading to Cloudinary:", error);
     return null;
+  } finally {
+    // Safely remove the locally saved temporary file
+    if (localFilePath && fs.existsSync(localFilePath)) {
+      try {
+        fs.unlinkSync(localFilePath);
+      } catch (unlinkError) {
+        console.error("Error unlinking local temp file:", unlinkError);
+      }
+    }
   }
 };
 
-export { uploadOnCloudinary,cloudinary  };
+export { uploadOnCloudinary, cloudinary };
 
 

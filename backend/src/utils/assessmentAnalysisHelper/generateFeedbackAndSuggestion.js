@@ -1,7 +1,7 @@
 const generateFeedbackAndSuggestions = async (score, totalQuestions) => {
   let feedback = "";
   let suggestions = "";
-  const scorePercentage = (score / totalQuestions) * 100;
+  const scorePercentage = score;
   if (scorePercentage >= 80) {
     feedback = "Excellent job! Your listening skills are impressive.";
     suggestions = "Try challenging yourself with more complex audio.";

@@ -8,7 +8,6 @@ import { AssemblyAI } from "assemblyai";
 import {
   ReadingAssessment,
   ListeningAssessment,
-  User,
   GrammarAssessment,
   VocabularyAssessment,
   SpeakingAssessment,
@@ -20,6 +19,10 @@ import {
   getTranscriptionAnalysis,
   generateFeedbackAndSuggestions,
 } from "../../utils/assessmentAnalysisHelper/exports.js";
+
+import { logger } from "../../utils/logger/logger.js";
+import { UserProgress } from "../../models/progress.model.js";
+import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 
 // Initialize the AssemblyAI client with the API key
 const assemblyClient = new AssemblyAI({
@@ -39,8 +42,6 @@ const analyzeReadingAssessment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Passage is required to analyze the audio");
   }
 
-  console.log("passage", passage);
-
   // Validate and retrieve audio file path
   let audioLocalPath;
   if (
@@ -54,12 +55,24 @@ const analyzeReadingAssessment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Audio file is required");
   }
 
-  // Attempt transcription of the audio file
+  // Upload audio to Cloudinary in dedicated reading folder
+  const cloudinaryResponse = await uploadOnCloudinary(
+    audioLocalPath,
+    "commprep.ai_audios/reading",
+    ["reading_assessment", "temp_audio", req.user?._id?.toString() || "anonymous"]
+  );
+
+  if (!cloudinaryResponse?.secure_url) {
+    throw new ApiError(500, "Failed to upload audio to Cloudinary");
+  }
+
+  // Attempt transcription of the audio file using Cloudinary URL
   const transcript = await assemblyClient.transcripts.transcribe({
-    audio: audioLocalPath,
+    audio: cloudinaryResponse.secure_url,
   });
 
-  console.log(transcript);
+  logger.info("Transcription result", { transcript });
+
   // Validate transcription response
   if (!transcript) {
     throw new ApiError(500, "Transcription failed or returned invalid data");
@@ -71,30 +84,28 @@ const analyzeReadingAssessment = asyncHandler(async (req, res) => {
     passage
   );
 
-  // Remove the audio file after processing
-  fs.unlinkSync(audioLocalPath);
+  logger.info("Analysis result", { response });
 
-  // Update reading assessment record with user completion data
-  await updateAssessmentCompletion(
-    ReadingAssessment,
-    assessmentID,
-    req.user._id,
-    response.overallScore
-  );
-
-  // Update the user's progress for reading assessments
+  // Update the user's progress for reading assessments with audio URL and public ID
   await updateUserProgress(
-    User,
     req.user._id,
     assessmentID,
     response.overallScore,
-    "reading"
+    "reading",
+    cloudinaryResponse.secure_url,
+    cloudinaryResponse.public_id
   );
 
-  // Return the transcription analysis result
+  // Return the transcription analysis result with audioUrl
   return res
     .status(200)
-    .json(new ApiResponse(200, response, "Successfully transcribed"));
+    .json(
+      new ApiResponse(
+        200,
+        { ...response, audioUrl: cloudinaryResponse.secure_url },
+        "Successfully transcribed"
+      )
+    );
 });
 //*************************************************************************************/
 
@@ -119,17 +130,8 @@ const analyzeListeningAssessment = asyncHandler(async (req, res) => {
     score,
     totalQuestions
   );
-  // Update listening assessment completion record
-  await updateAssessmentCompletion(
-    ListeningAssessment,
-    assessmentID,
-    req.user._id,
-    score
-  );
-
   // Update user's progress in listening assessments
   await updateUserProgress(
-    User,
     req.user._id,
     assessmentID,
     score,
@@ -163,16 +165,8 @@ const analyzeGrammarAssessment = asyncHandler(async (req, res) => {
     assessmentID
   );
 
-  // Update grammar assessment completion record
-  await updateAssessmentCompletion(
-    GrammarAssessment,
-    assessmentID,
-    req.user._id,
-    score
-  );
-
   // Update user's progress in grammar assessments
-  await updateUserProgress(User, req.user._id, assessmentID, score, "grammar");
+  await updateUserProgress(req.user._id, assessmentID, score, "grammar");
 
   const response = { score, assessment };
 
@@ -200,17 +194,8 @@ const analyzeVocabularyAssessment = asyncHandler(async (req, res) => {
     assessmentID
   );
 
-  // Update vocabulary assessment completion record
-  await updateAssessmentCompletion(
-    VocabularyAssessment,
-    assessmentID,
-    req.user._id,
-    score
-  );
-
   // Update user's vocabulary in grammar assessments
   await updateUserProgress(
-    User,
     req.user._id,
     assessmentID,
     score,
@@ -250,47 +235,62 @@ const analyzeSpeakingAssessment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Audio file is required");
   }
 
-  // Get the duration of the audio file
-  let audioDuration;
+  // Measure local duration first as fallback before file is removed by Cloudinary uploader
+  let localAudioDuration = null;
   try {
-    audioDuration = await getAudioDuration(audioLocalPath);
-    console.log(`Audio Duration: ${audioDuration} seconds`);
+    localAudioDuration = await getAudioDuration(audioLocalPath);
   } catch (error) {
-    console.error("Error fetching audio duration:", error);
-    throw new ApiError(500, "Failed to retrieve audio duration");
+    console.warn("Could not retrieve local audio duration:", error.message);
   }
 
-  // Attempt transcription of the audio file
+  // Upload audio to Cloudinary in dedicated speaking folder
+  const cloudinaryResponse = await uploadOnCloudinary(
+    audioLocalPath,
+    "commprep.ai_audios/speaking",
+    ["speaking_assessment", "temp_audio", req.user?._id?.toString() || "anonymous"]
+  );
+
+  if (!cloudinaryResponse?.secure_url) {
+    throw new ApiError(500, "Failed to upload audio to Cloudinary");
+  }
+
+  // Attempt transcription of the audio file using Cloudinary URL
   const transcript = await assemblyClient.transcripts.transcribe({
-    audio: audioLocalPath,
+    audio: cloudinaryResponse.secure_url,
   });
 
-  console.log(transcript);
   // Validate transcription response
   if (!transcript) {
     throw new ApiError(500, "Transcription failed or returned invalid data");
   }
 
+  // Resolve audio duration: Cloudinary response -> local metadata -> AssemblyAI duration
+  const audioDuration =
+    cloudinaryResponse.duration ||
+    localAudioDuration ||
+    transcript.audio_duration ||
+    0;
+
+  console.log(`Audio Duration: ${audioDuration} seconds`);
+
   // Analyze transcription with audio duration
   const { grammarScore, relevanceScore, adequacyScore, feedback, suggestions } =
     await getTranscriptionAnalysis(transcript, topic, audioDuration);
 
-  //calculate overallscore by calcualting avarage
-  const score = (grammarScore + relevanceScore + adequacyScore) / 3;
-
-  // Update speaking assessment completion record
-  await updateAssessmentCompletion(
-    SpeakingAssessment,
-    assessmentID,
-    req.user._id,
-    score
+  // Calculate overall score by calculating average
+  const score = Number(
+    ((grammarScore + relevanceScore + adequacyScore) / 3).toFixed(1)
   );
 
-  // Update user's Porogress in speaking assessments
-  await updateUserProgress(User, req.user._id, assessmentID, score, "speaking");
-
-  // Remove the audio file after processing
-  fs.unlinkSync(audioLocalPath);
+  // Update user's progress in speaking assessments with audio URL and public ID
+  await updateUserProgress(
+    req.user._id,
+    assessmentID,
+    score,
+    "speaking",
+    cloudinaryResponse.secure_url,
+    cloudinaryResponse.public_id
+  );
 
   return res.status(201).json(
     new ApiResponse(
@@ -302,6 +302,7 @@ const analyzeSpeakingAssessment = asyncHandler(async (req, res) => {
         adequacyScore: adequacyScore,
         feedback: feedback,
         suggestions: suggestions,
+        audioUrl: cloudinaryResponse.secure_url,
       },
       "Successfully Analyzed!"
     )
@@ -311,59 +312,33 @@ const analyzeSpeakingAssessment = asyncHandler(async (req, res) => {
 /******************************************************************************************* */
 
 /**
- * Update the assessment completion status for a user.
- */
-async function updateAssessmentCompletion(model, assessmentID, userID, score) {
-  // Check if the assessment completer with the given userId already exists
-  const existingEntry = await model.findOne({
-    _id: assessmentID,
-    "assessmentCompleters.userId": userID,
-  });
-
-  if (existingEntry) {
-    // If the user already exists, update their score and completedAt fields
-    await model.updateOne(
-      { _id: assessmentID, "assessmentCompleters.userId": userID },
-      {
-        $set: {
-          "assessmentCompleters.$.score": score,
-          "assessmentCompleters.$.completedAt": new Date(),
-        },
-      }
-    );
-  } else {
-    // If the user doesn't exist in assessmentCompleters, add them
-    await model.findByIdAndUpdate(
-      assessmentID,
-      {
-        $addToSet: {
-          assessmentCompleters: {
-            userId: userID,
-            score,
-            completedAt: new Date(),
-          },
-        },
-      },
-      { new: true }
-    );
-  }
-}
-//*************************************************************************************/
-
-/**
  * Update user progress for completed assessments.
  */
 async function updateUserProgress(
-  userModel,
   userID,
   assessmentID,
   score,
-  type
+  type,
+  audioUrl = null,
+  audioPublicId = null
 ) {
-  const user = await userModel.findById(userID);
+  const progress = await UserProgress.findOneAndUpdate(
+    { userId: userID },
+    {
+      $setOnInsert: {
+        userId: userID,
+        reading: { assessments: [] },
+        listening: { assessments: [] },
+        grammar: { assessments: [] },
+        vocabulary: { assessments: [] },
+        speaking: { assessments: [] },
+      },
+    },
+    { new: true, upsert: true }
+  );
 
   // Access the specific progress field based on the 'type' argument
-  const progressType = user.progress[type];
+  const progressType = progress[type];
 
   if (!progressType) {
     throw new Error(`Invalid progress type: ${type}`);
@@ -374,19 +349,22 @@ async function updateUserProgress(
     (assessment) => assessment.assessmentId.toString() === assessmentID
   );
 
+  const assessmentData = {
+    assessmentId: assessmentID,
+    takenAt: new Date(),
+    evaluationResult: { overallScore: score },
+    ...(audioUrl && { audioUrl }),
+    ...(audioPublicId && { audioPublicId }),
+  };
+
   if (existingAssessmentIndex === -1) {
     // Add new assessment if it doesn't exist
-    progressType.assessments.push({
-      assessmentId: assessmentID,
-      takenAt: new Date(),
-      evaluationResult: { overallScore: score },
-    });
+    progressType.assessments.push(assessmentData);
   } else {
     // Update the existing assessment
     progressType.assessments[existingAssessmentIndex] = {
-      assessmentId: assessmentID,
-      takenAt: new Date(),
-      evaluationResult: { overallScore: score },
+      ...(progressType.assessments[existingAssessmentIndex].toObject?.() || {}),
+      ...assessmentData,
     };
   }
 
@@ -407,7 +385,7 @@ async function updateUserProgress(
   // progressType.completionPercentage =
   //   Math.floor((completedAssessments / totalAvailableAssessments) * 100) || 0;
 
-  await user.save();
+  await progress.save();
 }
 
 export {

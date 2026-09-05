@@ -15,23 +15,23 @@ const vocabularyAssessmentSchema = new Schema(
         required: true,
       },
     },
-    assessmentCompleters: [
-      {
-        userId: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        score: {
-          type: Number,
-          required: true,
-        },
-        completedAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
+    // assessmentCompleters: [
+    //   {
+    //     userId: {
+    //       type: Schema.Types.ObjectId,
+    //       ref: "User",
+    //       required: true,
+    //     },
+    //     score: {
+    //       type: Number,
+    //       required: true,
+    //     },
+    //     completedAt: {
+    //       type: Date,
+    //       default: Date.now,
+    //     },
+    //   },
+    // ],
   },
   { timestamps: true }
 );
