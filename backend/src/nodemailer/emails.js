@@ -1,7 +1,7 @@
 import { ApiError } from "../utils/apiHandler/exports.js";
 import { VERIFICATION_EMAIL_TEMPLATE } from "./email.templates.js";
 import nodemailer from "nodemailer";
-
+import { logger } from "../utils/logger/logger.js";
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   host: "smtp.gmail.com",
@@ -32,7 +32,10 @@ export const sendVerificationEmail = async (
     const info = await transporter.sendMail(mailOptions);
 
     // Log the email response
-    console.log("Email sent successfully: ", info.response);
+    logger.info("Verification email sent successfully", {
+      recipientEmail,
+      messageId: info.messageId,
+    });
   } catch (error) {
     console.error("Error sending email: ", error);
     throw new ApiError(

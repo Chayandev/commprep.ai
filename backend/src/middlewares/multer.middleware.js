@@ -1,17 +1,17 @@
 import multer from "multer";
+import crypto from "crypto";
+import path from "path";
 
-//using diskstorage
-
-//The disk storage engine gives you full control on storing files to disk.
-
+// using diskstorage with unique filename generation to prevent concurrent request overwrites
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./public/temp"); //destination folder
+    cb(null, "./public/temp"); // destination folder
   },
   filename: function (req, file, cb) {
-    //const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.originalname);
+    const ext = path.extname(file.originalname) || ".wav";
+    const uniqueSuffix = `${Date.now()}-${crypto.randomUUID()}${ext}`;
+    cb(null, uniqueSuffix);
   },
 });
 
-export const upload = multer({ storage: storage });
+export const upload = multer({ storage: storage });

@@ -3,7 +3,6 @@ import { asyncHandler, ApiError } from "../utils/apiHandler/exports.js";
 import { User } from "../models/user.model.js";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
-  try {
     const token =
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", ""); //take cookie form teh browser or auth header
@@ -26,11 +25,16 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
 
     req.user = user; // setting the user to the request
     next();
-  } catch (error) {
-    console.log(error);
-    throw new ApiError(
-      401,
-      error?.message || "Invalid Access or expired Token"
-    );
-  }
 });
+
+const verifyAdminRole= asyncHandler(async (req, res, next) => {
+  const user = req.user;
+
+  if(user.permitedRole !== "admin"){
+    throw new ApiError(403, "Forbidden: Admins only");
+  } 
+
+  next();
+});
+
+export { verifyAdminRole };

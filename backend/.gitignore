@@ -121,3 +121,7 @@ dist
 
 #ssl cerificate 
 certificate/
+
+# Local temp upload files
+public/temp/*
+!public/temp/.gitkeep

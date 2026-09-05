@@ -12,7 +12,7 @@ import {
 } from "../../utils/codeGenarator.js";
 import jwt from "jsonwebtoken";
 import { convertToMilliseconds } from "../../utils/convertToMiliseconds.js";
-
+import {logger} from "../../utils/logger/logger.js";
 // Set maxAge using the converted values
 const accessTokenMaxAge = convertToMilliseconds(
   process.env.ACCESS_TOKEN_EXPIRY
@@ -43,7 +43,6 @@ const generateAccessAndRefreshTokens = async (userId) => {
       refreshToken,
     };
   } catch (error) {
-    console.log(error);
     throw new ApiError(500);
   }
 };
@@ -51,8 +50,6 @@ const generateAccessAndRefreshTokens = async (userId) => {
 //registering user
 const registerUser = asyncHandler(async (req, res) => {
   const { fullname, username, email, password, avatar, role } = req.body;
-
-  //console.log(`role:${role}`)
 
   if (
     [fullname, email, username, password].some((field) => field?.trim() === "")
@@ -66,7 +63,7 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (existedUser) {
-    console.log(existedUser);
+    logger.debug(`User with username or email already exists: ${username}, ${email}`);
 
     if (existedUser.isVerified) {
       throw new ApiError(409, "User with username or email already exists!");
@@ -112,7 +109,6 @@ const registerUser = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
-  console.log(createdUser);
   if (!createdUser) {
     throw new ApiError(
       500,
@@ -135,10 +131,10 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username && !email) {
-    throw new ApiError(400, "username or email is required!");
+  if (!email) {
+    throw new ApiError(400, "email is required!");
   }
 
   if (!password) {
@@ -146,14 +142,13 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findOne({
-    $or: [{ username }, { email }],
+       email: email
   });
 
   if (!user) {
     throw new ApiError(404, "User dose'nt exist");
   }
 
-  console.log(user);
   const isPasswordvalid = await user.isPasswordCorrect(password);
 
   if (!isPasswordvalid) {
@@ -206,7 +201,7 @@ const autoLoginUser = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
 
   if (!accessToken && refreshToken) {
-    console.log("generating new accesstoken using refreshToken");
+    logger.info("generating new accesstoken using refreshToken");
     try {
       const decodedToken = jwt.verify(
         refreshToken,
@@ -354,15 +349,12 @@ const sendVerificationCode = asyncHandler(async (req, res) => {
 const verifyEmail = asyncHandler(async (req, res) => {
   const { verificationCode } = req.body;
 
-  console.log(verificationCode);
-
   const user = await User.findOne({
     verificationCode: verificationCode,
     verificationCodeExpireAt: { $gt: Date.now() },
   });
 
   if (!user) {
-    console.log(verificationCode);
     throw new ApiError(400, "Invalid or Expired Varification Code");
   }
 
@@ -395,10 +387,12 @@ const getAvatars = asyncHandler(async (req, res) => {
     .execute();
 
   if (!resources) {
-    throw new ApiError(401, "No avaters found!");
+    throw new ApiError(404, "No avaters found!");
   }
-
-  console.log(resources.length);
+ 
+  logger.info("Avatars fetched successfully", {
+    count: resources.length,
+  });
 
   // Map through the resources to extract necessary fields
   const avatars = resources.map((file) => ({
@@ -408,7 +402,7 @@ const getAvatars = asyncHandler(async (req, res) => {
   }));
 
   return res
-    .status(201)
+    .status(200)
     .json(new ApiResponse(200, avatars, "avaters fetched sucessfully!"));
 });
 
