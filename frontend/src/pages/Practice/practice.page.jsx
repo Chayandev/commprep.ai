@@ -4,43 +4,50 @@ import { Mic, Headphones, MessageSquare, Book, Speech } from "lucide-react";
 import Progress from "../../components/Progress";
 import "../../App.css";
 import LazyLoadingCard from "../../components/LazyLoadingCard";
-import { getEachTotalAssessmentCount } from "../../../actions/user.actions";
+import {
+  getEachTotalAssessmentCount,
+  getUserProgress,
+} from "../../../actions/user.actions";
 import { calculateProgress } from "../../utils/formalCalculation";
 const CategoryCard = React.lazy(() => import("../../components/CategoryCard"));
 
 export default function Practice() {
   const user = useSelector((state) => state.auth.user);
-  const { isProcessing, totalAssessmentCount } = useSelector(
+  const { isProcessing, totalAssessmentCount, userProgress } = useSelector(
     (state) => state.operation
   );
   const [progressPercentage, setProgressPercentage] = useState(0);
   const dispatch = useDispatch();
 
+  const currentProgress = userProgress || user?.progress;
+
   useEffect(() => {
     dispatch(getEachTotalAssessmentCount());
+    dispatch(getUserProgress());
   }, [dispatch]);
 
   useEffect(() => {
-    if (totalAssessmentCount && user?.progress) {
+    if (totalAssessmentCount && currentProgress) {
       const totalAssessments =
         (totalAssessmentCount.totalReadingAssessments || 0) +
         (totalAssessmentCount.totalListeningAssessments || 0) +
         (totalAssessmentCount.totalGrammarAssessments || 0) +
-        (totalAssessmentCount.totalVocabularyAssessments || 0);
+        (totalAssessmentCount.totalVocabularyAssessments || 0) +
+        (totalAssessmentCount.totalSpeakingAssessments || 0);
 
       const totalCompletedAssessments =
-        (user.progress.reading?.assessments?.length || 0) +
-        (user.progress.listening?.assessments?.length || 0) +
-        (user.progress.grammar?.assessments?.length || 0) +
-        (user.progress.vocabulary?.assessments?.length || 0) +
-        (user.progress.speaking?.assessments?.length || 0);
+        (currentProgress.reading?.assessments?.length || 0) +
+        (currentProgress.listening?.assessments?.length || 0) +
+        (currentProgress.grammar?.assessments?.length || 0) +
+        (currentProgress.vocabulary?.assessments?.length || 0) +
+        (currentProgress.speaking?.assessments?.length || 0);
       setProgressPercentage(
         totalAssessments
           ? Math.round((totalCompletedAssessments / totalAssessments) * 100)
           : 0
       );
     }
-  }, [totalAssessmentCount, user]);
+  }, [totalAssessmentCount, currentProgress]);
 
   const categories = [
     {
@@ -48,7 +55,7 @@ export default function Practice() {
       icon: Mic,
       description: "Boost comprehension through active reading skills.",
       progress: calculateProgress(
-        user?.progress?.reading?.assessments?.length,
+        currentProgress?.reading?.assessments?.length,
         totalAssessmentCount?.totalReadingAssessments
       ),
       color: "from-pink-500 to-rose-500",
@@ -59,7 +66,7 @@ export default function Practice() {
       icon: Headphones,
       description: "Sharpen listening to grasp spoken language quickly.",
       progress: calculateProgress(
-        user?.progress?.listening?.assessments?.length,
+        currentProgress?.listening?.assessments?.length,
         totalAssessmentCount?.totalListeningAssessments
       ),
       color: "from-purple-500 to-indigo-500",
@@ -70,7 +77,7 @@ export default function Practice() {
       icon: MessageSquare,
       description: "Master rules for clear, effective communication.",
       progress: calculateProgress(
-        user?.progress?.grammar?.assessments?.length,
+        currentProgress?.grammar?.assessments?.length,
         totalAssessmentCount?.totalGrammarAssessments
       ),
       color: "from-green-500 to-emerald-500",
@@ -81,7 +88,7 @@ export default function Practice() {
       icon: Book,
       description: "Expand your lexicon for richer conversations.",
       progress: calculateProgress(
-        user?.progress?.vocabulary?.assessments?.length,
+        currentProgress?.vocabulary?.assessments?.length,
         totalAssessmentCount?.totalVocabularyAssessments
       ),
       color: "from-blue-500 to-cyan-500",
@@ -93,7 +100,7 @@ export default function Practice() {
       description:
         "Develop clear articulation and express thoughts confidently.",
       progress: calculateProgress(
-        user?.progress?.speaking?.assessments?.length,
+        currentProgress?.speaking?.assessments?.length,
         totalAssessmentCount?.totalSpeakingAssessments
       ),
       color: "from-orange-500 to-yellow-500",

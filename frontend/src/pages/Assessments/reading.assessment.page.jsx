@@ -143,7 +143,6 @@ export default function ReadingAssessmentPractice() {
     dispatch(getReadingAssessmentAnalysis(formData))
       .unwrap()
       .then((result) => {
-        console.log(result);
         setProgress(70);
         setFeedbackReceived(true);
       })
@@ -285,11 +284,11 @@ export default function ReadingAssessmentPractice() {
                                 Overall Score
                               </span>
                               <span className="text-2xl font-bold text-teal-600">
-                                {`${result.overallScore * 10}/100`}
+                                {`${result.overallScore}/100`}
                               </span>
                             </div>
                             <Progress
-                              value={result.overallScore * 10}
+                              value={result.overallScore}
                               className="h-3 rounded-full bg-gray-200"
                               indicatorClassName="bg-black"
                             />

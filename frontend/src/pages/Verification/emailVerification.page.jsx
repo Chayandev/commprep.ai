@@ -66,7 +66,6 @@ export default function EmailVerification() {
       })
       .catch((error) => {
         console.error("Error during email-verification:", error);
-        console.log(verificationError);
       })
       .finally(() => {
         setProgress(100);

@@ -123,7 +123,7 @@ const McqBasedAssessmentUi = ({
                 <div>
                   <div className="bg-teal-50 border-l-4 border-teal-500 p-4 mb-6">
                     <p className="text-xl font-semibold text-teal-800">
-                      Your score: {result?.score} out of {questions?.length}
+                      Your score: {result?.score} out of 100
                     </p>
                   </div>
 

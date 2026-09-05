@@ -63,8 +63,6 @@ export default function VocabularyAssessmentPractice() {
       setAssessmentTime((prevTime) => {
         if (timeRef.current === 0) {
           clearInterval(timerRef.current);
-          // Handle when time is up
-          console.log("Time's up!");
           return 0;
         }
         return timeRef.current - 1;
@@ -98,7 +96,6 @@ export default function VocabularyAssessmentPractice() {
     // handle submit
     setIsSubmitted(true);
     if (timerRef.current) clearInterval(timerRef.current);
-    console.log("Submitting answers:", answers);
 
     if (!answers && answers.length < 0) {
       toast.error("Answers are missing or invalid");
@@ -112,7 +109,6 @@ export default function VocabularyAssessmentPractice() {
     )
       .unwrap()
       .then((result) => {
-        console.log(result);
         setProgress(70);
         //setAssessment(result?.assessment);
       })

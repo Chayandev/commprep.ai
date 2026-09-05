@@ -11,7 +11,6 @@ const AuthContextProvider = ({ children }) => {
     const attemptToAutoLogin = async () => {
       try {
         const result = await autoLoginUser();
-        console.log(result);
         setIsLoggedIn(true);
         setUsername(result.data?.username);
       } catch (error) {
