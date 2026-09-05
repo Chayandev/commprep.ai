@@ -1,5 +1,6 @@
 import connectDB from "./db/index.js";
 import { app } from "./app.js";
+import { logger } from "./utils/logger/logger.js";
 
 // // SSL certificate and key using environment variables
 // const sslOptions = {
@@ -11,14 +12,24 @@ import { app } from "./app.js";
 connectDB()
   .then(() => {
     app.on("error", (error) => {
-      console.log("Error:", error);
+      logger.error("Express application error", {
+        errorName: error.name,
+        errorMessage: error.message,
+        stack: error.stack,
+      });
       throw error;
     });
 
     app.listen(process.env.PORT || 5000, () => {
-      console.log(`Server is running at PORT: ${process.env.PORT}`);
+      logger.info("Server started", {
+        port: process.env.PORT || 5000,
+      });
     });
   })
   .catch((error) => {
-    console.log("MongoDB connection failed!!!", error);
+    logger.error("MongoDB connection failed", {
+      errorName: error.name,
+      errorMessage: error.message,
+      stack: error.stack,
+    });
   });
