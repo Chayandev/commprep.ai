@@ -52,11 +52,7 @@ api.interceptors.response.use(
         isRefreshing = false;
 
         if (refreshError.response && refreshError.response.status === 403) {
-          // Dynamically import store to avoid early access before initialization
-          const { store } = await import("../src/app/store");
-          const dispatch = store.dispatch;
-
-          dispatch(handleSessionExpiry()); // Show session expired dialog or redirect // Show session expired dialog or redirect
+          store.dispatch(handleSessionExpiry());
         }
 
         return Promise.reject(refreshError); // Reject with the refresh error
@@ -66,11 +62,7 @@ api.interceptors.response.use(
     // Handle Refresh Token Expiry (403)
     if (error.response && error.response.status === 403) {
       if (!isSessionExpired) {
-        // Dynamically import store to avoid early access before initialization
-        const { store } = await import("../src/app/store");
-        const dispatch = store.dispatch;
-
-        dispatch(handleSessionExpiry()); // Show session expired dialog or redirect
+        store.dispatch(handleSessionExpiry());
         return Promise.reject(error);
       }
       return Promise.reject(error); // Reject with the 403 error

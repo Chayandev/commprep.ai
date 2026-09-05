@@ -6,12 +6,12 @@ import { selectAssessment, setDifficulty, setShowCompleted } from "../../feature
 import { useNavigate } from "react-router-dom";
 import AssessmentHeader from "../../components/AssessmentHeader.jsx";
 import NoAssessmentsFound from "../../components/NoAssessmentFound.jsx";
+import LoadingUI from "../../components/LoadingUI.jsx";
+import LazyLoadingCard from "../../components/LazyLoadingCard.jsx";
+
 const AssessmentCard = React.lazy(() =>
   import("../../components/AssessmentCard.jsx")
 );
-import { v4 as uuidv4 } from "uuid";
-import LazyLoadingCard from "../../components/LazyLoadingCard.jsx";
-import LoadingUI from "../../components/LoadingUI.jsx";
 
 export default function SpeakingAssessments() {
   const navigate = useNavigate();
@@ -50,9 +50,11 @@ export default function SpeakingAssessments() {
           {filteredAssessments?.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAssessments.map((assessment, index) => (
-                <Suspense key={uuidv4()} fallback={<LazyLoadingCard />}>
+                <Suspense
+                  key={assessment._id || index}
+                  fallback={<LazyLoadingCard />}
+                >
                   <AssessmentCard
-                    key={assessment._id} // Add a unique key here
                     assessment={assessment}
                     index={index}
                     handleSelectAssessment={handleSelectAssessment}

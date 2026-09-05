@@ -39,14 +39,14 @@ const getTranscriptionAnalysis = async (
           content: prompt,
         },
       ],
-      model: "llama3-8b-8192",
+      model: "openai/gpt-oss-120b",
+      response_format: { type: "json_object" },
     });
 
     // Ensure the result is returned as JSON
-    const result = JSON.parse(response.choices[0]?.message?.content || "{}");
-    console.log(result);
+    const content = response.choices[0]?.message?.content || "{}";
+    const result = JSON.parse(content);
     return result;
-    //  return JSON.parse(result); // Parse the JSON response for further use
   } catch (error) {
     console.error("Error during transcription analysis:", error);
     throw new Error("Failed to analyze transcription");

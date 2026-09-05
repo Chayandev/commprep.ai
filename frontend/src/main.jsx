@@ -32,24 +32,13 @@ import VocabularyAssessmentPractice from "./pages/Assessments/vocabulary.assessm
 import SpeakingAssessments from "./pages/Practice/speaking.page.jsx";
 import SpeakingAssessmentPractice from "./pages/Assessments/speaking.assessment.page.jsx";
 import Profile from "./pages/Profile/profile.page.jsx";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      {/* Full-Screen Layout Routes (without Header/Footer) */}
-      {/* <Route element={<FullScreenLayout />}>
-        <Route
-          path="practice/reading/assessment/:assessmentId"
-          element={<ReadingAssessmentPractice />}
-        />
-        <Route
-          path="practice/listening/assessment/:assessmentId"
-          element={<ListeningAssessmentPractice />}
-        />
-      </Route> */}
-
       {/* Main Layout Routes (with Header/Footer) */}
-      <Route path="/" element={<App />}>
+      <Route path="/" element={<App />} errorElement={<ErrorBoundary />}>
         {/* <Route path="" element={<LoadingPage />} /> */}
         <Route path="" element={<Home />} />
         <Route path="login" element={<Login />} />

@@ -259,6 +259,8 @@ const analyzeSpeakingAssessment = asyncHandler(async (req, res) => {
     audio: cloudinaryResponse.secure_url,
   });
 
+  logger.info("Transcription result", { transcript });
+
   // Validate transcription response
   if (!transcript) {
     throw new ApiError(500, "Transcription failed or returned invalid data");

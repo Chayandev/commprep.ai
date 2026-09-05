@@ -13,13 +13,13 @@ import {
   getEachTotalAssessmentCount,
   getUserProgress,
 } from "../../../actions/user.actions";
-import { v4 as uuidv4 } from "uuid";
 import ShimmerCard from "../../components/ShimmerCard";
 import { Typography } from "@mui/material";
 
 const cloudinaryBaseImaegUrl = import.meta.env
   .VITE_CLOUDINARY_IMAGE_FOLDER_BASE_URL;
-const CategoryCard = React.lazy(() =>
+
+const ProfileCategoryCard = React.lazy(() =>
   import("../../components/ProfileCategoryCard")
 );
 
@@ -134,11 +134,11 @@ export default function Profile() {
             Progress Overview
           </Typography>
           {categories.map((category) => (
-            <Suspense key={uuidv4()} fallback={<ShimmerCard />}>
+            <Suspense key={category.name} fallback={<ShimmerCard />}>
               {isProcessing ? (
                 <ShimmerCard />
               ) : (
-                <CategoryCard category={category} />
+                <ProfileCategoryCard category={category} />
               )}
             </Suspense>
           ))}
