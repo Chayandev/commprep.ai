@@ -42,9 +42,9 @@ const AssessmentCard = ({
       {assessment.isCompleted && (
         <div
           className={`absolute top-12 left-[-25px] rotate-[-45deg] text-center py-1 px-8 ${
-            parseFloat(assessment.score * 10) < 60
+            parseFloat(assessment.score) < 60
               ? "bg-red-600"
-              : parseFloat(assessment.score * 10) < 80
+              : parseFloat(assessment.score) < 80
               ? "bg-yellow-600"
               : "bg-green-600"
           } shadow-md`}

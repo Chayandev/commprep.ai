@@ -1,15 +1,19 @@
 import { parseFile } from "music-metadata";
+import { logger } from "../logger/logger.js";
+
 const getAudioDuration = async (audioPath) => {
   try {
-    // Parse the audio file
     const metadata = await parseFile(audioPath);
-    const durationInSeconds = metadata.format.duration; // Duration in seconds
-    console.log(`Audio Duration: ${durationInSeconds} seconds`);
+    const durationInSeconds = metadata.format.duration;
+    logger.info("Local audio duration parsed", { durationInSeconds, audioPath });
     return durationInSeconds;
   } catch (error) {
-    console.error("Error reading audio file:", error);
+    logger.error("Failed to parse local audio duration", {
+      audioPath,
+      error: error.message,
+    });
     throw new Error("Failed to retrieve audio duration");
   }
 };
 
-export { getAudioDuration as getAudioDuration };
+export { getAudioDuration };

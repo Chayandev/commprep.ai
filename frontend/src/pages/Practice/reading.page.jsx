@@ -69,8 +69,8 @@ export default function ReadingAssessments() {
             </div>
           ) : (
             <div className="flex justify-center mt-10">
-              <NoAssessmentsFound />
-              {/* Display NoAssessmentsFound in the main content area */}
+              <NoAssessmentFound />
+              {/* Display NoAssessmentFound in the main content area */}
             </div>
           )}
         </main>

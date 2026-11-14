@@ -74,29 +74,44 @@ const analyzeReadingAssessment = asyncHandler(async (req, res) => {
   logger.info("Transcription result", { transcript });
 
   // Validate transcription response
-  if (!transcript) {
-    throw new ApiError(500, "Transcription failed or returned invalid data");
+  if (!transcript || transcript.status === "error") {
+    logger.error("AssemblyAI reading transcription returned error or invalid data", {
+      status: transcript?.status,
+      error: transcript?.error,
+    });
+    throw new ApiError(500, transcript?.error || "Transcription failed or returned invalid data");
   }
 
   // Analyze transcription against the provided passage
+  // Pass audio_duration so the function can calculate reading pace (WPM)
   const response = await analyzeAgainstPassageAndGenerateFeedback(
     transcript,
-    passage
+    passage,
+    transcript.audio_duration || 0
   );
 
   logger.info("Analysis result", { response });
 
-  // Update the user's progress for reading assessments with audio URL and public ID
+  // Update the user's progress — pass full evaluation breakdown, not just overallScore
   await updateUserProgress(
     req.user._id,
     assessmentID,
     response.overallScore,
     "reading",
     cloudinaryResponse.secure_url,
-    cloudinaryResponse.public_id
+    cloudinaryResponse.public_id,
+    {
+      wordAccuracy:    response.wordAccuracy?.score    ?? null,
+      clarityScore:    response.clarity?.score         ?? null,
+      readingPaceWPM:  response.readingPace?.wpm       ?? null,
+      missedWords:     response.wordAccuracy?.missedWords   ?? [],
+      changedWords:    response.wordAccuracy?.changedWords  ?? [],
+      addedWords:      response.addedWords               ?? [],
+      lowClarityWords: response.clarity?.lowClarityWords   ?? [],
+    }
   );
 
-  // Return the transcription analysis result with audioUrl
+  // Return the full analysis result with audioUrl
   return res
     .status(200)
     .json(
@@ -240,7 +255,7 @@ const analyzeSpeakingAssessment = asyncHandler(async (req, res) => {
   try {
     localAudioDuration = await getAudioDuration(audioLocalPath);
   } catch (error) {
-    console.warn("Could not retrieve local audio duration:", error.message);
+    logger.warn("Could not retrieve local audio duration", { error: error.message });
   }
 
   // Upload audio to Cloudinary in dedicated speaking folder
@@ -262,8 +277,12 @@ const analyzeSpeakingAssessment = asyncHandler(async (req, res) => {
   logger.info("Transcription result", { transcript });
 
   // Validate transcription response
-  if (!transcript) {
-    throw new ApiError(500, "Transcription failed or returned invalid data");
+  if (!transcript || transcript.status === "error") {
+    logger.error("AssemblyAI reading transcription returned error or invalid data", {
+      status: transcript?.status,
+      error: transcript?.error,
+    });
+    throw new ApiError(500, transcript?.error || "Transcription failed or returned invalid data");
   }
 
   // Resolve audio duration: Cloudinary response -> local metadata -> AssemblyAI duration
@@ -273,7 +292,7 @@ const analyzeSpeakingAssessment = asyncHandler(async (req, res) => {
     transcript.audio_duration ||
     0;
 
-  console.log(`Audio Duration: ${audioDuration} seconds`);
+  logger.info("Speaking audio duration resolved", { audioDuration });
 
   // Analyze transcription with audio duration
   const { grammarScore, relevanceScore, adequacyScore, feedback, suggestions } =
@@ -315,6 +334,13 @@ const analyzeSpeakingAssessment = asyncHandler(async (req, res) => {
 
 /**
  * Update user progress for completed assessments.
+ * @param {string}  userID        - MongoDB user _id
+ * @param {string}  assessmentID  - MongoDB assessment _id
+ * @param {number}  score         - overall score (0–100)
+ * @param {string}  type          - "reading" | "speaking" | "listening" | "grammar" | "vocabulary"
+ * @param {string}  audioUrl      - Cloudinary secure URL (reading & speaking only)
+ * @param {string}  audioPublicId - Cloudinary public_id  (reading & speaking only)
+ * @param {object}  extraResult   - additional breakdown fields to persist (optional)
  */
 async function updateUserProgress(
   userID,
@@ -322,7 +348,8 @@ async function updateUserProgress(
   score,
   type,
   audioUrl = null,
-  audioPublicId = null
+  audioPublicId = null,
+  extraResult = {}
 ) {
   const progress = await UserProgress.findOneAndUpdate(
     { userId: userID },
@@ -354,8 +381,12 @@ async function updateUserProgress(
   const assessmentData = {
     assessmentId: assessmentID,
     takenAt: new Date(),
-    evaluationResult: { overallScore: score },
-    ...(audioUrl && { audioUrl }),
+    evaluationResult: {
+      overallScore: score,
+      // Persist any extra breakdown fields (e.g. wordAccuracy, pace, clarity for reading)
+      ...extraResult,
+    },
+    ...(audioUrl      && { audioUrl }),
     ...(audioPublicId && { audioPublicId }),
   };
 
