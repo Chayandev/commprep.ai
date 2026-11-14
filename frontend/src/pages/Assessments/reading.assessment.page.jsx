@@ -5,15 +5,21 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
+  XCircle,
+  ArrowRightLeft,
+  PlusCircle,
+  Mic,
+  Volume2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { selectAssessment } from "../../features/userOperationSlice";
 import { Card, CardContent, Typography } from "@mui/material";
 import Progress from "../../components/Progress";
+import Score from "../../components/Score.jsx";
 import { getReadingAssessmentAnalysis } from "../../../actions/user.actions";
 import { toast } from "react-toastify";
 import LoadingBar from "react-top-loading-bar";
-import useFullScreen from "../../components/Hooks/FullScreenHook.js";
 import TimeDisplay from "../../components/TimeDisplay.jsx";
 import AssessmentError from "../../components/AssessmentError.jsx";
 import TakeAssessmentHeader from "../../components/TakeAssessmentHeader.jsx";
@@ -21,14 +27,13 @@ import RecordingInterface from "../../components/RecodingInterface.jsx";
 import useUnloadConfirmation from "../../components/Hooks/useReloadConfirmation.js";
 import { requestMicrophonePermission } from "../../utils/microphonePermission.js";
 import useScrollPosition from "../../components/Hooks/useScrollPosition.js";
-import Score from "../../components/Score.jsx";
 
 export default function ReadingAssessmentPractice() {
-  //useFullScreen();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [progress, setProgress] = useState(0);
   const [feedbackReceived, setFeedbackReceived] = useState(false);
+
   const { assessments, selectedAssessmentIndex } = useSelector(
     (state) => state.operation
   );
@@ -46,20 +51,17 @@ export default function ReadingAssessmentPractice() {
   const timeDisplayRef = useRef(null);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
-  //Use the custom hook to set the scrolling
   const isScrolled = useScrollPosition(80);
-  // Use the custom hook to display the unload confirmation message
+
   useUnloadConfirmation(
     "Are you sure you want to reload? You might lose your progress."
   );
 
-  //useFullScreen();
-
   useEffect(() => {
-    if (!isErrorState) {
+    if (!isErrorState && assessments && assessments[selectedAssessmentIndex]) {
       setAssessment(assessments[selectedAssessmentIndex]);
       setTimeLeft(
-        assessments[selectedAssessmentIndex].evaluationCriteria.timeToComplete
+        assessments[selectedAssessmentIndex].evaluationCriteria?.timeToComplete || 60
       );
     }
   }, [selectedAssessmentIndex, assessments, isErrorState]);
@@ -71,29 +73,21 @@ export default function ReadingAssessmentPractice() {
     setFeedbackReceived(false);
   };
 
-  const handleBack = () => {
-    //dispatch(changeLayout());
-    navigate("/practice/reading");
-  };
+  const handleBack = () => navigate("/practice/reading");
 
   const toggleRecording = async () => {
     if (isRecording) {
       stopRecording();
     } else {
       const permission = await requestMicrophonePermission();
-      if (permission) {
-        startRecording();
-      }
+      if (permission) startRecording();
     }
   };
 
   const startRecording = () => {
     setIsRecording(true);
     setRecordingComplete(false);
-    setTimeLeft(
-      assessment.evaluationCriteria.timeToComplete
-      //assessments[selectedAssessmentIndex].evaluationCriteria.timeToComplete
-    );
+    setTimeLeft(assessment?.evaluationCriteria?.timeToComplete || 60);
 
     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
       const recorder = new MediaRecorder(stream);
@@ -101,24 +95,19 @@ export default function ReadingAssessmentPractice() {
       recorder.start();
 
       const audioChunks = [];
-      recorder.ondataavailable = (event) => {
-        audioChunks.push(event.data);
-      };
-
+      recorder.ondataavailable = (e) => audioChunks.push(e.data);
       recorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-        setAudioBlob(audioBlob);
+        setAudioBlob(new Blob(audioChunks, { type: "audio/wav" }));
         setRecordingComplete(true);
       };
 
       timerRef.current = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            setRecordingComplete(true);
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
             stopRecording();
             return 0;
           }
-          return prevTime - 1;
+          return prev - 1;
         });
       }, 1000);
     });
@@ -126,14 +115,12 @@ export default function ReadingAssessmentPractice() {
 
   const stopRecording = () => {
     setIsRecording(false);
-    if (mediaRecorder) {
-      mediaRecorder.stop();
-    }
+    if (mediaRecorder) mediaRecorder.stop();
     clearInterval(timerRef.current);
   };
 
   const analyzeRecording = () => {
-    if (!audioBlob) return;
+    if (!audioBlob || !assessment) return;
     setProgress(10);
     const formData = new FormData();
     formData.append("assessmentID", assessment._id);
@@ -142,67 +129,62 @@ export default function ReadingAssessmentPractice() {
 
     dispatch(getReadingAssessmentAnalysis(formData))
       .unwrap()
-      .then((result) => {
+      .then(() => {
         setProgress(70);
         setFeedbackReceived(true);
       })
       .catch((error) => {
-        // Show the error message as a toast error
-        toast.error(
-          error || "An error occurred during ReadingAssesment Analysis.",
-          {
-            position: "top-center",
-            autoClose: 1000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          }
-        );
-        console.error("Error during ReadingAssesment Analysis:", error);
+        toast.error(error || "An error occurred during Reading Assessment Analysis.", {
+          position: "top-center",
+          autoClose: 3000,
+        });
       })
-      .finally(() => {
-        setProgress(100);
-      });
+      .finally(() => setProgress(100));
   };
 
-  useEffect(() => {
-    return () => clearInterval(timerRef.current);
-  }, []);
+  useEffect(() => () => clearInterval(timerRef.current), []);
 
-  //if (result && feedbackReceived) {
-  // Extract feedback and suggestions safely with defaults
-  const feedbackLines = result?.feedback
-    ? result.feedback
-        .split("#") // Split feedback by "#"
-        .map((line) => line.trim()) // Trim extra spaces
-        .filter((line) => line !== "") // Remove empty lines
-        .map((line, index, array) => {
-          // Add a period if the last line doesn't have one
-          if (index === array.length - 1 && !line.endsWith(".")) {
-            return `${line}.`;
-          }
-          return line;
-        })
-    : []; // Default to an empty array if feedback is missing
+  // ─── Derived result values ───────────────────────────────────────────────
+  const overallScore    = result?.overallScore ?? 0;
+  const wordAccuracy    = result?.wordAccuracy ?? {};
+  const readingPace     = result?.readingPace ?? {};
+  const clarity         = result?.clarity ?? {};
+  const addedWords      = result?.addedWords ?? [];
+  const feedback        = result?.feedback ?? "";
+  const suggestion      = result?.suggestion ?? "";
 
-  const suggestionLines = result?.suggestion
-    ? result.suggestion
-        .split("#") // Split suggestions by "#"
-        .map((line) => line.trim()) // Trim extra spaces
-        .filter((line) => line !== "") // Remove empty lines
-        .map((line, index, array) => {
-          // Add a period if the last line doesn't have one
-          if (index === array.length - 1 && !line.endsWith(".")) {
-            return `${line}.`;
-          }
-          return line;
-        })
-    : []; // Default to an empty array if suggestions are missing
+  const wordAccScore    = wordAccuracy.score ?? 0;
+  const clarityScore    = clarity.score ?? 0;
+  const paceWPM         = readingPace.wpm ?? 0;
+  const paceLabel       = readingPace.label ?? "";
+  const missedWords     = wordAccuracy.missedWords ?? [];
+  const changedWords    = wordAccuracy.changedWords ?? [];
+  const lowClarityWords = clarity.lowClarityWords ?? [];
+  const correctCount    = wordAccuracy.correct ?? 0;
+  const totalWords      = wordAccuracy.total ?? 0;
+  const totalIssues     = missedWords.length + changedWords.length + addedWords.length + lowClarityWords.length;
 
-  //}
+  const getOverallColorClass = (score) => {
+    const num = parseFloat(score);
+    if (num < 60) {
+      return {
+        text: "text-red-600",
+        bar: "bg-red-500",
+      };
+    } else if (num < 80) {
+      return {
+        text: "text-yellow-600",
+        bar: "bg-yellow-500",
+      };
+    } else {
+      return {
+        text: "text-green-600",
+        bar: "bg-green-600",
+      };
+    }
+  };
+
+  const overallColorClass = getOverallColorClass(overallScore);
 
   return (
     <>
@@ -217,8 +199,9 @@ export default function ReadingAssessmentPractice() {
           <AssessmentError />
         ) : (
           <>
+            {/* Header */}
             <div className="mb-8 bg-white border border-gray-300 rounded-lg shadow-sm">
-              <div className=" flex  justify-between items-center p-6">
+              <div className="flex justify-between items-center p-6">
                 <TakeAssessmentHeader
                   title={
                     assessment?.title ||
@@ -226,7 +209,6 @@ export default function ReadingAssessmentPractice() {
                   }
                   assessment={assessment}
                 />
-                {/* Timer Display */}
                 {timeLeft !== null && (
                   <TimeDisplay
                     ref={timeDisplayRef}
@@ -236,8 +218,9 @@ export default function ReadingAssessmentPractice() {
                 )}
               </div>
             </div>
-            <div className="flex flex-col-reverse md:flex-row  gap-8">
-              {/* Left Column - Passage */}
+
+            <div className="flex flex-col-reverse md:flex-row gap-8">
+              {/* Left Column */}
               <div className="flex-[3] bg-white rounded-lg shadow-md p-8">
                 <Typography
                   variant="h4"
@@ -247,7 +230,7 @@ export default function ReadingAssessmentPractice() {
                   Reading Passage
                 </Typography>
                 <Typography
-                  variant="h7"
+                  variant="subtitle1"
                   style={{ fontWeight: 400 }}
                   className="text-gray-400 my-1"
                 >
@@ -269,83 +252,234 @@ export default function ReadingAssessmentPractice() {
                       </div>
                     </div>
                   )}
-                  {/* Feedback Display */}
 
-                  {feedbackReceived && (
+                  {/* Feedback Display */}
+                  {feedbackReceived && result && (
                     <Card className="mt-8 w-full bg-white shadow-lg">
                       <CardContent className="pt-6">
                         <h3 className="text-2xl font-bold mb-6 text-gray-800">
                           Analysis Result
                         </h3>
                         <div className="space-y-6">
+                          {/* Overall Score */}
                           <div>
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-lg font-medium text-gray-700">
-                                Overall Score
-                              </span>
-                              <span className="text-2xl font-bold text-teal-600">
-                                {`${result.overallScore}/100`}
+                            <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg font-medium text-gray-700">
+                                  Overall Score
+                                </span>
+                                <span className="text-[11px] font-medium bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full border border-gray-200">
+                                  60% Accuracy + 25% Clarity + 15% Pace
+                                </span>
+                              </div>
+                              <span className={`text-2xl font-bold ${overallColorClass.text}`}>
+                                {`${overallScore}/100`}
                               </span>
                             </div>
                             <Progress
-                              value={result.overallScore}
+                              value={overallScore}
                               className="h-3 rounded-full bg-gray-200"
-                              indicatorClassName="bg-black"
+                              indicatorClassName={overallColorClass.bar}
                             />
+                            <p className="text-xs text-gray-500 mt-2">
+                              {correctCount} of {totalWords} words aligned ({wordAccScore}% accuracy)
+                              {paceWPM > 0 && ` • Pace: ${paceWPM} WPM (${paceLabel})`}
+                            </p>
                           </div>
-                          <div className="grid grid-cols-2 gap-4">
+
+                          {/* Scores Grid using theme Score component */}
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <Score
+                              title="Word Accuracy"
+                              score={`${wordAccScore}%`}
+                              thresholds={{ low: 60, high: 80 }}
+                              pill="60% Weight"
+                              description="Words matched correctly against passage"
+                            />
                             <Score
                               title="Pronunciation Score"
-                              score={result.pronunciationConfidence}
+                              score={`${clarityScore}%`}
                               thresholds={{ low: 60, high: 80 }}
+                              pill="25% Weight"
+                              description="Speech clarity & phoneme recognition"
                             />
                             <Score
-                              title="Accuracy"
-                              score={result.accuracy}
-                              thresholds={{ low: 60, high: 80 }}
+                              title="Reading Pace"
+                              score={`${paceWPM} WPM`}
+                              thresholds={{ low: 90, high: 130 }}
+                              pill="15% Weight"
+                              description="Reading speed (120–160 WPM optimal)"
                             />
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-4">
-                            <div className="flex items-start">
-                              <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 mt-1" />
-                              <div>
-                                <h4 className="font-semibold text-gray-800 mb-1">
-                                  Feedback
-                                </h4>
-                                <ul className="list-disc list-inside text-gray-600 text-sm font-semibold">
-                                  {feedbackLines.map((line, index) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start"
-                                    >
-                                      <span className="mr-2">•</span>
-                                      {line}
-                                    </li>
-                                  ))}
-                                </ul>
+
+                          {/* Audio Player - Listen to your reading */}
+                          {(result?.audioUrl || audioBlob) && (
+                            <div className="bg-gray-50 rounded-lg p-3.5 border border-gray-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Volume2 className="w-4 h-4 text-teal-600" />
+                                <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                                  Listen to Your Recording
+                                </span>
+                              </div>
+                              <audio
+                                src={result?.audioUrl || (audioBlob ? URL.createObjectURL(audioBlob) : "")}
+                                controls
+                                className="w-full h-9 rounded outline-none"
+                              />
+                            </div>
+                          )}
+
+                          {/* Word Breakdown (Clean, theme-specific card) */}
+                          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div className="flex justify-between items-center mb-3">
+                              <h4 className="font-semibold text-gray-800 text-sm">
+                                Word Breakdown
+                              </h4>
+                              {totalIssues === 0 && (
+                                <span className="text-xs font-medium text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full border border-green-200">
+                                  ✓ No issues found
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                              {/* Missed Words */}
+                              <div className="bg-white p-3 rounded-md border border-gray-200">
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-red-600 mb-1">
+                                  <XCircle className="w-3.5 h-3.5" />
+                                  <span>Missed Words ({missedWords.length})</span>
+                                </div>
+                                {missedWords.length === 0 ? (
+                                  <span className="text-xs text-gray-400">None</span>
+                                ) : (
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {missedWords.map((w, i) => (
+                                      <span
+                                        key={i}
+                                        className="text-xs font-medium px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200"
+                                      >
+                                        {w}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Said Differently */}
+                              <div className="bg-white p-3 rounded-md border border-gray-200">
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 mb-1">
+                                  <ArrowRightLeft className="w-3.5 h-3.5" />
+                                  <span>Said Differently ({changedWords.length})</span>
+                                </div>
+                                {changedWords.length === 0 ? (
+                                  <span className="text-xs text-gray-400">None</span>
+                                ) : (
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {changedWords.map((w, i) => (
+                                      <span
+                                        key={i}
+                                        className="text-xs font-medium px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200"
+                                      >
+                                        "{w.expected}" → "{w.spoke}"
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Extra Added */}
+                              <div className="bg-white p-3 rounded-md border border-gray-200">
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 mb-1">
+                                  <PlusCircle className="w-3.5 h-3.5" />
+                                  <span>Extra Words ({addedWords.length})</span>
+                                </div>
+                                {addedWords.length === 0 ? (
+                                  <span className="text-xs text-gray-400">None</span>
+                                ) : (
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {addedWords.map((w, i) => (
+                                      <span
+                                        key={i}
+                                        className="text-xs font-medium px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200"
+                                      >
+                                        +{w}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Unclear */}
+                              <div className="bg-white p-3 rounded-md border border-gray-200">
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-600 mb-1">
+                                  <Mic className="w-3.5 h-3.5" />
+                                  <span>Low Clarity ({lowClarityWords.length})</span>
+                                </div>
+                                {lowClarityWords.length === 0 ? (
+                                  <span className="text-xs text-gray-400">None</span>
+                                ) : (
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {lowClarityWords.map((w, i) => (
+                                      <span
+                                        key={i}
+                                        className="text-xs font-medium px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200"
+                                      >
+                                        {w}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
-                          <div className="bg-yellow-50 rounded-lg p-4">
-                            <div className="flex items-start">
-                              <AlertTriangle className="w-5 h-5 text-yellow-500 mr-2 mt-1" />
-                              <div>
-                                <h4 className="font-semibold text-gray-800 mb-1">
-                                  Suggestion
-                                </h4>
-                                <ul className="list-disc list-inside text-gray-600 text-sm font-semibold">
-                                  {suggestionLines.map((line, index) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start"
-                                    >
-                                      <span className="mr-2">•</span>
-                                      {line}
-                                    </li>
-                                  ))}
-                                </ul>
+
+                          {/* Feedback */}
+                          {feedback && (
+                            <div className="bg-gray-50 rounded-lg p-4">
+                              <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 mt-1 shrink-0" />
+                                <div>
+                                  <h4 className="font-semibold text-gray-800 mb-1">
+                                    Feedback
+                                  </h4>
+                                  <p className="text-gray-600 text-sm font-semibold">
+                                    {feedback}
+                                  </p>
+                                </div>
                               </div>
                             </div>
+                          )}
+
+                          {/* Suggestion */}
+                          {suggestion && (
+                            <div className="bg-yellow-50 rounded-lg p-4">
+                              <div className="flex items-start">
+                                <AlertTriangle className="w-5 h-5 text-yellow-500 mr-2 mt-1 shrink-0" />
+                                <div>
+                                  <h4 className="font-semibold text-gray-800 mb-1">
+                                    Suggestion
+                                  </h4>
+                                  <p className="text-gray-600 text-sm font-semibold">
+                                    {suggestion}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Try again */}
+                          <div className="flex justify-end pt-2">
+                            <button
+                              onClick={() => {
+                                setFeedbackReceived(false);
+                                setRecordingComplete(false);
+                                setAudioBlob(null);
+                              }}
+                              className="flex items-center gap-1.5 px-4 py-2 border border-teal-600 text-teal-600 rounded-md hover:bg-teal-50 text-sm font-medium transition-colors"
+                            >
+                              <RefreshCw className="w-4 h-4" />
+                              Try Again
+                            </button>
                           </div>
                         </div>
                       </CardContent>
@@ -370,15 +504,15 @@ export default function ReadingAssessmentPractice() {
         {/* Navigation Buttons */}
         <div className="mt-12 flex justify-between">
           <button
-            onClick={handleBack} // Add click handler for navigation
-            className="flex items-center px-4 py-2 border rounded-md transition-all duration-200  text-teal-600 border-teal-600 hover:bg-teal-50"
+            onClick={handleBack}
+            className="flex items-center px-4 py-2 border rounded-md transition-all duration-200 text-teal-600 border-teal-600 hover:bg-teal-50"
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
             Back to Main Page
           </button>
           <button
-            onClick={handleNext} // Add click handler for navigation
-            disabled={isErrorState || isLastAssessment} // Disable if in error state or last assessment
+            onClick={handleNext}
+            disabled={isErrorState || isLastAssessment}
             className={`flex items-center px-4 py-2 bg-teal-600 rounded-md transition-all duration-200 
                 ${
                   !isErrorState && !isLastAssessment
@@ -391,6 +525,6 @@ export default function ReadingAssessmentPractice() {
           </button>
         </div>
       </main>
-      </>
+    </>
   );
 }

@@ -7,10 +7,6 @@ const userProgressSchema = new Schema(
       required: true,
     },
     reading: {
-      // completionPercentage: {
-      //   type: Number,
-      //   default: 0,
-      // },
       assessments: [
         {
           assessmentId: {
@@ -27,9 +23,18 @@ const userProgressSchema = new Schema(
             type: String,
           },
           evaluationResult: {
-            overallScore: {
-              type: Number,
-            },
+            // Core score
+            overallScore:    { type: Number },
+            // Word accuracy breakdown
+            wordAccuracy:    { type: Number },        // 0–100
+            missedWords:     [{ type: String }],      // words the user skipped
+            changedWords:    [{ type: Schema.Types.Mixed }], // [{ expected, spoke }]
+            addedWords:      [{ type: String }],      // filler / extra words
+            // Clarity
+            clarityScore:    { type: Number },        // 0–100
+            lowClarityWords: [{ type: String }],      // words AssemblyAI was uncertain about
+            // Pace
+            readingPaceWPM:  { type: Number },        // words per minute
           },
         },
       ],

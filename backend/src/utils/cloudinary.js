@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
-
 import fs from "fs";
+import { logger } from "./logger/logger.js";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -33,7 +33,7 @@ const uploadOnCloudinary = async (
 
     return response;
   } catch (error) {
-    console.error("Error uploading to Cloudinary:", error);
+    logger.error("Cloudinary upload failed", { localFilePath, error: error.message });
     return null;
   } finally {
     // Safely remove the locally saved temporary file
@@ -41,7 +41,10 @@ const uploadOnCloudinary = async (
       try {
         fs.unlinkSync(localFilePath);
       } catch (unlinkError) {
-        console.error("Error unlinking local temp file:", unlinkError);
+        logger.error("Failed to delete local temp file", {
+          localFilePath,
+          error: unlinkError.message,
+        });
       }
     }
   }
